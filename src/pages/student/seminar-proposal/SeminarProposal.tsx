@@ -23,47 +23,80 @@ import {
 import { Badge } from "../../../components/ui/badge";
 import ResearchDetailsModal from "./ResearchDetail";
 import DocumentUploadModal from "./DocumentUpload";
-import ReviewSubmitModal from "./ReviewSubmit";
 import StudentLayout from "../../../components/layouts/StudentLayout";
 import { Stepper } from "../../../components/ui/stepper";
+import { Link } from "react-router";
+
+interface Seminar {
+  id: number | null;
+  title: string;
+  student?: {
+    nim: string;
+    name: string;
+  } | null;
+  status: "DRAFT" | "SUBMITTED" | "SCHEDULED" | "COMPLETED" | null;
+  advisors: { lecturerNIP: string; lecturerName?: string }[];
+  documents: Record<
+    string,
+    { uploaded: boolean; fileName?: string; fileURL?: string }
+  >;
+  time: string | null;
+  room: string | null;
+  assessors: { lecturerNIP: string; lecturerName?: string }[];
+}
 
 const StudentSeminarProposal = () => {
   const [currentStep, setCurrentStep] = useState<string>("step1");
   const [maxStepReached, setMaxStepReached] = useState<number>(1);
-  const [seminarId, setSeminarId] = useState<number | null>(null);
   const { user, token } = useAuth();
   const lecturersQuery = useApiData({ type: "lecturers" });
   const lecturers = lecturersQuery.data || [];
 
-  const [formData, setFormData] = useState({
-    researchTitle: "",
-    advisor1: "",
-    advisor2: "",
-    uploadedDocuments: {
-      THESIS_PROPOSAL: null,
-      ADVISOR_AVAILABILITY: null,
-      KRS: null,
-      ADVISOR_ASSISTANCE: null,
-      SEMINAR_ATTENDANCE: null,
-    } as Record<string, File | null>,
+  const [seminar, setSeminar] = useState<Seminar>({
+    id: null,
+    title: "",
+    student: null,
+    status: null,
+    advisors: [],
+
+    documents: {
+      THESIS_PROPOSAL: { uploaded: false },
+      ADVISOR_AVAILABILITY: { uploaded: false },
+      KRS: { uploaded: false },
+      ADVISOR_ASSISTANCE: { uploaded: false },
+      SEMINAR_ATTENDANCE: { uploaded: false },
+    },
+    time: null,
+    room: null,
+    assessors: [],
   });
 
-  const [uploadedStatus, setUploadedStatus] = useState<Record<string, boolean>>(
+  const requiredDocuments = [
     {
-      THESIS_PROPOSAL: false,
-      ADVISOR_AVAILABILITY: false,
-      KRS: false,
-      ADVISOR_ASSISTANCE: false,
-      SEMINAR_ATTENDANCE: false,
-    }
-  );
+      id: "THESIS_PROPOSAL",
+      name: "Proposal Tugas Akhir",
+    },
+    {
+      id: "ADVISOR_AVAILABILITY",
+      name: "Kesediaan Pembimbing",
+    },
+    {
+      id: "KRS",
+      name: "Kartu Rencana Studi",
+    },
+    {
+      id: "ADVISOR_ASSISTANCE",
+      name: "Asistensi Pembimbing",
+    },
+    {
+      id: "SEMINAR_ATTENDANCE",
+      name: "Kehadiran Seminar",
+    },
+  ];
 
   const [researchDetailsModalOpen, setResearchDetailsModalOpen] =
     useState(false);
   const [documentUploadModalOpen, setDocumentUploadModalOpen] = useState(false);
-  const [reviewSubmitModalOpen, setReviewSubmitModalOpen] = useState(false);
-  const [seminarStatus, setSeminarStatus] = useState<string | null>(null);
-
   if (!user || !user.profile?.nim) {
     return <div>Loading...</div>;
   }
@@ -77,40 +110,99 @@ const StudentSeminarProposal = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        const seminar = response.data.seminar;
-        if (seminar) {
-          setSeminarId(seminar.id);
-          setSeminarStatus(seminar.status);
-          const uploadedDocs = seminar.documents.reduce(
-            (acc: Record<string, boolean>, doc: any) => {
-              acc[doc.documentType] = true;
-              return acc;
-            },
-            { ...uploadedStatus }
-          );
-          setUploadedStatus(uploadedDocs);
-          setFormData({
-            researchTitle: seminar.title,
-            advisor1: seminar.advisors[0]?.lecturerNIP || "",
-            advisor2: seminar.advisors[1]?.lecturerNIP || "",
-            uploadedDocuments: seminar.documents.reduce(
-              (acc: Record<string, File | null>, doc: any) => {
-                acc[doc.documentType] = null;
-                return acc;
+        console.log("Response Data:", response);
+
+        const seminarData = response.data.seminar;
+        console.log("Fetched Seminar Data:", seminarData);
+
+        if (seminarData) {
+          setSeminar({
+            id: seminarData.id,
+            title: seminarData.title,
+            student: seminarData.student,
+            status: seminarData.status,
+            advisors: seminarData.advisors.map((a: any) => ({
+              lecturerNIP: a.lecturerNIP,
+              lecturerName: a.lecturer?.name,
+            })),
+            documents: {
+              THESIS_PROPOSAL: {
+                uploaded: !!seminarData.documents.find(
+                  (d: any) => d.documentType === "THESIS_PROPOSAL"
+                ),
+                fileName: seminarData.documents.find(
+                  (d: any) => d.documentType === "THESIS_PROPOSAL"
+                )?.fileName,
+                fileURL: seminarData.documents.find(
+                  (d: any) => d.documentType === "THESIS_PROPOSAL"
+                )?.fileURL,
               },
-              { ...formData.uploadedDocuments }
-            ),
+              ADVISOR_AVAILABILITY: {
+                uploaded: !!seminarData.documents.find(
+                  (d: any) => d.documentType === "ADVISOR_AVAILABILITY"
+                ),
+                fileName: seminarData.documents.find(
+                  (d: any) => d.documentType === "ADVISOR_AVAILABILITY"
+                )?.fileName,
+                fileURL: seminarData.documents.find(
+                  (d: any) => d.documentType === "ADVISOR_AVAILABILITY"
+                )?.fileURL,
+              },
+              KRS: {
+                uploaded: !!seminarData.documents.find(
+                  (d: any) => d.documentType === "KRS"
+                ),
+                fileName: seminarData.documents.find(
+                  (d: any) => d.documentType === "KRS"
+                )?.fileName,
+                fileURL: seminarData.documents.find(
+                  (d: any) => d.documentType === "KRS"
+                )?.fileURL,
+              },
+              ADVISOR_ASSISTANCE: {
+                uploaded: !!seminarData.documents.find(
+                  (d: any) => d.documentType === "ADVISOR_ASSISTANCE"
+                ),
+                fileName: seminarData.documents.find(
+                  (d: any) => d.documentType === "ADVISOR_ASSISTANCE"
+                )?.fileName,
+                fileURL: seminarData.documents.find(
+                  (d: any) => d.documentType === "ADVISOR_ASSISTANCE"
+                )?.fileURL,
+              },
+              SEMINAR_ATTENDANCE: {
+                uploaded: !!seminarData.documents.find(
+                  (d: any) => d.documentType === "SEMINAR_ATTENDANCE"
+                ),
+                fileName: seminarData.documents.find(
+                  (d: any) => d.documentType === "SEMINAR_ATTENDANCE"
+                )?.fileName,
+                fileURL: seminarData.documents.find(
+                  (d: any) => d.documentType === "SEMINAR_ATTENDANCE"
+                )?.fileURL,
+              },
+            },
+            time: seminarData.time,
+            room: seminarData.room,
+            assessors: seminarData.assessors.map((a: any) => ({
+              lecturerNIP: a.lecturerNIP,
+              lecturerName: a.lecturer?.name,
+            })),
           });
-          if (seminar.status === "DRAFT") setCurrentStep("step1");
-          else if (seminar.status === "SUBMITTED") setCurrentStep("step2");
-          else if (seminar.status === "SCHEDULED") setCurrentStep("step4");
+
+          if (seminarData.status === "DRAFT") setCurrentStep("step1");
+          else if (seminarData.status === "SUBMITTED") setCurrentStep("step2");
+          else if (seminarData.status === "SCHEDULED") setCurrentStep("step3");
         }
       } catch (error) {
         console.error("Failed to fetch seminar:", error);
       }
     };
     fetchExistingSeminar();
-  }, [user.profile.nim, token]);
+  }, [user.profile.nim, token, documentUploadModalOpen]);
+
+  console.log("Seminar", seminar);
+  console.log("Dospem: ", seminar.advisors);
 
   const handleResearchDetailsSubmit = async (data: {
     researchTitle: string;
@@ -121,16 +213,20 @@ const StudentSeminarProposal = () => {
       const advisorNIPs = [data.advisor1];
       if (data.advisor2) advisorNIPs.push(data.advisor2);
 
-      const endpoint = seminarId
-        ? `http://localhost:5500/api/seminars/${seminarId}`
+      console.log("ID Seminar:", seminar);
+      console.log("Data: ", data);
+
+      const endpoint = seminar.id
+        ? `http://localhost:5500/api/seminars/${seminar.id}`
         : "http://localhost:5500/api/seminars/proposal-register";
-      const method = seminarId ? "put" : "post";
+      const method = seminar.id ? "put" : "post";
 
       const requestData = {
         title: data.researchTitle,
         advisorNIPs,
         ...(method === "post" && { studentNIM: user.profile.nim }),
       };
+
       console.log("Request Data:", {
         method,
         url: endpoint,
@@ -144,24 +240,42 @@ const StudentSeminarProposal = () => {
         data: requestData,
         headers: { Authorization: `Bearer ${token}` },
       });
+
       console.log("Server Response:", response.data);
 
-      if (!response.data || !response.data.data || !response.data.data.id) {
-        throw new Error("ID Seminar tersebut tidak ditemukan");
-      }
-
-      setSeminarId(response.data.data.id);
-      setFormData((prev) => ({
+      const newSeminarId = response.data.seminar.id;
+      setSeminar((prev) => ({
         ...prev,
-        researchTitle: data.researchTitle,
-        advisor1: data.advisor1,
-        advisor2: data.advisor2 || "",
+        id: newSeminarId,
+        title: data.researchTitle,
+        advisors: [
+          {
+            lecturerNIP: data.advisor1,
+            lecturerName:
+              lecturers.find((l: any) => l.nip === data.advisor1)?.name || "",
+          },
+          ...(data.advisor2
+            ? [
+                {
+                  lecturerNIP: data.advisor2,
+                  lecturerName:
+                    lecturers.find((l: any) => l.nip === data.advisor2)?.name ||
+                    "",
+                },
+              ]
+            : []),
+        ],
+        status: "DRAFT",
+        student:
+          method === "post"
+            ? { nim: user.profile.nim!, name: user.profile.name || "" }
+            : prev.student,
       }));
       setResearchDetailsModalOpen(false);
       setCurrentStep("step2");
       toast.success(
-        seminarId
-          ? "Detail seminar berhasil diupdate!"
+        method === "put"
+          ? "Detail seminar berhasil diperbarui!"
           : "Detail seminar berhasil didaftarkan!"
       );
     } catch (error: any) {
@@ -175,7 +289,7 @@ const StudentSeminarProposal = () => {
   const handleDocumentUpload = async (
     documents: Record<string, File | null>
   ) => {
-    if (!seminarId) {
+    if (!seminar.id) {
       toast.error(
         "ID seminar tidak ditemukan, selesaikan detail seminar terlebih dahulu."
       );
@@ -195,15 +309,15 @@ const StudentSeminarProposal = () => {
         const file = documents[docType];
         if (file instanceof File) {
           const uploadFormData = new FormData();
-          uploadFormData.append("seminarId", String(seminarId));
+          uploadFormData.append("seminarId", String(seminar.id));
           uploadFormData.append("documentType", docType);
           uploadFormData.append("file", file);
 
-          const method = uploadedStatus[docType] ? "put" : "post";
+          const method = seminar.documents[docType].uploaded ? "put" : "post";
           const endpoint =
             "http://localhost:5500/api/seminars/proposal-documents";
 
-          await axios({
+          const response = await axios({
             method,
             url: endpoint,
             data: uploadFormData,
@@ -213,11 +327,22 @@ const StudentSeminarProposal = () => {
             },
           });
 
-          setUploadedStatus((prev) => ({ ...prev, [docType]: true }));
+          console.log("Upload Response:", response.data);
+
+          setSeminar((prev) => ({
+            ...prev,
+            documents: {
+              ...prev.documents,
+              [docType]: {
+                uploaded: true,
+                fileName: response.data.seminarDocument.fileName,
+                fileURL: response.data.seminarDocument.fileURL,
+              },
+            },
+            status: "SUBMITTED",
+          }));
         }
       }
-
-      setFormData((prev) => ({ ...prev, uploadedDocuments: documents }));
       setDocumentUploadModalOpen(false);
       setCurrentStep("step3");
       toast.success("Dokumen berhasil diunggah!");
@@ -230,20 +355,8 @@ const StudentSeminarProposal = () => {
     }
   };
 
-  const handleFinalSubmit = async () => {
-    try {
-      setReviewSubmitModalOpen(false);
-      setCurrentStep("step4");
-      toast.success("Seminar proposal berhasil disubmit!");
-    } catch (error: any) {
-      toast.error(
-        "Gagal submit: " + (error.response?.data?.message || error.message)
-      );
-    }
-  };
-
   const allDocumentsUploaded = () =>
-    Object.values(uploadedStatus).every((status) => status === true);
+    Object.values(seminar.documents).every((doc) => doc.uploaded);
 
   const getStatusBadge = (step: string) => {
     const currentStepNum = Number.parseInt(currentStep.replace("step", ""));
@@ -269,7 +382,7 @@ const StudentSeminarProposal = () => {
     }
   };
 
-  const isScheduled = seminarStatus === "SCHEDULED";
+  const isScheduled = seminar.status === "SCHEDULED";
 
   const steps = [
     "Detail Seminar",
@@ -282,7 +395,7 @@ const StudentSeminarProposal = () => {
   const handleNextStep = () => {
     const nextStepNum = currentStepIndex + 1;
     if (nextStepNum <= steps.length) {
-      if (currentStep === "step1" && !formData.researchTitle) {
+      if (currentStep === "step1" && !seminar.title) {
         toast.error("Silakan masukkan detail seminar terlebih dahulu.");
         return;
       }
@@ -318,26 +431,31 @@ const StudentSeminarProposal = () => {
 
         {currentStep === "step1" && (
           <Card className="bg-white sm:col-span-2 overflow-hidden">
-            <CardHeader className="bg-primary">
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-2xl -mb-1 font-heading font-black text-primary-foreground">
-                  Detail Seminar
-                </CardTitle>
-                {getStatusBadge("step1")}
-              </div>
-              <CardDescription className="text-primary-foreground text-sm">
-                Masukkan judul penelitian dan dosen pembimbing Anda.
-              </CardDescription>
-            </CardHeader>
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary opacity-100"></div>
+              <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10"></div>
+
+              <CardHeader className="relative z-10 ">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-2xl -mb-1 font-heading font-black text-primary-foreground">
+                    Detail Seminar
+                  </CardTitle>
+                  {getStatusBadge("step3")}
+                </div>
+                <CardDescription className="text-primary-foreground text-sm">
+                  Masukkan judul penelitian dan dosen pembimbing Anda.
+                </CardDescription>
+              </CardHeader>
+            </div>
             <CardContent>
-              {formData.researchTitle ? (
+              {seminar.title ? (
                 <div className="space-y-4 mt-6">
                   <div>
                     <h3 className="text-sm font-bold font-heading text-primary">
                       Judul Penelitian
                     </h3>
                     <p className="text-primary-800 text-lg font-bold">
-                      {formData.researchTitle}
+                      {seminar.title}
                     </p>
                   </div>
                   <div>
@@ -345,18 +463,16 @@ const StudentSeminarProposal = () => {
                       Dosen Pembimbing I
                     </h3>
                     <p className="text-primary-800 text-lg font-bold">
-                      {lecturers.find((l: any) => l.nip === formData.advisor1)
-                        ?.name || formData.advisor1}
+                      {seminar.advisors[0]?.lecturerName}
                     </p>
                   </div>
-                  {formData.advisor2 && (
+                  {seminar.advisors[1] && (
                     <div>
                       <h3 className="text-sm font-bold font-heading text-primary">
                         Dosen Pembimbing II
                       </h3>
                       <p className="text-primary-800 text-lg font-bold">
-                        {lecturers.find((l: any) => l.nip === formData.advisor2)
-                          ?.name || formData.advisor2}
+                        {seminar.advisors[1]?.lecturerName}
                       </p>
                     </div>
                   )}
@@ -374,17 +490,17 @@ const StudentSeminarProposal = () => {
               <div className="space-x-2">
                 <Button
                   onClick={() => setResearchDetailsModalOpen(true)}
-                  disabled={isScheduled}
+                  disabled={seminar.status === "SCHEDULED"}
                   variant="outline"
                   className="border-2 border-primary text-primary-800"
                 >
-                  {formData.researchTitle
+                  {seminar.title
                     ? "Perbarui Detail Seminar"
                     : "Masukkan Detail Seminar"}
                 </Button>
                 <Button
                   onClick={handleNextStep}
-                  disabled={!formData.researchTitle || isScheduled}
+                  disabled={!seminar.title || seminar.status === "SCHEDULED"}
                   className="bg-primary hover:bg-primary-700 text-primary-foreground"
                 >
                   Lanjut
@@ -395,18 +511,23 @@ const StudentSeminarProposal = () => {
         )}
 
         {currentStep === "step2" && (
-          <Card className="bg-white sm:col-span-2 overflow-hidden">
-            <CardHeader className="bg-primary">
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-2xl -mb-1 font-heading font-black text-primary-foreground">
-                  Dokumen yang Dibutuhkan
-                </CardTitle>
-                {getStatusBadge("step2")}
-              </div>
-              <CardDescription className="text-primary-foreground text-sm">
-                Upload semua dokumen yang dibutuhkan untuk seminar proposal.
-              </CardDescription>
-            </CardHeader>
+          <Card className="bg-white overflow-hidden">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary opacity-100"></div>
+              <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10"></div>
+
+              <CardHeader className="relative z-10 ">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-2xl -mb-1 font-heading font-black text-primary-foreground">
+                    Dokumen yang Dibutuhkan
+                  </CardTitle>
+                  {getStatusBadge("step3")}
+                </div>
+                <CardDescription className="text-primary-foreground text-sm">
+                  Upload semua dokumen yang dibutuhkan untuk seminar proposal.
+                </CardDescription>
+              </CardHeader>
+            </div>
             <CardContent>
               {allDocumentsUploaded() ? (
                 <div className="space-y-4 mt-6">
@@ -417,14 +538,39 @@ const StudentSeminarProposal = () => {
                     </p>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Object.entries(uploadedStatus).map(([key, status]) => (
-                      <div key={key} className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-primary-600" />
-                        <span className="text-sm text-primary-800">
-                          {status ? "Dokumen telah diunggah" : "Belum diunggah"}
-                        </span>
-                      </div>
-                    ))}
+                    {Object.entries(seminar.documents).map(([key, doc]) => {
+                      const reqDoc = requiredDocuments.find(
+                        (d) => d.id === key
+                      );
+                      return (
+                        <div key={key} className="flex flex-col">
+                          <h1 className="font-bold text-lg font-heading text-primary-800">
+                            {reqDoc ? reqDoc.name : key}
+                          </h1>
+                          <div className="flex items-center gap-1">
+                            <FileText className="h-4 w-4 text-primary-600" />
+                            <span className="text-sm text-primary-800">
+                              {doc.uploaded ? doc.fileName : "Belum diunggah"}
+                            </span>
+                            {doc.uploaded && doc.fileURL && (
+                              <Button
+                                variant="link"
+                                size="sm"
+                                className="text-primary-600 hover:text-primary-800 p-0"
+                              >
+                                <Link
+                                  to={doc.fileURL}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  Lihat File
+                                </Link>
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ) : (
@@ -441,7 +587,9 @@ const StudentSeminarProposal = () => {
               <Button
                 variant="secondary"
                 onClick={handlePrevStep}
-                disabled={currentStepIndex === 1 || isScheduled}
+                disabled={
+                  currentStepIndex === 1 || seminar.status === "SCHEDULED"
+                }
                 className="border-primary-400 text-primary-700 hover:bg-accent hover:text-accent-foreground"
               >
                 Kembali
@@ -449,7 +597,7 @@ const StudentSeminarProposal = () => {
               <div className="space-x-2">
                 <Button
                   onClick={() => setDocumentUploadModalOpen(true)}
-                  disabled={isScheduled}
+                  disabled={seminar.status === "SCHEDULED"}
                   variant="outline"
                   className="border-2 border-primary text-primary-800"
                 >
@@ -459,7 +607,9 @@ const StudentSeminarProposal = () => {
                 </Button>
                 <Button
                   onClick={handleNextStep}
-                  disabled={!allDocumentsUploaded() || isScheduled}
+                  disabled={
+                    !allDocumentsUploaded() || seminar.status === "SCHEDULED"
+                  }
                   className="bg-primary hover:bg-primary-700 text-primary-foreground"
                 >
                   Lanjut
@@ -470,106 +620,152 @@ const StudentSeminarProposal = () => {
         )}
 
         {currentStep === "step3" && (
-          <Card className="bg-white">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-primary-700">
-                  Review & Submit
-                </CardTitle>
-                {getStatusBadge("step3")}
-              </div>
-              <CardDescription className="text-primary-600">
-                Review your information before final submission.
-              </CardDescription>
-            </CardHeader>
+          <Card className="bg-white overflow-hidden">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary opacity-100"></div>
+              <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10"></div>
+
+              <CardHeader className="relative z-10 ">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-2xl -mb-1 font-heading font-black text-primary-foreground">
+                    Undangan Seminar
+                  </CardTitle>
+                  {getStatusBadge("step3")}
+                </div>
+                <CardDescription className="text-primary-foreground text-sm">
+                  Lihat detail seminar Anda dan unduh undangan seminar setelah
+                  jadwal ditentukan.
+                </CardDescription>
+              </CardHeader>
+            </div>
             <CardContent>
-              <div className="space-y-6">
-                <div className="border rounded-lg p-4 border-primary-300">
-                  <h3 className="font-medium mb-2 text-primary-700">
-                    Research Details
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-primary-600">
-                        Research Title
+              <div className="space-y-6 mt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="text-sm font-bold font-heading text-primary">
+                      Mahasiswa
+                    </h3>
+                    <div className="flex flex-col">
+                      <p className="text-primary-800 -mb-2 text-lg font-bold">
+                        {seminar.student?.name}
                       </p>
-                      <p className="text-primary-800">
-                        {formData.researchTitle}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-primary-600">
-                        First Supervisor
-                      </p>
-                      <p className="text-primary-800">
-                        {lecturers.find((l: any) => l.nip === formData.advisor1)
-                          ?.name || formData.advisor1}
+                      <p className="text-primary-400 font-bold">
+                        {seminar.student?.nim}
                       </p>
                     </div>
-                    {formData.advisor2 && (
-                      <div>
-                        <p className="text-sm font-medium text-primary-600">
-                          Second Supervisor
-                        </p>
-                        <p className="text-primary-800">
-                          {lecturers.find(
-                            (l: any) => l.nip === formData.advisor2
-                          )?.name || formData.advisor2}
-                        </p>
-                      </div>
-                    )}
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-bold font-heading text-primary">
+                      Judul Penelitian
+                    </h3>
+                    <p className="text-primary-800 text-lg font-bold">
+                      {seminar.title}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold font-heading text-primary">
+                      Dosen Pembimbing I
+                    </h3>
+                    <p className="text-primary-800 text-lg font-bold">
+                      {seminar.advisors[0]?.lecturerName}
+                    </p>
+                  </div>
+                  {seminar.advisors[1] && (
+                    <div>
+                      <h3 className="text-sm font-bold font-heading text-primary">
+                        Dosen Pembimbing II
+                      </h3>
+                      <p className="text-primary-800 text-lg font-bold">
+                        {seminar.advisors[1]?.lecturerName}
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="text-sm font-bold font-heading text-primary">
+                      Waktu
+                    </h3>
+                    <p className="text-primary-800 text-lg font-bold">
+                      {seminar.time
+                        ? new Date(seminar.time).toLocaleString()
+                        : "Belum ditentukan"}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold font-heading text-primary">
+                      Ruangan
+                    </h3>
+                    <p className="text-primary-800 text-lg font-bold">
+                      {seminar.room || "Belum ditentukan"}
+                    </p>
                   </div>
                 </div>
-                <div className="border rounded-lg p-4 border-primary-300">
-                  <h3 className="font-medium mb-2 text-primary-700">
-                    Uploaded Documents
-                  </h3>
-                  <ul className="space-y-2">
-                    {Object.entries(uploadedStatus).map(([key, status]) => (
-                      <li key={key} className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-primary-600" />
-                        <span className="text-primary-800">
-                          {status ? "Dokumen telah diunggah" : "Belum diunggah"}
-                        </span>
+                <h3 className="text-sm font-bold font-heading text-primary">
+                  Dosen Penguji
+                </h3>
+                {seminar.assessors.length > 0 ? (
+                  <ul>
+                    {seminar.assessors.map((assessor, index) => (
+                      <li
+                        key={index}
+                        className="text-primary-800 text-lg font-bold"
+                      >
+                        {assessor.lecturerName || assessor.lecturerNIP}
                       </li>
                     ))}
                   </ul>
-                </div>
+                ) : (
+                  <p className="text-primary-800 text-lg font-bold">
+                    Belum ditentukan
+                  </p>
+                )}
                 <Alert className="bg-primary-50 border-primary-200">
                   <AlertCircle className="h-4 w-4 text-primary-600" />
                   <AlertTitle className="text-primary-800">
-                    Important Note
+                    Informasi
                   </AlertTitle>
                   <AlertDescription className="text-primary-700">
-                    After submission, your registration will be reviewed by the
-                    coordinator.
+                    Undangan seminar akan tersedia setelah koordinator
+                    menentukan jadwal dan penguji.
                   </AlertDescription>
                 </Alert>
               </div>
             </CardContent>
             <CardFooter className="flex justify-between">
               <Button
-                variant="outline"
+                variant="secondary"
                 onClick={handlePrevStep}
-                disabled={currentStepIndex === 1 || isScheduled}
+                disabled={currentStepIndex === 1}
                 className="border-primary-400 text-primary-700 hover:bg-accent hover:text-accent-foreground"
               >
-                Back
+                Kembali
               </Button>
               <div className="space-x-2">
                 <Button
-                  onClick={() => setReviewSubmitModalOpen(true)}
-                  disabled={isScheduled}
-                  className="bg-primary hover:bg-primary-700 text-primary-foreground"
+                  onClick={() =>
+                    window.open(
+                      `http://localhost:5500/api/seminars/${seminar.id}/invitation`,
+                      "_blank"
+                    )
+                  }
+                  disabled={
+                    seminar.status !== "SCHEDULED" ||
+                    !seminar.time ||
+                    !seminar.room
+                  }
+                  variant="outline"
+                  className="border-2 border-primary text-primary-800"
                 >
-                  Review & Submit
+                  Unduh Undangan
                 </Button>
                 <Button
                   onClick={handleNextStep}
-                  disabled={isScheduled}
+                  disabled={seminar.status !== "SCHEDULED"}
                   className="bg-primary hover:bg-primary-700 text-primary-foreground"
                 >
-                  Next
+                  Lanjut
                 </Button>
               </div>
             </CardFooter>
@@ -602,7 +798,7 @@ const StudentSeminarProposal = () => {
                 <div className="bg-primary-50 p-4 rounded-lg mb-6 w-full max-w-md border-primary-200">
                   <p className="font-medium text-primary-800">
                     Registration ID:{" "}
-                    <span className="font-mono">{seminarId || "N/A"}</span>
+                    <span className="font-mono">{seminar.id || "N/A"}</span>
                   </p>
                   <p className="text-sm text-primary-600">
                     Please keep this ID for your reference.
@@ -642,23 +838,24 @@ const StudentSeminarProposal = () => {
           onOpenChange={setResearchDetailsModalOpen}
           onSubmit={handleResearchDetailsSubmit}
           initialData={{
-            researchTitle: formData.researchTitle,
-            advisor1: formData.advisor1,
-            advisor2: formData.advisor2,
+            researchTitle: seminar.title,
+            advisor1: seminar.advisors[0]?.lecturerNIP,
+            advisor2: seminar.advisors[1]?.lecturerNIP || "",
           }}
         />
         <DocumentUploadModal
           open={documentUploadModalOpen}
           onOpenChange={setDocumentUploadModalOpen}
           onSubmit={handleDocumentUpload}
-          initialData={formData.uploadedDocuments}
-          uploadedStatus={uploadedStatus}
-        />
-        <ReviewSubmitModal
-          open={reviewSubmitModalOpen}
-          onOpenChange={setReviewSubmitModalOpen}
-          onSubmit={handleFinalSubmit}
-          formData={formData}
+          initialData={Object.fromEntries(
+            Object.entries(seminar.documents).map(([key, doc]) => [key, null])
+          )}
+          uploadedStatus={Object.fromEntries(
+            Object.entries(seminar.documents).map(([key, doc]) => [
+              key,
+              doc.uploaded,
+            ])
+          )}
         />
       </div>
     </StudentLayout>
