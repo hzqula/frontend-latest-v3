@@ -7,6 +7,7 @@ import {
   fetchStudentByNIM,
   fetchLecturerByNIP,
   fetchStudents,
+  fetchSeminarByStudentNIM,
 } from "../api/apiClient";
 
 type DataType =
@@ -15,7 +16,8 @@ type DataType =
   | "lecturers"
   | "lecturerByNIP"
   | "seminars"
-  | "seminarById";
+  | "seminarById"
+  | "seminarByStudentNIM";
 
 interface UseApiDataOptions {
   type: DataType;
@@ -43,6 +45,9 @@ export const useApiData = ({ type, param, id }: UseApiDataOptions) => {
       case "seminarById":
         if (!id) throw new Error("ID seminar harus ada");
         return fetchSeminarById(id);
+      case "seminarByStudentNIM":
+        if (!param) throw new Error("NIM mahasiswa harus ada");
+        return fetchSeminarByStudentNIM(param);
       default:
         throw new Error("Tipe data tidak diketahui");
     }

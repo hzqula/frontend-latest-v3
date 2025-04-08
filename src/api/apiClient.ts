@@ -68,7 +68,6 @@ export const fetchLecturers = async () => {
 };
 
 export const fetchLecturerByNIP = async (nip: string) => {
-  // Ubah nama fungsi agar konsisten (fetchStudentByNIP -> fetchLecturerByNIP)
   const response = await apiClient.get(`/lecturers/${nip}`);
   return response.data.lecturer;
 };
@@ -80,6 +79,10 @@ export const fetchSeminars = async () => {
 
 export const fetchSeminarById = async (id: number) => {
   const response = await apiClient.get(`/seminars/${id}`);
+  return response.data.seminar;
+};
+export const fetchSeminarByStudentNIM = async (nim: string) => {
+  const response = await apiClient.get(`/seminars/student/${nim}`);
   return response.data.seminar;
 };
 
