@@ -31,7 +31,7 @@ const requiredDocuments = [
     id: "KRS",
     name: "Kartu Rencana Studi",
     description:
-      "Kartu Rencana Studi (KRS) di semester ini yang sudah disetujui oleh penasihat akademik",
+      "Kartu Rencana Studi (KRS) di semester ini yang sudah disetujui",
     template: "/templates/krs_template.pdf",
   },
   {
@@ -63,18 +63,8 @@ const DocumentUploadModal = ({
   initialData,
   uploadedStatus,
 }: DocumentUploadModalProps) => {
-  const [uploadedDocuments, setUploadedDocuments] = useState<
-    Record<string, File | null>
-  >(
-    initialData || {
-      THESIS_PROPOSAL: null,
-      ADVISOR_AVAILABILITY: null,
-      KRS: null,
-      ADVISOR_ASSISTANCE: null,
-      SEMINAR_ATTENDANCE: null,
-    }
-  );
-
+  const [uploadedDocuments, setUploadedDocuments] =
+    useState<Record<string, File | null>>(initialData);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleFileUpload = (documentId: string, file: File | null) => {
@@ -89,15 +79,21 @@ const DocumentUploadModal = ({
   };
 
   const allDocumentsUploaded = () =>
-    Object.keys(uploadedDocuments).every(
-      (key) => uploadedDocuments[key] !== null || uploadedStatus[key]
+    requiredDocuments.every(
+      (doc) => uploadedDocuments[doc.id] !== null || uploadedStatus[doc.id]
     );
 
   const handleSubmit = async () => {
+    if (!allDocumentsUploaded()) {
+      toast.error("Silakan unggah semua dokumen yang dibutuhkan.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await onSubmit(uploadedDocuments);
-      // Modal akan tertutup di parent setelah sukses, jadi isSubmitting tetap true
+      setIsSubmitting(false);
+      onOpenChange(false); // Tutup modal setelah sukses
     } catch (error) {
       setIsSubmitting(false);
       toast.error("Gagal menyimpan dokumen.");
@@ -111,6 +107,9 @@ const DocumentUploadModal = ({
           <DialogTitle className="text-2xl -mb-1 font-heading font-black text-primary-800">
             Upload Dokumen yang Dibutuhkan
           </DialogTitle>
+          <DialogDescription>
+            Unggah semua dokumen yang diperlukan untuk seminar proposal Anda.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
@@ -118,13 +117,14 @@ const DocumentUploadModal = ({
             <div key={document.id} className="border rounded-lg p-4">
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <h3 className="font-medium">{document.name}</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <h3 className="text-sm font-bold font-heading text-primary-800">
+                    {document.name}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
                     {document.description}
                   </p>
                 </div>
-                {(uploadedDocuments[document.id] ||
-                  uploadedStatus[document.id]) && (
+                {uploadedStatus[document.id] && (
                   <CheckCircle2 className="h-5 w-5 text-green-600" />
                 )}
               </div>
@@ -134,6 +134,7 @@ const DocumentUploadModal = ({
                   variant="outline"
                   size="sm"
                   className="flex items-center gap-2"
+                  onClick={() => window.open(document.template, "_blank")}
                 >
                   <Download className="h-4 w-4" />
                   Download Template
@@ -168,12 +169,10 @@ const DocumentUploadModal = ({
                   </Button>
                 </div>
 
-                {(uploadedDocuments[document.id] ||
-                  uploadedStatus[document.id]) && (
-                  <div className="flex ITEMS-center gap-2 text-sm text-muted-foreground">
+                {uploadedDocuments[document.id] && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <FileText className="h-4 w-4" />
-                    {uploadedDocuments[document.id]?.name ||
-                      "Dokumen telah diunggah"}
+                    {uploadedDocuments[document.id]?.name}
                   </div>
                 )}
               </div>
