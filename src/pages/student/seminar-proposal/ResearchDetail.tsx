@@ -16,7 +16,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -94,6 +93,9 @@ const ResearchDetailsModal = ({
           <DialogTitle className="text-2xl -mb-1 font-heading font-black text-primary-800">
             Detail Seminar Proposal
           </DialogTitle>
+          <DialogDescription className="text-primary text-sm">
+            Masukkan judul penelitian dan dosen pembimbing Anda.
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
