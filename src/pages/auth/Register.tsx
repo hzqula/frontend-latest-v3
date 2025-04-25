@@ -180,11 +180,11 @@ const Register: React.FC = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message);
+        toast.error(data.error);
         return;
       }
 
-      toast.success(data.message);
+      toast.success(data.error);
       setCurrentStep(2);
       startResendCountdown();
     } catch (error) {
@@ -219,7 +219,7 @@ const Register: React.FC = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message);
+        toast.error(data.error);
         setCurrentStep(1);
         return;
       }
@@ -284,7 +284,7 @@ const Register: React.FC = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message);
+        toast.error(data.error);
         return;
       }
 

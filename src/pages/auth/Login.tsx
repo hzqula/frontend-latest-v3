@@ -122,7 +122,7 @@ const Login: React.FC = () => {
       console.error("Terjadi kesalahan: ", error);
       toast.error(
         axios.isAxiosError(error) && error.response?.data?.message
-          ? error.response.data.message
+          ? error.response.data.error
           : "Terjadi kesalahan saat login"
       );
     } finally {
