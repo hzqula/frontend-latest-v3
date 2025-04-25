@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router";
 import StudentSeminarProposal from "../student/seminar-proposal/SeminarProposal";
-// import DashboardCoordinator from "./coordinator/DashboardCoordinator";
-// import DashboardLecturer from "./lecturer/DashboardLecturer";
-// import SeminarProposalStudent from "./student/SeminarProposalStudent";
+import CoordinatorSeminarProposal from "../coordinator/seminar-proposal/SeminarProposal";
+import LecturerSeminarProposal from "../lecturer/seminar-proposal/SeminarProposal";
 
 enum UserRole {
   STUDENT = "STUDENT",
@@ -44,13 +43,10 @@ const SeminarProposal: React.FC = () => {
   switch (userData.role) {
     case UserRole.STUDENT:
       return <StudentSeminarProposal />;
-
-    // case UserRole.LECTURER:
-    //   return <DashboardLecturer />;
-
-    // case UserRole.COORDINATOR:
-    //   return <DashboardCoordinator />;
-
+    case UserRole.COORDINATOR:
+      return <CoordinatorSeminarProposal />;
+    case UserRole.LECTURER:
+      return <LecturerSeminarProposal />;
     default:
       return <Navigate to="/sign-in" replace />;
   }
