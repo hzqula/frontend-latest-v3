@@ -21,6 +21,9 @@
   --color-primary-800: oklch(34.7% 0.0452 180.73);
   --color-primary-900: oklch(29.7% 0.0352 180.73);
 
+  /* blue */
+  --color-secondary-600: oklch(0.38 0.0743 253.34);
+
   /* white */
   --color-white: oklch(98.48% 0 0);
 
@@ -57,4 +60,6 @@
     --color-destructive-500
   ); /* Warna utama destructive */
   --color-destructive-foreground: var(--color-white); /* Teks kontras putih */
+
+  --color-success: var(--color-secondary-600); /* Warna utama untuk sukses */
 }
