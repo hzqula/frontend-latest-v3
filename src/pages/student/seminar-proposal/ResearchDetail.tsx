@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "../../../components/ui/select";
 import { Plus, Minus } from "lucide-react";
+import { toast } from "react-toastify";
 
 const formSchema = z.object({
   researchTitle: z
@@ -66,6 +67,8 @@ const ResearchDetailsModal = ({
   const lecturersQuery = useApiData({ type: "lecturers" });
   const availableSupervisors = lecturersQuery.data || [];
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -75,8 +78,18 @@ const ResearchDetailsModal = ({
     },
   });
 
-  const handleSubmit = (data: FormData) => {
-    onSubmit(data);
+  const handleSubmit = async (data: FormData) => {
+    if (isSubmitting) return; // Cegah double submit
+
+    setIsSubmitting(true);
+    try {
+      await onSubmit(data);
+      onOpenChange(false); // Tutup modal setelah sukses
+    } catch (error) {
+      toast.error("Gagal menyimpan detail seminar.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const toggleSecondSupervisor = () => {
@@ -229,8 +242,8 @@ const ResearchDetailsModal = ({
               >
                 Batal
               </Button>
-              <Button className="w-2/3" type="submit">
-                Simpan
+              <Button className="w-2/3" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Menyimpan..." : "Simpan"}
               </Button>
             </DialogFooter>
           </form>
