@@ -505,55 +505,48 @@ const CoordinatorDashboard = () => {
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Student Distribution - spans full width (4 columns) */}
+              
+              {/* Dosen Mahasiswa Chart */}
               <Card className="bg-white sm:col-span-4">
                 <CardHeader>
                   <CardTitle className="text-primary-700">
-                    Recent Activity
+                    Pembagian Mahasiswa Per Dosen Pembimbing
                   </CardTitle>
                   <CardDescription className="text-primary-600">
-                    Latest actions in the system
+                    January - June 2025
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {filteredUpcomingSeminars
-                      .slice(0, 4)
-                      .map((seminar: any, index: number) => (
-                        <div
-                          key={`activity-${index}`}
-                          className="flex items-center gap-4 border-b pb-3 last:border-0 last:pb-0"
-                        >
-                          <div className="p-2 bg-primary-100 rounded-full">
-                            {index % 2 === 0 ? (
-                              <CalendarDays className="h-5 w-5 text-primary-700" />
-                            ) : (
-                              <FileText className="h-5 w-5 text-primary-700" />
-                            )}
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-primary-800">
-                              {index % 2 === 0
-                                ? "Seminar Scheduled"
-                                : "New Submission"}
-                            </h4>
-                            <p className="text-sm text-primary-600">
-                              {seminar.title.substring(0, 40)}
-                              {seminar.title.length > 40 ? "..." : ""}
-                            </p>
-                          </div>
-                          <div className="ml-auto text-right">
-                            <div className="text-sm font-medium text-primary-800">
-                              {formatDate(seminar.time || seminar.createdAt)}
-                            </div>
-                            <div className="text-xs text-primary-600">
-                              {formatTime(seminar.time || seminar.createdAt)}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                  <div className="h-[300px] overflow-auto">
+                  <div className="h-[600px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={chartData}
+                        layout="vertical"
+                        margin={{ top: 10, right: 20, left: 20, bottom: 10 }}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          horizontal={false}
+                        />
+                        <XAxis type="number" />
+                        <YAxis
+                          dataKey="dosen"
+                          type="category"
+                          width={180}
+                          tick={{ fontSize: 12 }}
+                          tickLine={false}
+                        />
+                        <Tooltip/>
+                        <Bar
+                          dataKey="mahasiswa"
+                          fill="var(--color-primary-600)"
+                          radius={[0, 4, 4, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
+                  </div>  
                 </CardContent>
               </Card>
             </div>
@@ -796,3 +789,17 @@ const completionRate = [
   { month: "Nov", rate: 89 },
   { month: "Dec", rate: 78 },
 ];
+
+const chartData = [
+  { dosen: "Gunadi Priyambada, S.T., M.T", mahasiswa: 6 },
+  { dosen: "Shinta Elystia, S.T., M.Si", mahasiswa: 5 },
+  { dosen: "Muhammad Reza, S.T., M.Sc", mahasiswa: 5 },
+  { dosen: "Dr. Hafidawati, S.Tp., M.T", mahasiswa: 3 },
+  { dosen: "Ir. Syarfi Daud, M.T", mahasiswa: 3 },
+  { dosen: "Dr. David Andrio, S.T., M.Si", mahasiswa: 3 },
+  { dosen: "Dewi Fitria, S.T.,  M.T., Ph.D", mahasiswa: 3 },
+  { dosen: "Elvi Yenie, S.T., M.Eng", mahasiswa: 3 },
+  { dosen: "Aryo Sasmita, S.T., M.T", mahasiswa: 3 },
+  { dosen: "Dr. Lita Darmayanti, S.T., M.T", mahasiswa: 2 },
+  { dosen: "Jecky Asmura, S.T., M.T", mahasiswa: 1 },
+].sort((a, b) => b.mahasiswa - a.mahasiswa);
