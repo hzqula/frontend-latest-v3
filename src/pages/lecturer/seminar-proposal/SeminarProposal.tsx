@@ -368,11 +368,11 @@ const LecturerSeminarProposal = () => {
                               <td className="p-4">{seminar.room || "TBD"}</td>
                               <td className="p-4">
                                 {isAssessed ? (
-                                  <Badge className="bg-success text-primary-800 border-primary-400 border-2">
+                                  <Badge className="bg-success text-primary-foreground border-primary-400 border-2">
                                     Sudah
                                   </Badge>
                                 ) : (
-                                  <Badge className="bg-destructive text-primary-800 border-primary-400 border-2">
+                                  <Badge className="bg-destructive text-primary-foreground border-primary-400 border-2">
                                     Belum
                                   </Badge>
                                 )}
