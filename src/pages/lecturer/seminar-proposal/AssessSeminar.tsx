@@ -46,8 +46,8 @@ const AssessSeminarProposal = () => {
   const [scores, setScores] = useState({
     writingScore: "",
     presentationScore: "",
-    titleScore: "",
-    guidanceScore: "",
+    masteryScore: "",
+    characteristicScore: "",
   });
   const [submitted, setSubmitted] = useState(false);
 
@@ -96,10 +96,10 @@ const AssessSeminarProposal = () => {
   };
 
   const calculateAverage = () => {
-    const { writingScore, presentationScore, titleScore } = scores;
+    const { writingScore, presentationScore, masteryScore } = scores;
     const writing = parseFloat(writingScore) || 0; // Penyajian Makalah / Presentasi (25%)
     const presentation = parseFloat(presentationScore) || 0; // Penguasaan Materi (40%)
-    const title = parseFloat(titleScore) || 0; // Karakteristik Mahasiswa (35%)
+    const title = parseFloat(masteryScore) || 0; // Karakteristik Mahasiswa (35%)
 
     // Weighted average: (score * weight) / total weight
     const weightedAverage =
@@ -117,11 +117,11 @@ const AssessSeminarProposal = () => {
     const requiredScores = [
       scores.writingScore,
       scores.presentationScore,
-      scores.titleScore,
+      scores.masteryScore,
     ];
 
     if (isAdvisor) {
-      requiredScores.push(scores.guidanceScore);
+      requiredScores.push(scores.characteristicScore);
     }
 
     for (const score of requiredScores) {
@@ -137,11 +137,11 @@ const AssessSeminarProposal = () => {
       const payload: any = {
         writingScore: parseFloat(scores.writingScore),
         presentationScore: parseFloat(scores.presentationScore),
-        titleScore: parseFloat(scores.titleScore),
+        masteryScore: parseFloat(scores.masteryScore),
       };
 
       if (isAdvisor) {
-        payload.guidanceScore = parseFloat(scores.guidanceScore);
+        payload.characteristicScore = parseFloat(scores.characteristicScore);
       }
 
       await axios.post(
@@ -362,7 +362,7 @@ const AssessSeminarProposal = () => {
                   </CardHeader>
                 </div>
                 <CardContent className="space-y-8 p-6">
-                  {/* Writing Score */}
+                  {/* Peresentasion Score */}
                   <div className="">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
                       <Label
@@ -375,45 +375,6 @@ const AssessSeminarProposal = () => {
                       <div className="flex items-center gap-3">
                         <Input
                           id="writing-score"
-                          type="number"
-                          className="w-20 text-right font-bold border-primary-400"
-                          min="0"
-                          max="100"
-                          value={scores.writingScore}
-                          onChange={(e) =>
-                            handleScoreChange("writingScore", e.target.value)
-                          }
-                          disabled={isSubmitting}
-                          required
-                        />
-                        <span className="text-sm font-bold text-primary-600">
-                          / 100
-                        </span>
-                      </div>
-                    </div>
-                    <p className="text-sm text-primary-800 w-4/5">
-                      Kejelasan materi yang disampaikan, Sikap, kejelasan{" "}
-                      <span className="italic">vokal</span> dan{" "}
-                      <span className="italic">body</span>{" "}
-                      <span className="italic">language</span>, Interaksi dan
-                      komunikasi, Tampilan /{" "}
-                      <span className="italic">design</span> materi presentasi
-                    </p>
-                  </div>
-
-                  {/* Presentation Score */}
-                  <div className="">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
-                      <Label
-                        htmlFor="presentation-score"
-                        className="text-lg font-medium font-heading text-primary-800"
-                      >
-                        Penguasaan Materi{" "}
-                        <span className="font-bold">(40%)</span>
-                      </Label>
-                      <div className="flex items-center gap-3">
-                        <Input
-                          id="presentation-score"
                           type="number"
                           className="w-20 text-right font-bold border-primary-400"
                           min="0"
@@ -434,19 +395,58 @@ const AssessSeminarProposal = () => {
                       </div>
                     </div>
                     <p className="text-sm text-primary-800 w-4/5">
+                      Kejelasan materi yang disampaikan, Sikap, kejelasan{" "}
+                      <span className="italic">vokal</span> dan{" "}
+                      <span className="italic">body</span>{" "}
+                      <span className="italic">language</span>, Interaksi dan
+                      komunikasi, Tampilan /{" "}
+                      <span className="italic">design</span> materi presentasi
+                    </p>
+                  </div>
+
+                  {/* Mastery Score */}
+                  <div className="">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+                      <Label
+                        htmlFor="presentation-score"
+                        className="text-lg font-medium font-heading text-primary-800"
+                      >
+                        Penguasaan Materi{" "}
+                        <span className="font-bold">(40%)</span>
+                      </Label>
+                      <div className="flex items-center gap-3">
+                        <Input
+                          id="presentation-score"
+                          type="number"
+                          className="w-20 text-right font-bold border-primary-400"
+                          min="0"
+                          max="100"
+                          value={scores.masteryScore}
+                          onChange={(e) =>
+                            handleScoreChange("masteryScore", e.target.value)
+                          }
+                          disabled={isSubmitting}
+                          required
+                        />
+                        <span className="text-sm font-bold text-primary-600">
+                          / 100
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-primary-800 w-4/5">
                       Kemampuan menjawab dan kualitas jawaban
                     </p>
                   </div>
 
-                  {/* Title Score */}
+                  {/* Writing Score */}
                   <div className="">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
                       <Label
                         htmlFor="title-score"
                         className="text-lg font-medium font-heading text-primary-800"
                       >
-                        Karakteristik Mahasiswa{" "}
-                        <span className="font-bold">(40%)</span>
+                        Penulisan Makalah
+                        <span className="font-bold">(35%)</span>
                       </Label>
                       <div className="flex items-center gap-3">
                         <Input
@@ -455,9 +455,9 @@ const AssessSeminarProposal = () => {
                           className="w-20 text-right font-bold border-primary-400"
                           min="0"
                           max="100"
-                          value={scores.titleScore}
+                          value={scores.writingScore}
                           onChange={(e) =>
-                            handleScoreChange("titleScore", e.target.value)
+                            handleScoreChange("writingScore", e.target.value)
                           }
                           disabled={isSubmitting}
                           required
@@ -473,7 +473,7 @@ const AssessSeminarProposal = () => {
                     </p>
                   </div>
 
-                  {/* Guidance Score (hanya untuk pembimbing) */}
+                  {/* Characteristic Score (hanya untuk pembimbing) */}
                   {isAdvisor && (
                     <div className="space-y-4">
                       <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
@@ -481,7 +481,8 @@ const AssessSeminarProposal = () => {
                           htmlFor="guidance-score"
                           className="text-lg font-medium font-heading text-primary-800"
                         >
-                          4. Kualitas Bimbingan
+                          Karakteristik Mahasiswa{" "}
+                          <span className="font-bold">(35%)</span>
                         </Label>
                         <div className="flex items-center gap-3">
                           <Input
@@ -490,9 +491,12 @@ const AssessSeminarProposal = () => {
                             className="w-20 text-right font-bold border-primary-400"
                             min="0"
                             max="100"
-                            value={scores.guidanceScore}
+                            value={scores.characteristicScore}
                             onChange={(e) =>
-                              handleScoreChange("guidanceScore", e.target.value)
+                              handleScoreChange(
+                                "characteristicScore",
+                                e.target.value
+                              )
                             }
                             disabled={isSubmitting}
                             required
@@ -502,9 +506,9 @@ const AssessSeminarProposal = () => {
                           </span>
                         </div>
                       </div>
-                      <p className="text-sm text-primary-600 ml-4">
-                        Menilai proses bimbingan, keteraturan konsultasi, dan
-                        kemajuan penelitian.
+                      <p className="text-sm text-primary-800 w-3/4">
+                        Kerajinan / kemauan berusaha, inisiatif dan
+                        mengembangkan pola pikir, adab kesopanan dan tepat waktu
                       </p>
                     </div>
                   )}
@@ -539,7 +543,7 @@ const AssessSeminarProposal = () => {
                       </p>
                       <p className="text-2xl font-bold text-primary-700 mt-1">
                         {(
-                          (parseFloat(scores.writingScore) || 0) * 0.25
+                          (parseFloat(scores.presentationScore) || 0) * 0.25
                         ).toFixed(1)}
                       </p>
                     </div>
@@ -548,28 +552,28 @@ const AssessSeminarProposal = () => {
                         Penguasaan (40%)
                       </p>
                       <p className="text-2xl font-bold text-primary-700 mt-1">
-                        {(
-                          (parseFloat(scores.presentationScore) || 0) * 0.4
-                        ).toFixed(1)}
+                        {((parseFloat(scores.masteryScore) || 0) * 0.4).toFixed(
+                          1
+                        )}
                       </p>
                     </div>
                     <div className="flex flex-col items-center">
                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                        Karakteristik (35%)
+                        Penulisan (35%)
                       </p>
                       <p className="text-2xl font-bold text-primary-700 mt-1">
-                        {((parseFloat(scores.titleScore) || 0) * 0.35).toFixed(
-                          1
-                        )}
+                        {(
+                          (parseFloat(scores.writingScore) || 0) * 0.35
+                        ).toFixed(1)}
                       </p>
                     </div>
                     {isAdvisor && (
                       <div className="flex flex-col items-center">
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                          Bimbingan
+                          Karakteristik (35%)
                         </p>
                         <p className="text-2xl font-bold text-primary-700 mt-1">
-                          {scores.guidanceScore || "0"}
+                          {scores.characteristicScore || "0"}
                         </p>
                       </div>
                     )}
