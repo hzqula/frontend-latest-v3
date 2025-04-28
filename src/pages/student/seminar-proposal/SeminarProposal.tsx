@@ -883,7 +883,7 @@ const StudentSeminarProposal = () => {
           onOpenChange={setDocumentUploadModalOpen}
           onSubmit={handleDocumentUpload}
           initialData={Object.fromEntries(
-            Object.entries(seminar.documents).map(([key, doc]) => [key, null])
+            Object.entries(seminar.documents).map(([key, _]) => [key, null])
           )}
           uploadedStatus={Object.fromEntries(
             Object.entries(seminar.documents).map(([key, doc]) => [

@@ -20,7 +20,6 @@ import { Alert, AlertDescription } from "../../components/ui/alert";
 import {
   EyeIcon,
   EyeOffIcon,
-  BookOpen,
   ArrowLeft,
   ArrowRight,
   Mail,
