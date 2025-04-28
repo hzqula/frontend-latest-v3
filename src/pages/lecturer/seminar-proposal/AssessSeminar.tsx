@@ -283,7 +283,7 @@ const AssessSeminarProposal = () => {
                           src={
                             advisor.lecturer.profilePicture
                               ? advisor.lecturer.profilePicture
-                              : "https://robohash.org/mail@ashallendesign.co.uk"
+                              : "https://robohash.org/advisor"
                           }
                           alt="advisor-image"
                           className="w-12 h-12 border rounded-full bg-white"
@@ -319,7 +319,7 @@ const AssessSeminarProposal = () => {
                           src={
                             assessor.lecturer.profilePicture
                               ? assessor.lecturer.profilePicture
-                              : "https://robohash.org/mail@ashallendesign.co.uk"
+                              : "https://robohash.org/assessor"
                           }
                           alt="assessor-image"
                           className="w-12 h-12 border rounded-full bg-white"
