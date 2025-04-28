@@ -13,6 +13,7 @@ import {
   CalendarDays,
   FileText,
   Clock,
+  University,
   PenTool,
   ChevronRight,
   BookOpen,
@@ -25,16 +26,16 @@ interface Advisor {
   nip: string;
 }
 
+interface Assessor {
+  name: string;
+  nip: string;
+}
+
 interface Seminar {
   status: "DRAFT" | "SUBMITTED" | "SCHEDULED" | "COMPLETED";
   date: string | null;
   title: string;
-}
-
-interface UpcomingSeminar {
-  type: "PROPOSAL" | "HASIL";
-  date: string;
-  room: string;
+  room: string | null;
 }
 
 interface StudentData {
@@ -43,7 +44,7 @@ interface StudentData {
   proposalSeminar: Seminar;
   finalSeminar: Seminar;
   advisors: Advisor[];
-  upcomingSeminar: UpcomingSeminar | null;
+  assessors: Assessor[];
 }
 
 const StudentDashboard = () => {
@@ -55,21 +56,43 @@ const StudentDashboard = () => {
       status: "COMPLETED", // DRAFT, SUBMITTED, SCHEDULED, COMPLETED
       date: "2023-10-15T10:00:00",
       title: "Implementation of Machine Learning in Healthcare",
+      room: "RPL",
     },
     finalSeminar: {
       status: "SUBMITTED", // DRAFT, SUBMITTED, SCHEDULED, COMPLETED
       date: null,
       title: "Implementation of Machine Learning in Healthcare",
+      room: null,
     },
     advisors: [
-      { name: "Dr. Jane Smith", nip: "987654321" },
-      { name: "Prof. Robert Johnson", nip: "123456789" },
+      { name: "Dr. Jane", nip: "987654321" },
+      { name: "Prof. Robert", nip: "123456789" },
     ],
-    upcomingSeminar: {
-      type: "HASIL",
-      date: "2023-11-20T13:00:00",
-      room: "Room 301",
-    },
+    assessors: [
+      { name: "Dr. Smith", nip: "987654321" },
+      { name: "Prof. Johnson", nip: "123456789" },
+    ],
+  };
+
+  // Helper function to format date
+  const formatDate = (dateString: string | number | Date | null) => {
+    if (!dateString) return "TBD";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  // Helper function to format time
+  const formatTime = (dateString: string | number | Date | null) => {
+    if (!dateString) return "TBD";
+    const date = new Date(dateString);
+    return date.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   const getSeminarStatusBadge = (status: string) => {
@@ -130,10 +153,9 @@ const StudentDashboard = () => {
           </div>
         </div>
 
-        {/* Grid Layout - 4 columns with 200px row height */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[200px]">
-          {/* Proposal Seminar - Spans 1 column */}
-          <Card className="h-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-[200px]">
+          {/* Proposal Seminar */}
+          <Card className="h-full bg-primary-50">
             <CardHeader className="pb-2">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-lg font-medium">
@@ -145,8 +167,8 @@ const StudentDashboard = () => {
                 {studentData.proposalSeminar.title || "No title submitted yet"}
               </CardDescription>
             </CardHeader>
-            <CardContent className="pb-2">
-              <div className="space-y-2">
+            <CardContent className="pb-2 text-sm">
+              <div className="grid grid-cols-2 gap-y-2 gap-x-4">
                 <div className="flex items-center">
                   <CalendarDays className="h-4 w-4 mr-2 text-muted-foreground" />
                   <span className="text-sm truncate">
@@ -160,6 +182,14 @@ const StudentDashboard = () => {
                         })
                       : "Not scheduled yet"}
                   </span>
+                </div>
+                <div className="flex items-center">
+                  <Clock className="h-4 w-4 mr-2 text-muted-foreground text-sm" />
+                  {formatTime(studentData.proposalSeminar.date) || "TBD"}
+                </div>
+                <div className="flex items-center">
+                  <University className="h-4 w-4 mr-2 text-muted-foreground" />
+                  {studentData.proposalSeminar.room || "TBD"}
                 </div>
                 <div className="flex items-center">
                   <PenTool className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -183,8 +213,8 @@ const StudentDashboard = () => {
             </CardFooter>
           </Card>
 
-          {/* Final Seminar - Spans 1 column */}
-          <Card className="h-full">
+          {/* Final Seminar */}
+          <Card className="h-full bg-primary-50">
             <CardHeader className="pb-2">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-lg font-medium">
@@ -196,8 +226,8 @@ const StudentDashboard = () => {
                 {studentData.finalSeminar.title || "No title submitted yet"}
               </CardDescription>
             </CardHeader>
-            <CardContent className="pb-2">
-              <div className="space-y-2">
+            <CardContent className="pb-2 text-sm">
+              <div className="grid grid-cols-2 gap-y-2 gap-x-4">
                 <div className="flex items-center">
                   <CalendarDays className="h-4 w-4 mr-2 text-muted-foreground" />
                   <span className="text-sm truncate">
@@ -211,6 +241,14 @@ const StudentDashboard = () => {
                         })
                       : "Not scheduled yet"}
                   </span>
+                </div>
+                <div className="flex items-center">
+                  <Clock className="h-4 w-4 mr-2 text-muted-foreground text-sm" />
+                  {formatTime(studentData.finalSeminar.date) || "TBD"}
+                </div>
+                <div className="flex items-center">
+                  <University className="h-4 w-4 mr-2 text-muted-foreground" />
+                  {studentData.finalSeminar.room || "TBD"}
                 </div>
                 <div className="flex items-center">
                   <PenTool className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -234,175 +272,66 @@ const StudentDashboard = () => {
             </CardFooter>
           </Card>
 
-          {/* Register Seminar - Spans 1 column */}
-          <Card className="h-full">
+          {/* Advisors */}
+          <Card className="h-full overflow-auto bg-primary-50">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium">
-                Register Seminar
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pb-2">
-              <p className="text-sm text-muted-foreground">
-                Register for your proposal or final seminar
-              </p>
-            </CardContent>
-            <CardFooter>
-              <div className="flex gap-2 w-full">
-                <Button variant="outline" className="w-full" asChild>
-                  <Link to="/seminar-proposal">Proposal</Link>
-                </Button>
-                <Button variant="outline" className="w-full" asChild>
-                  <Link to="/seminar-hasil">Final</Link>
-                </Button>
-              </div>
-            </CardFooter>
-          </Card>
-
-          {/* Upload Documents - Spans 1 column */}
-          <Card className="h-full">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium">
-                Upload Documents
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pb-2">
-              <p className="text-sm text-muted-foreground">
-                Upload required documents for your seminars
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full">
-                Upload Documents
-              </Button>
-            </CardFooter>
-          </Card>
-
-          {/* Upcoming Seminar - Spans 2 columns */}
-          {studentData.upcomingSeminar && (
-            <Card className="bg-primary/5 border-primary/20 md:col-span-2 h-full">
-              <CardHeader>
-                <CardTitle className="text-lg font-medium">
-                  Upcoming Seminar
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <FileText className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span className="text-sm">
-                        {studentData.upcomingSeminar.type === "PROPOSAL"
-                          ? "Proposal Seminar"
-                          : "Final Seminar"}
-                      </span>
-                    </div>
-                    <div className="flex items-center">
-                      <CalendarDays className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span className="text-sm">
-                        {new Date(
-                          studentData.upcomingSeminar.date
-                        ).toLocaleDateString("en-US", {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </span>
-                    </div>
-                    <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span className="text-sm">
-                        {new Date(
-                          studentData.upcomingSeminar.date
-                        ).toLocaleTimeString("en-US", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="mr-2 text-muted-foreground"
-                      >
-                        <path d="M3 3h18v18H3z"></path>
-                      </svg>
-                      <span className="text-sm">
-                        {studentData.upcomingSeminar.room}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button className="w-full">Prepare for Seminar</Button>
-              </CardFooter>
-            </Card>
-          )}
-
-          {/* Advisors - Spans 2 columns */}
-          <Card className="md:col-span-2 h-full overflow-auto">
-            <CardHeader>
               <CardTitle className="text-lg font-medium">
                 Your Advisors
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {studentData.advisors.map((advisor, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span className="text-primary font-medium">
-                          {advisor.name.charAt(0)}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="font-medium">{advisor.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          NIP: {advisor.nip}
-                        </p>
-                      </div>
+            <CardContent className="pb-2 text-sm space-y-4">
+              {studentData.advisors.map((advisor, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-primary font-medium">
+                        {advisor.name.charAt(0)}
+                      </span>
                     </div>
-                    <Button variant="ghost" size="sm">
-                      Contact
-                    </Button>
+                    <div>
+                      <p className="font-medium">{advisor.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        NIP: {advisor.nip}
+                      </p>
+                    </div>
                   </div>
-                ))}
-              </div>
+                  <Button variant="ghost" size="sm">
+                    Contact
+                  </Button>
+                </div>
+              ))}
             </CardContent>
           </Card>
 
-          {/* Check Requirements - Spans 1 column */}
-          <Card className="h-full">
+          {/* Assessors */}
+          <Card className="h-full overflow-auto bg-primary-50">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg font-medium">
-                Check Requirements
+                Your Assessors
               </CardTitle>
             </CardHeader>
-            <CardContent className="pb-2">
-              <p className="text-sm text-muted-foreground">
-                View all requirements for your seminars
-              </p>
+            <CardContent className="pb-2 text-sm space-y-4">
+              {studentData.assessors.map((assessor, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-primary font-medium">
+                        {assessor.name.charAt(0)}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-medium">{assessor.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        NIP: {assessor.nip}
+                      </p>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="sm">
+                    Contact
+                  </Button>
+                </div>
+              ))}
             </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full">
-                View Requirements
-              </Button>
-            </CardFooter>
           </Card>
         </div>
       </div>
