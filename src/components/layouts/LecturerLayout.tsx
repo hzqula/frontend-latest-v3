@@ -4,11 +4,8 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import {
   HomeIcon,
-  File,
-  FileArchive,
   PanelLeft,
   LogOutIcon,
-  ChevronRight,
   BookOpen,
   FileText,
 } from "lucide-react";
@@ -244,18 +241,19 @@ const LecturerLayout: React.FC<LecturerLayoutProps> = ({ children }) => {
 
           <div className="flex items-center space-x-3">
             <div className="text-right hidden sm:block">
-              <p className="text-body-bold text-sm font-semibold truncate max-w-[150px]">
+              <p className="text-body-bold text-sm font-semibold ">
                 {user?.profile?.name}
               </p>
               <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
             </div>
             <img
               src={
-                user?.profile?.profilePicture ||
-                "/placeholder.svg?height=32&width=32"
+                user.profile.profilePicture
+                  ? user.profile.profilePicture
+                  : `https://robohash.org/${user.profile.name}`
               }
               alt="profile"
-              className="rounded-full size-8 object-cover border border-gray-200"
+              className="rounded-full size-12 object-cover border border-primary-800"
             />
           </div>
         </header>
