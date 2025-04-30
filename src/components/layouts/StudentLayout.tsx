@@ -5,10 +5,8 @@ import { useState, useEffect } from "react";
 import {
   HomeIcon,
   File,
-  FileArchive,
   PanelLeft,
   LogOutIcon,
-  ChevronRight,
   BookOpen,
   FileText,
 } from "lucide-react";
