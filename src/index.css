@@ -9,35 +9,7 @@
   --font-heading: "Funnel Display", sans-serif;
 
   /* COLOR */
-  /* green */
-  --color-primary-50: oklch(
-    96% 0.01 185
-  ); /* Lebih terang, sedikit lebih hidup */
-  --color-primary-100: oklch(
-    92% 0.03 185
-  ); /* Kecerahan meningkat, chroma naik */
-  --color-primary-200: oklch(
-    87% 0.05 187
-  ); /* Lebih segar dengan hue sedikit bergeser */
-  --color-primary-300: oklch(
-    78% 0.08 187
-  ); /* Chroma lebih tinggi, terasa vibrant */
-  --color-primary-400: oklch(68% 0.09 188); /* Lebih cerah dan berani */
-  --color-primary-500: oklch(
-    58% 0.11 189
-  ); /* Sedikit lebih terang dari 600, chroma naik */
-  --color-primary-600: oklch(50% 0.1 190); /* Tetap sama, sebagai pivot */
-  --color-primary-700: oklch(
-    42% 0.07 190
-  ); /* Lebih lembut, kecerahan sedikit naik */
-  --color-primary-800: oklch(
-    36% 0.055 191
-  ); /* Chroma sedikit lebih tinggi, lebih halus */
-  --color-primary-900: oklch(
-    30% 0.04 191
-  ); /* Tetap gelap tapi sedikit lebih segar */
-
-  /* Green-Teal (Primary, dari improvisasi sebelumnya) */
+  /* Green-Teal (Primary) */
   --color-primary-50: oklch(96% 0.01 185);
   --color-primary-100: oklch(92% 0.03 185);
   --color-primary-200: oklch(87% 0.05 187);
@@ -49,50 +21,57 @@
   --color-primary-800: oklch(36% 0.055 191);
   --color-primary-900: oklch(30% 0.04 191);
 
-  /* Blue (Secondary, lebih segar dan vibrant) */
-  --color-secondary-600: oklch(
-    55% 0.12 250
-  ); /* Biru elektrik, lebih cerah dan hidup */
+  /* Blue (Secondary) */
+  --color-secondary-600: oklch(55% 0.12 250);
 
-  /* White (sedikit lebih lembut, nuansa dingin) */
-  --color-white: oklch(
-    98% 0.005 190
-  ); /* Putih dengan hint teal untuk harmoni */
+  /* Destructive (Red) */
+  --color-destructive-50: oklch(96% 0.025 25);
+  --color-destructive-100: oklch(92% 0.06 25);
+  --color-destructive-200: oklch(87% 0.09 25);
+  --color-destructive-300: oklch(78% 0.14 25);
+  --color-destructive-400: oklch(68% 0.17 25);
+  --color-destructive-500: oklch(58% 0.2 25);
+  --color-destructive-600: oklch(48% 0.19 25);
+  --color-destructive-700: oklch(38% 0.16 25);
+  --color-destructive-800: oklch(28% 0.13 25);
+  --color-destructive-900: oklch(22% 0.11 25);
+
+  /* Gray Scale (New) */
+  --color-gray-100: oklch(98% 0.005 240); /* Very light gray, cool-toned */
+  --color-gray-200: oklch(94% 0.01 240); /* Light gray for backgrounds */
+  --color-gray-300: oklch(88% 0.015 240); /* Light-medium gray */
+  --color-gray-400: oklch(78% 0.02 240); /* Medium gray */
+  --color-gray-500: oklch(65% 0.025 240); /* Medium-dark gray for labels */
+  --color-gray-600: oklch(55% 0.03 240); /* Darker gray */
+  --color-gray-700: oklch(45% 0.035 240); /* Dark gray */
+  --color-gray-800: oklch(35% 0.04 240); /* Very dark gray */
+  --color-gray-900: oklch(25% 0.045 240); /* Near black */
+
+  /* Warning (Yellow, New) */
+  --color-warning-50: oklch(98% 0.02 90); /* Very light yellow */
+  --color-warning-100: oklch(95% 0.04 90);
+  --color-warning-200: oklch(90% 0.06 90);
+  --color-warning-300: oklch(85% 0.08 90);
+  --color-warning-400: oklch(80% 0.1 90);
+  --color-warning-500: oklch(75% 0.12 90); /* Main warning color */
+  --color-warning-600: oklch(65% 0.1 90);
+  --color-warning-700: oklch(55% 0.08 90);
+  --color-warning-800: oklch(45% 0.06 90);
+  --color-warning-900: oklch(35% 0.04 90);
 
   /* UI */
-  --color-primary: var(--color-primary-600); /* Tetap sama */
-  --color-primary-foreground: var(--color-white); /* Tetap putih lembut */
-  --color-input: var(
-    --color-primary-700
-  ); /* Border lebih gelap untuk kontras */
-  --color-background: var(--color-white); /* Latar tetap putih lembut */
-  --color-accent: var(--color-primary-200); /* Aksen lebih terang untuk hover */
-  --color-accent-foreground: var(
-    --color-primary-800
-  ); /* Teks hover lebih gelap */
-
-  /* Destructive (Red, lebih berani dan segar) */
-  --color-destructive-50: oklch(96% 0.025 25); /* Merah muda sangat terang */
-  --color-destructive-100: oklch(92% 0.06 25); /* Lebih cerah */
-  --color-destructive-200: oklch(87% 0.09 25); /* Chroma naik, lebih hidup */
-  --color-destructive-300: oklch(78% 0.14 25); /* Lebih berani */
-  --color-destructive-400: oklch(68% 0.17 25); /* Merah hangat, vibrant */
-  --color-destructive-500: oklch(58% 0.2 25); /* Merah utama, lebih terang */
-  --color-destructive-600: oklch(48% 0.19 25); /* Sedikit lebih gelap */
-  --color-destructive-700: oklch(38% 0.16 25); /* Kontras kuat */
-  --color-destructive-800: oklch(28% 0.13 25); /* Gelap tapi hidup */
-  --color-destructive-900: oklch(
-    22% 0.11 25
-  ); /* Merah sangat gelap, lebih lembut */
-
-  /* UI Destructive */
-  --color-destructive: var(
-    --color-destructive-500
-  ); /* Merah utama yang lebih segar */
-  --color-destructive-foreground: var(--color-white); /* Tetap putih lembut */
-
-  /* Success */
+  --color-primary: var(--color-primary-600);
+  --color-primary-foreground: var(--color-white);
+  --color-input: var(--color-primary-700);
+  --color-background: var(--color-white);
+  --color-accent: var(--color-primary-200);
+  --color-accent-foreground: var(--color-primary-800);
+  --color-destructive: var(--color-destructive-500);
+  --color-destructive-foreground: var(--color-white);
   --color-success: var(
-    --color-secondary-600
-  ); /* Biru elektrik untuk kesan sukses */
+    --color-primary-500
+  ); /* Updated to use primary for success */
+  --color-warning: var(--color-warning-500); /* New warning color */
+  --color-error: var(--color-destructive-500); /* Reuse destructive for error */
+  --color-muted-foreground: var(--color-gray-500); /* Define muted-foreground */
 }
