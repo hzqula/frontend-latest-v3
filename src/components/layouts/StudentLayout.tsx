@@ -137,7 +137,7 @@ const StudentLayout: React.FC<StudentLayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="flex h-screen bg-gray-50 font-body">
+    <div className="flex h-screen bg-white font-body">
       {/* Overlay for mobile when sidebar is open */}
       {isMobile && isSidebarExpanded && (
         <div
