@@ -251,11 +251,12 @@ const CoordinatorLayout: React.FC<CoordinatorLayoutProps> = ({ children }) => {
             </div>
             <img
               src={
-                user?.profile?.profilePicture ||
-                "/placeholder.svg?height=32&width=32"
+                user.profile.profilePicture
+                  ? user.profile.profilePicture
+                  : `https://robohash.org/${user.profile.name}`
               }
               alt="profile"
-              className="rounded-full size-8 object-cover border border-gray-200"
+              className="rounded-full size-12 object-cover border border-primary-800"
             />
           </div>
         </header>
