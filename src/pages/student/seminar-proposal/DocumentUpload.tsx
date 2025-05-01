@@ -13,6 +13,7 @@ import { Button } from "../../../components/ui/button";
 import { Upload, Download, FileText, CheckCircle2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { Input } from "../../../components/ui/input";
+import { ScrollArea } from "../../../components/ui/scroll-area";
 
 const requiredDocuments = [
   {
@@ -112,7 +113,7 @@ const DocumentUploadModal = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+        <ScrollArea className="space-y-4 max-h-[60vh] pr-2">
           {requiredDocuments.map((document) => (
             <div key={document.id} className="border rounded-lg p-4">
               <div className="flex justify-between items-start mb-2">
@@ -178,7 +179,7 @@ const DocumentUploadModal = ({
               </div>
             </div>
           ))}
-        </div>
+        </ScrollArea>
 
         <DialogFooter>
           <Button
