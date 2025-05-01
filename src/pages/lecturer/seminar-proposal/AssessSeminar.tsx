@@ -14,7 +14,6 @@ import {
 } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
 import LecturerLayout from "../../../components/layouts/LecturerLayout";
-import { Badge } from "../../../components/ui/badge";
 import {
   FilePenLine,
   PresentationIcon,
@@ -33,6 +32,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import SeminarProposalDetail from "./SeminarProposalDetail";
 
 interface Seminar {
   id: number;
@@ -111,6 +111,31 @@ const ScoreVisualization: React.FC<ScoreVisualizationProps> = ({
     return "#dc2626"; // red-600
   };
 
+  // Custom Tooltip Component
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload; // Get the data for the hovered bar
+      return (
+        <div
+          className="bg-white border border-gray-200 rounded-lg shadow-md p-3"
+          style={{
+            backgroundColor: "#fff",
+            border: "1px solid #e2e8f0",
+            borderRadius: "8px",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+          }}
+        >
+          <p className="text-sm font-semibold text-gray-800">{label}</p>
+          <p className="text-sm text-gray-600">Nilai: {data.score}/100</p>
+          {data.description && (
+            <p className="text-xs text-gray-500 mt-1">{data.description}</p>
+          )}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="space-y-6">
       {/* Grafik Batang Horizontal */}
@@ -133,15 +158,7 @@ const ScoreVisualization: React.FC<ScoreVisualizationProps> = ({
               tick={{ fontSize: 14, fill: "#334155" }}
               width={100}
             />
-            <Tooltip
-              formatter={(value: number) => `${value}/100`}
-              contentStyle={{
-                backgroundColor: "#fff",
-                border: "1px solid #e2e8f0",
-                borderRadius: "8px",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-              }}
-            />
+            <Tooltip content={<CustomTooltip />} />
             <Bar
               dataKey="score"
               radius={[0, 8, 8, 0]}
@@ -186,8 +203,13 @@ const AssessSeminarProposal = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [canUpdate, setCanUpdate] = useState(false);
 
+  if (!user || !user.profile.nip || !token || user.role !== "LECTURER") {
+    navigate("/login");
+    return null;
+  }
+
   useEffect(() => {
-    if (seminarQuery.data && user?.profile?.nip) {
+    if (seminarQuery.data) {
       const seminar: Seminar = seminarQuery.data;
 
       const advisorMatch = seminar.advisors.some(
@@ -402,11 +424,6 @@ const AssessSeminarProposal = () => {
       : undefined,
   };
 
-  if (!user || !token || user.role !== "LECTURER") {
-    navigate("/login");
-    return null;
-  }
-
   if (seminarQuery.isLoading) {
     return (
       <div className="container mx-auto p-4">
@@ -435,127 +452,16 @@ const AssessSeminarProposal = () => {
         Penilaian Seminar Proposal
       </h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-white col-span-1 sm:col-span-2 lg:col-span-4 overflow-hidden">
-          <div className="relative">
-            <div className="absolute inset-0 bg-primary opacity-100"></div>
-            <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10"></div>
-
-            <CardHeader className="relative z-10">
-              <div className="flex justify-between items-center gap-4">
-                <img
-                  src={
-                    seminar.student.profilePicture
-                      ? seminar.student.profilePicture
-                      : "https://robohash.org/mail@ashallendesign.co.uk"
-                  }
-                  alt="student-image"
-                  className="w-12 h-12 border rounded-full bg-white"
-                />
-                <div className="flex justify-between items-center w-full">
-                  <div className="flex flex-col justify-center">
-                    <p className="text-sm font-medium text-primary-foreground">
-                      Mahasiswa
-                    </p>
-                    <p className="text-2xl font-heading font-black text-primary-foreground">
-                      {seminar.student.name}
-                    </p>
-                  </div>
-                  <Badge className="bg-primary-foreground text-primary">
-                    {seminar.student.nim}
-                  </Badge>
-                </div>
-              </div>
-            </CardHeader>
-          </div>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-            <div className="flex justify-between items-center md:col-span-2">
-              <div>
-                <p className="text-xs uppercase -mb-1 font-medium text-primary-600">
-                  Judul Penelitian
-                </p>
-                <p className="text-xl font-heading font-bold text-primary-800">
-                  {seminar.title}
-                </p>
-                <p className="text-sm text-primary-600">
-                  {formatDate(seminar.time)} • Jam {formatTime(seminar.time)}
-                </p>
-              </div>
-              <Badge className="relative z-10 bg-primary text-primary-foreground">
-                {seminar.room}
-              </Badge>
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <p className="text-sm font-medium text-primary-600">Pembimbing</p>
-              <div className="flex flex-col md:flex-row gap-4">
-                {seminar.advisors.map((advisor, index) => (
-                  <div
-                    key={index}
-                    className="border rounded-md group flex items-center gap-4 px-4 py-2 border-primary-200 bg-primary-50 relative overflow-hidden flex-1"
-                  >
-                    <div className="absolute -right-6 -top-6 w-16 h-16 rounded-full bg-primary-300 transition-transform duration-300 ease-in-out group-hover:-translate-x-4 group-hover:-translate-y-4 group-hover:scale-150"></div>
-                    <img
-                      src={
-                        advisor.lecturer.profilePicture
-                          ? advisor.lecturer.profilePicture
-                          : `https://robohash.org/${advisor.lecturer.name}`
-                      }
-                      alt="advisor-image"
-                      className="w-12 h-12 border rounded-full bg-white"
-                    />
-                    <div className="flex justify-between items-center w-full">
-                      <div className="flex flex-col justify-center">
-                        <p className="text-lg font-heading font-bold text-primary-800">
-                          {advisor.lecturer.name}
-                        </p>
-                      </div>
-                      <Badge className="relative z-10">
-                        {advisor.lecturer.nip}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <p className="text-sm font-medium text-primary-600">Penguji</p>
-              <div className="flex flex-col md:flex-row gap-4">
-                {seminar.assessors.map((assessor, index) => (
-                  <div
-                    key={index}
-                    className="border rounded-md group flex items-center gap-4 px-4 py-2 border-primary-200 bg-primary-50 relative overflow-hidden flex-1"
-                  >
-                    <div className="absolute -right-6 -top-6 w-16 h-16 rounded-full bg-primary-300 transition-transform duration-300 ease-in-out group-hover:-translate-x-4 group-hover:-translate-y-4 group-hover:scale-150"></div>
-                    <img
-                      src={
-                        assessor.lecturer.profilePicture
-                          ? assessor.lecturer.profilePicture
-                          : `https://robohash.org/${assessor.lecturer.name}`
-                      }
-                      alt="assessor-image"
-                      className="w-12 h-12 border rounded-full bg-white"
-                    />
-                    <div className="flex justify-between items-center w-full">
-                      <div className="flex flex-col justify-center">
-                        <p className="text-lg font-heading font-bold text-primary-800">
-                          {assessor.lecturer.name}
-                        </p>
-                      </div>
-                      <Badge className="relative z-10">
-                        {assessor.lecturer.nip}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <SeminarProposalDetail
+          seminar={seminar}
+          formatDate={formatDate}
+          formatTime={formatTime}
+          isAdvisor={isAdvisor}
+          lecturerNIP={user.profile.nip}
+        />
 
         <Card className="bg-white col-span-1 sm:col-span-2 lg:col-span-2 overflow-hidden">
-          <div className="relative">
-            <div className="absolute inset-0 bg-primary opacity-100"></div>
+          <div className="relative bg-gradient-to-r from-primary-600 to-primary-800">
             <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10"></div>
 
             <CardHeader className="relative z-10">
@@ -633,11 +539,10 @@ const AssessSeminarProposal = () => {
           </CardContent>
         </Card>
         <Card className="bg-white col-span-1 flex flex-col sm:col-span-2 lg:col-span-2 overflow-hidden">
-          <div className="relative">
-            <div className="absolute inset-0 bg-primary opacity-100"></div>
+          <div className="relative bg-gradient-to-r from-emerald-600 to-primary">
             <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10"></div>
 
-            <CardHeader className="relative z-10 bg-gradient-to-r from-primary to-primary-800">
+            <CardHeader className="relative z-10">
               <div className="flex justify-between items-center">
                 <div>
                   <CardTitle className="text-2xl font-heading font-black text-primary-foreground">
@@ -651,7 +556,7 @@ const AssessSeminarProposal = () => {
               </div>
             </CardHeader>
           </div>
-          <CardContent className="p-6 flex-1">
+          <CardContent className="p-6 flex-1 flex flex-col justify-between">
             <div className="space-y-3 mb-6">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground font-semibold text-lg">
@@ -697,7 +602,7 @@ const AssessSeminarProposal = () => {
               </div>
             </div>
 
-            <div className="flex flex-col items-center justify-center mt-8">
+            <div className="flex flex-col items-center flex-1 justify-center mt-8">
               <p className="text-sm font-black uppercase tracking-wide mb-3">
                 Total Nilai
               </p>
