@@ -1,3 +1,4 @@
+// SeminarProposal.tsx
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "../../../context/AuthContext";
@@ -34,9 +35,8 @@ const LecturerSeminarProposal = () => {
   const seminarsQuery = useApiData({ type: "seminars" });
   const isLoading = seminarsQuery.isLoading;
   const isError = seminarsQuery.isError;
-  const refetch = seminarsQuery.refetch; // Ambil fungsi refetch dari useApiData
+  const refetch = seminarsQuery.refetch;
 
-  // Refetch data saat kembali dari halaman penilaian
   useEffect(() => {
     if (location.state?.fromAssessment) {
       refetch();
@@ -65,27 +65,23 @@ const LecturerSeminarProposal = () => {
 
   const seminars = seminarsQuery.data || [];
 
-  // Filter seminars berdasarkan status SCHEDULED dan tipe PROPOSAL
   const scheduledSeminars = seminars.filter(
     (seminar: any) =>
       seminar.status === "SCHEDULED" && seminar.type === "PROPOSAL"
   );
 
-  // Seminar yang dibimbing (advised) oleh dosen ini
   const advisedSeminars = scheduledSeminars.filter((seminar: any) =>
     seminar.advisors.some(
       (advisor: any) => advisor.lecturer?.nip === user.profile.nip
     )
   );
 
-  // Seminar yang diuji (assessed) oleh dosen ini
   const assessedSeminars = scheduledSeminars.filter((seminar: any) =>
     seminar.assessors.some(
       (assessor: any) => assessor.lecturer?.nip === user.profile.nip
     )
   );
 
-  // Filter berdasarkan pencarian
   const filteredAdvisedSeminars = advisedSeminars.filter(
     (seminar: any) =>
       seminar.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -98,7 +94,6 @@ const LecturerSeminarProposal = () => {
       seminar.studentNIM.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Fungsi untuk format tanggal
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("id-ID", {
       weekday: "short",
@@ -108,7 +103,6 @@ const LecturerSeminarProposal = () => {
     });
   };
 
-  // Fungsi untuk format waktu
   const formatTime = (dateString: string) => {
     return new Date(dateString).toLocaleTimeString("id-ID", {
       hour: "2-digit",
@@ -116,34 +110,26 @@ const LecturerSeminarProposal = () => {
     });
   };
 
-  // Fungsi untuk membuka modal detail
   const openDetailsModal = (seminar: any) => {
     setSelectedSeminar(seminar);
     setDetailsModalOpen(true);
   };
 
-  // Fungsi untuk mengecek apakah seminar sudah terlaksana
   const canAssessSeminar = (seminarTime: string) => {
     const currentDate = new Date();
     const seminarDate = new Date(seminarTime);
     return currentDate > seminarDate;
   };
 
-  // Fungsi untuk mengecek apakah seminar sudah dinilai oleh dosen ini
   const hasBeenAssessed = (seminar: any) => {
     if (!seminar.assessments || seminar.assessments.length === 0) {
-      console.log(`No assessments for seminar ${seminar.id}`);
       return false;
     }
-    console.log(`Assessments for seminar ${seminar.id}:`, seminar.assessments);
-    console.log("Current lecturer NIP:", user.profile.nip);
-    return seminar.assessments.some((assessment: any) => {
-      console.log("Assessment lecturerNIP:", assessment.lecturerNIP);
-      return assessment.lecturerNIP === user.profile.nip;
-    });
+    return seminar.assessments.some(
+      (assessment: any) => assessment.lecturerNIP === user.profile.nip
+    );
   };
 
-  // Fungsi untuk navigasi dengan state
   const handleAssessNavigation = (seminarId: number) => {
     navigate(`/seminar-proposal/assess/${seminarId}`, {
       state: { fromAssessment: true },
@@ -153,7 +139,6 @@ const LecturerSeminarProposal = () => {
   return (
     <LecturerLayout>
       <div className="container mx-auto p-4">
-        {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <div>
             <h1 className="text-4xl font-heading font-black text-primary-800">
@@ -173,7 +158,6 @@ const LecturerSeminarProposal = () => {
           </div>
         </div>
 
-        {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-2 mb-6 bg-primary">
             <TabsTrigger
@@ -194,7 +178,6 @@ const LecturerSeminarProposal = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* Tab: Dibimbing */}
           <TabsContent value="advised">
             <Card className="bg-white">
               <CardHeader>
@@ -309,7 +292,6 @@ const LecturerSeminarProposal = () => {
             </Card>
           </TabsContent>
 
-          {/* Tab: Diuji */}
           <TabsContent value="assessed">
             <Card className="bg-white">
               <CardHeader>
@@ -423,7 +405,6 @@ const LecturerSeminarProposal = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Modal Detail Seminar */}
         {selectedSeminar && (
           <SeminarDetailsModal
             open={detailsModalOpen}
