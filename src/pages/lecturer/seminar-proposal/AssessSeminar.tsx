@@ -1,4 +1,3 @@
-// AssessSeminar.tsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useAuth } from "../../../context/AuthContext";
@@ -21,8 +20,6 @@ import {
   UserCog,
 } from "lucide-react";
 import AssessmentCriterion from "../../../components/SeminarCriterion";
-
-// Impor Recharts untuk visualisasi
 import {
   BarChart,
   Bar,
@@ -57,7 +54,6 @@ interface Seminar {
   }[];
 }
 
-// Komponen ScoreVisualization menggunakan Recharts
 interface ScoreVisualizationProps {
   scores: {
     writing: number;
@@ -72,7 +68,6 @@ const ScoreVisualization: React.FC<ScoreVisualizationProps> = ({
   scores,
   isAdvisor,
 }) => {
-  // Siapkan data untuk grafik
   const data = [
     {
       name: "Penulisan",
@@ -103,15 +98,13 @@ const ScoreVisualization: React.FC<ScoreVisualizationProps> = ({
     });
   }
 
-  // Fungsi untuk menentukan warna berdasarkan nilai
   const getScoreColor = (score: number) => {
-    if (score >= 90) return "#10b981"; // emerald-600
-    if (score >= 80) return "#2563eb"; // blue-600
-    if (score >= 70) return "#f59e0b"; // amber-600
-    return "#dc2626"; // red-600
+    if (score >= 90) return "#10b981";
+    if (score >= 80) return "#2563eb";
+    if (score >= 70) return "#f59e0b";
+    return "#dc2626";
   };
 
-  // Custom Tooltip Component
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload; // Get the data for the hovered bar
@@ -138,7 +131,6 @@ const ScoreVisualization: React.FC<ScoreVisualizationProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Grafik Batang Horizontal */}
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
@@ -163,7 +155,7 @@ const ScoreVisualization: React.FC<ScoreVisualizationProps> = ({
               dataKey="score"
               radius={[0, 8, 8, 0]}
               barSize={20}
-              fill="#10b981" // Warna default, akan diatur secara dinamis
+              fill="#10b981"
             >
               {data.map((entry, index) => (
                 <Bar
@@ -202,14 +194,50 @@ const AssessSeminarProposal = () => {
   const [assessmentData, setAssessmentData] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [canUpdate, setCanUpdate] = useState(false);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
 
-  if (!user || !user.profile.nip || !token || user.role !== "LECTURER") {
-    navigate("/login");
-    return null;
-  }
-
+  // Cek apakah user dan nip sudah dimuat
   useEffect(() => {
-    if (seminarQuery.data) {
+    if (user !== null && user.profile?.nip) {
+      setIsLoadingUser(false);
+    }
+  }, [user]);
+
+  // if (!user || !user.profile?.nip) {
+  //   return null;
+  // }
+  // Navigasi ke login jika user tidak valid
+  useEffect(() => {
+    if (
+      !isLoadingUser &&
+      (!user || !token || user.role !== "LECTURER" || !user.profile?.nip)
+    ) {
+      navigate("/login");
+    }
+  }, [isLoadingUser, user, token, navigate]);
+
+  // Reset state saat seminarId berubah
+  useEffect(() => {
+    setIsAdvisor(false);
+    setScores({
+      writingScore: "",
+      presentationScore: "",
+      masteryScore: "",
+      characteristicScore: "",
+    });
+    setHasAssessed(false);
+    setAssessmentData(null);
+    setIsEditing(false);
+    setCanUpdate(false);
+
+    if (seminarId) {
+      seminarQuery.refetch();
+    }
+  }, [seminarId, seminarQuery.refetch]);
+
+  // Update state berdasarkan data seminar yang baru
+  useEffect(() => {
+    if (seminarQuery.data && user?.profile?.nip) {
       const seminar: Seminar = seminarQuery.data;
 
       const advisorMatch = seminar.advisors.some(
@@ -424,6 +452,16 @@ const AssessSeminarProposal = () => {
       : undefined,
   };
 
+  if (isLoadingUser) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="text-center text-muted-foreground py-10">
+          Memuat data user...
+        </div>
+      </div>
+    );
+  }
+
   if (seminarQuery.isLoading) {
     return (
       <div className="container mx-auto p-4">
@@ -457,7 +495,7 @@ const AssessSeminarProposal = () => {
           formatDate={formatDate}
           formatTime={formatTime}
           isAdvisor={isAdvisor}
-          lecturerNIP={user.profile.nip}
+          lecturerNIP={user!.profile.nip!}
         />
 
         <Card className="bg-white col-span-1 sm:col-span-2 lg:col-span-2 overflow-hidden">
