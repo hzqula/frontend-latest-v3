@@ -1,15 +1,29 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { User, CalendarDays, Clock, University } from "lucide-react";
+import { CalendarDays, Clock, University} from "lucide-react";
 import { CardContent } from "../ui/card";
-import { fetchSeminars } from "../../api/apiClient"; 
+import { fetchSeminars } from "../../api/apiClient";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { ScrollArea } from "../ui/scroll-area";
+import { Badge } from "../ui/badge";
 
-// Define the interface for the API response
+// Interfaces
 interface Advisor {
   lecturer: {
     name: string;
     nip: string;
+    profilePicture?: string;
   };
 }
 
@@ -17,12 +31,14 @@ interface Assessor {
   lecturer: {
     name: string;
     nip: string;
+    profilePicture?: string;
   };
 }
 
 interface Student {
   name: string;
   nim: string;
+  profilePicture?: string;
 }
 
 interface Seminar {
@@ -41,7 +57,7 @@ interface Seminar {
   assessors: Assessor[];
 }
 
-// Helper function to format date
+// Helper functions
 const formatDate = (dateString: string | number | Date | null) => {
   if (!dateString) return "TBD";
   const date = new Date(dateString);
@@ -52,7 +68,6 @@ const formatDate = (dateString: string | number | Date | null) => {
   });
 };
 
-// Helper function to format time
 const formatTime = (dateString: string | number | Date | null) => {
   if (!dateString) return "TBD";
   const date = new Date(dateString);
@@ -67,15 +82,16 @@ export default function SeminarScrollerGrid() {
   const [seminars, setSeminars] = useState<Seminar[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedSeminar, setSelectedSeminar] = useState<Seminar | null>(null);
 
   useEffect(() => {
     const getSeminars = async () => {
       try {
         setLoading(true);
         const seminarData = await fetchSeminars();
-        
-        // Filter to only include SCHEDULED seminars
-        const scheduledSeminars = seminarData.filter((seminar: { status: string; }) => seminar.status === "SCHEDULED");
+        const scheduledSeminars = seminarData.filter(
+          (seminar: { status: string }) => seminar.status === "SCHEDULED"
+        );
         setSeminars(scheduledSeminars);
       } catch (err) {
         setError("Error fetching seminars");
@@ -88,63 +104,221 @@ export default function SeminarScrollerGrid() {
     getSeminars();
   }, []);
 
-  // Filter seminars by type
-  const proposalSeminars = seminars.filter(seminar => seminar.type === "PROPOSAL");
-  const hasilSeminars = seminars.filter(seminar => seminar.type === "HASIL");
+  const proposalSeminars = seminars.filter((s) => s.type === "PROPOSAL");
+  const hasilSeminars = seminars.filter((s) => s.type === "HASIL");
 
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-  };
+  const handleTabChange = (value: string) => setActiveTab(value);
+  const handleOpenModal = (seminar: Seminar) => setSelectedSeminar(seminar);
+  const handleCloseModal = () => setSelectedSeminar(null);
 
-  if (loading) {
+  if (loading)
     return <div className="w-full text-center py-12">Loading seminars...</div>;
-  }
-
-  if (error) {
+  if (error)
     return <div className="w-full text-center py-12 text-red-500">{error}</div>;
-  }
 
   return (
-    <Tabs
-      defaultValue="proposal"
-      className="w-full"
-      onValueChange={handleTabChange}
-    >
-      <TabsList className="grid grid-cols-2 mb-6 bg-primary">
-        <TabsTrigger
-          value="proposal"
-          className={`text-primary-foreground ${
-            activeTab === "proposal" ? "text-primary-800" : ""
-          }`}
-        >
-          Proposal
-        </TabsTrigger>
-        <TabsTrigger
-          value="hasil"
-          className={`text-primary-foreground ${
-            activeTab === "hasil" ? "text-primary-800" : ""
-          }`}
-        >
-          Hasil
-        </TabsTrigger>
-      </TabsList>
+    <>
+      <Tabs
+        defaultValue="proposal"
+        className="w-full"
+        onValueChange={handleTabChange}
+      >
+        <TabsList className="grid grid-cols-2 mb-6 bg-primary">
+          <TabsTrigger
+            value="proposal"
+            className={`text-primary-foreground ${
+              activeTab === "proposal" ? "text-primary-800" : ""
+            }`}
+          >
+            Proposal
+          </TabsTrigger>
+          <TabsTrigger
+            value="hasil"
+            className={`text-primary-foreground ${
+              activeTab === "hasil" ? "text-primary-800" : ""
+            }`}
+          >
+            Hasil
+          </TabsTrigger>
+        </TabsList>
 
-      <TabsContent value="proposal">
-        <div className="h-[600px] w-full lg:w-[1300px] mx-auto px-4">
-          <ScrollingColumn items={proposalSeminars} />
-        </div>
-      </TabsContent>
+        <TabsContent value="proposal">
+          <div className="h-[600px] w-full lg:w-[1300px] mx-auto px-4">
+            <ScrollingColumn
+              items={proposalSeminars}
+              onClickDetail={handleOpenModal}
+            />
+          </div>
+        </TabsContent>
 
-      <TabsContent value="hasil">
-        <div className="h-[600px] w-full lg:w-[1300px] mx-auto px-4">
-          <ScrollingColumn items={hasilSeminars} />
-        </div>
-      </TabsContent>
-    </Tabs>
+        <TabsContent value="hasil">
+          <div className="h-[600px] w-full lg:w-[1300px] mx-auto px-4">
+            <ScrollingColumn
+              items={hasilSeminars}
+              onClickDetail={handleOpenModal}
+            />
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      <Dialog
+        open={!!selectedSeminar}
+        onOpenChange={(open) => !open && handleCloseModal()}
+      >
+        {selectedSeminar && (
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader className="bg-gradient-to-r from-primary-500 to-primary-700 p-4 -m-4 mb-4 rounded-t-lg text-white">
+              <DialogTitle className="text-xl sm:text-2xl font-bold break-words">
+                {selectedSeminar.title}
+              </DialogTitle>
+              <DialogDescription className="text-gray-100 mt-2 flex items-center gap-2">
+                <img
+                  src={
+                    selectedSeminar.student.profilePicture
+                      ? selectedSeminar.student.profilePicture
+                      : "https://robohash.org/mail@ashallendesign.co.uk"
+                  }
+                  alt="student-image"
+                  className="w-12 h-12 border rounded-full bg-white"
+                />
+                <span className="break-words">
+                  {selectedSeminar.student.name} ({selectedSeminar.studentNIM})
+                </span>
+              </DialogDescription>
+            </DialogHeader>
+
+            <ScrollArea className="max-h-[60vh]">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="flex items-center space-x-3 bg-muted p-3 rounded-lg">
+                  <CalendarDays className="h-5 w-5 text-primary-600 dark:text-primary-400 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Tanggal</p>
+                    <p className="font-medium">
+                      {formatDate(selectedSeminar.time)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3 bg-muted p-3 rounded-lg">
+                  <Clock className="h-5 w-5 text-primary-600 dark:text-primary-400 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Waktu</p>
+                    <p className="font-medium">
+                      {formatTime(selectedSeminar.time)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3 bg-muted p-3 rounded-lg">
+                  <University className="h-5 w-5 text-primary-600 dark:text-primary-400 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Ruangan</p>
+                    <p className="font-medium">
+                      {selectedSeminar.room || "TBD"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 flex items-center">
+                    <Badge
+                      variant="outline"
+                      className="mr-2 bg-primary-100 text-primary-700 border-primary-200"
+                    >
+                      Pembimbing
+                    </Badge>
+                  </h3>
+                  <ul className="space-y-3">
+                    {selectedSeminar.advisors.map((advisor, idx) => (
+                      <li
+                        key={idx}
+                        className="pl-4 border-l-2 border-primary-200 dark:border-primary-800"
+                      >
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={
+                              advisor.lecturer.profilePicture
+                                ? advisor.lecturer.profilePicture
+                                : `https://robohash.org/${advisor.lecturer.name}`
+                            }
+                            alt="advisor-image"
+                            className="w-12 h-12 border rounded-full bg-white"
+                          />
+                          <div>
+                            <p className="font-medium break-words">
+                              {advisor.lecturer.name}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {advisor.lecturer.nip}
+                            </p>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 flex items-center">
+                    <Badge
+                      variant="outline"
+                      className="mr-2 bg-primary-100 text-primary-700 border-primary-200"
+                    >
+                      Penguji
+                    </Badge>
+                  </h3>
+                  <ul className="space-y-3">
+                    {selectedSeminar.assessors.map((assessor, idx) => (
+                      <li
+                        key={idx}
+                        className="pl-4 border-l-2 border-primary-200 dark:border-primary-800"
+                      >
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={
+                              assessor.lecturer.profilePicture
+                                ? assessor.lecturer.profilePicture
+                                : `https://robohash.org/${assessor.lecturer.name}`
+                            }
+                            alt="advisor-image"
+                            className="w-12 h-12 border rounded-full bg-white"
+                          />
+                          <div>
+                            <p className="font-medium break-words">
+                              {assessor.lecturer.name}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {assessor.lecturer.nip}
+                            </p>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </ScrollArea>
+
+            <DialogFooter className="border-t border-border pt-4 mt-4">
+              <Button onClick={handleCloseModal}>Tutup</Button>
+            </DialogFooter>
+          </DialogContent>
+        )}
+      </Dialog>
+    </>
   );
 }
 
-function ScrollingColumn({ items }: { items: Seminar[] }) {
+// ScrollingColumn
+function ScrollingColumn({
+  items,
+  onClickDetail,
+}: {
+  items: Seminar[];
+  onClickDetail: (seminar: Seminar) => void;
+}) {
   const controls = useAnimation();
   const [paused, setPaused] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -156,7 +330,8 @@ function ScrollingColumn({ items }: { items: Seminar[] }) {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const shouldScroll = (isMobile && items.length > 1) || (!isMobile && items.length >= 5);
+  const shouldScroll =
+    (isMobile && items.length > 1) || (!isMobile && items.length >= 5);
 
   useEffect(() => {
     if (paused || !shouldScroll || items.length === 0) {
@@ -165,7 +340,7 @@ function ScrollingColumn({ items }: { items: Seminar[] }) {
       controls.start({
         y: ["0%", "-50%"],
         transition: {
-          repeat: Infinity,
+          repeat: Number.POSITIVE_INFINITY,
           duration: 20,
           ease: "linear",
         },
@@ -174,7 +349,7 @@ function ScrollingColumn({ items }: { items: Seminar[] }) {
   }, [paused, controls, shouldScroll, items.length]);
 
   if (items.length === 0) {
-    return <div className="text-center py-12">No scheduled seminars available</div>;
+    return <div className="text-center py-12">Tidak ada seminar saat ini</div>;
   }
 
   return (
@@ -185,91 +360,71 @@ function ScrollingColumn({ items }: { items: Seminar[] }) {
     >
       <motion.div
         animate={shouldScroll ? controls : { y: 0 }}
-        className="flex flex-col gap-6"
+        className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
       >
-        {shouldScroll
-          ? [...items, ...items].map((seminar, index) => (
-              <SeminarCard key={`${seminar.id}-${index}`} seminar={seminar} />
-            ))
-          : items.map((seminar) => (
-              <SeminarCard key={seminar.id} seminar={seminar} />
-            ))}
+        {(shouldScroll ? [...items, ...items] : items).map((seminar, index) => (
+          <SeminarCard
+            key={`${seminar.id}-${index}`}
+            seminar={seminar}
+            onClickDetail={onClickDetail}
+          />
+        ))}
       </motion.div>
     </div>
   );
 }
 
-// Extracted SeminarCard component for better readability
-function SeminarCard({ seminar }: { seminar: Seminar }) {
+// SeminarCard
+function SeminarCard({
+  seminar,
+  onClickDetail,
+}: {
+  seminar: Seminar;
+  onClickDetail: (seminar: Seminar) => void;
+}) {
   return (
-    <CardContent className="w-full p-4 sm:p-6 rounded-xl shadow-md bg-primary-50 text-black">
-      <div className="space-y-4">
-        <div className="flex flex-col md:flex-row md:items-start justify-between border-b pb-4 gap-4">
-          <div className="basis-full md:basis-1/3">
-            <div className="flex items-center text-sm font-medium text-primary-800">
-                <CalendarDays className="h-3 w-3 mr-1" />{formatDate(seminar.time)}
-            </div>
-            <h4 className="font-medium mt-1 text-primary-800">
-              {seminar.title}
-            </h4>
-            <div className="flex items-center gap-4 mt-1 text-sm text-primary-600">
-              <div className="flex items-center">
-                <User className="h-3 w-3 mr-1" />
-                {seminar.student.name}
-              </div>
-              <div className="flex items-center">
-                <Clock className="h-3 w-3 mr-1" />
-                {formatTime(seminar.time)}
-              </div>
-              <div className="flex items-center">
-                <University className="h-3 w-3 mr-1" />
-                {seminar.room || "TBD"}
-              </div>
-            </div>
-          </div>
+    <CardContent className="group overflow-hidden relative border-0 shadow-xl rounded-lg h-full">
+      <div className="absolute inset-[1px] bg-white dark:bg-gray-800 rounded-lg z-0"></div>
+      <div className="relative z-10 p-6 h-full flex flex-col">
+        <h3 className="text-xl font-bold mb-2 group-hover:text-emerald-600 dark:group-hover:text-primary-600 transition-colors text-center">
+          {seminar.title}
+        </h3>
 
-          {/* Dosen Pembimbing (Middle Section) */}
-          <div className="basis-full md:basis-1/3 border-t md:border-t-0 md:border-l md:border-r px-0 md:px-4 pt-4 md:pt-0">
-            <h5 className="font-medium text-sm text-primary-800">
-              Dosen Pembimbing
-            </h5>
-            <div className="mt-2 text-sm text-primary-600">
-              {seminar.advisors.map((advisor, index) => (
-                <div key={index} className="flex items-center mt-1">
-                  <User className="h-3 w-3 mr-1" />
-                  {advisor.lecturer.name || "TBD"}
-                </div>
-              ))}
-              {seminar.advisors.length === 0 && (
-                <div className="flex items-center">
-                  <User className="h-3 w-3 mr-1" />
-                  TBD
-                </div>
-              )}
-            </div>
-          </div>
+        <div className="flex items-center gap-2 mb-4">
+          <img
+            src={
+              seminar.student.profilePicture
+                ? seminar.student.profilePicture
+                : "https://robohash.org/mail@ashallendesign.co.uk"
+            }
+            alt="student-image"
+            className="w-8 h-8 border rounded-full bg-white"
+          />
+          <p className="text-gray-600 dark:text-gray-300">
+            {seminar.student.name} ({seminar.studentNIM})
+          </p>
+        </div>
 
-          {/* Dosen Penguji (Right Section) */}
-          <div className="basis-full md:basis-1/3 pt-4 md:pt-0 md:pl-4 border-t md:border-t-0">
-            <h5 className="font-medium text-sm text-primary-800">
-              Dosen Penguji
-            </h5>
-            <div className="mt-2 text-sm text-primary-600">
-              {seminar.assessors.map((assessor, index) => (
-                <div key={index} className="flex items-center mt-1">
-                  <User className="h-3 w-3 mr-1" />
-                  {assessor.lecturer.name || "TBD"}
-                </div>
-              ))}
-              {seminar.assessors.length === 0 && (
-                <div className="flex items-center">
-                  <User className="h-3 w-3 mr-1" />
-                  TBD
-                </div>
-              )}
-            </div>
+        <div className="space-y-2 mb-6">
+          <div className="flex items-center text-sm">
+            <CalendarDays className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-400" />
+            <span>{formatDate(seminar.time)}</span>
+          </div>
+          <div className="flex items-center text-sm">
+            <Clock className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-400" />
+            <span>{formatTime(seminar.time)}</span>
+          </div>
+          <div className="flex items-center text-sm">
+            <University className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-400" />
+            <span>{seminar.room || "TBD"}</span>
           </div>
         </div>
+        <button
+          onClick={() => onClickDetail(seminar)}
+          className="w-full py-2 px-4 rounded-md bg-gradient-to-r from-primary-300 to-primary-600 hover:from-primary-700 hover:to-primary-400 text-white font-medium transition-colors mt-auto"
+        >
+          Detail
+        </button>
       </div>
     </CardContent>
   );
