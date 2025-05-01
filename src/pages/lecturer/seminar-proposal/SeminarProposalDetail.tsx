@@ -4,7 +4,6 @@ import {
   CardHeader,
   CardContent,
   CardTitle,
-  CardDescription,
 } from "../../../components/ui/card";
 import { Badge } from "../../../components/ui/badge";
 import {
@@ -69,7 +68,7 @@ const SeminarProposalDetail: React.FC<SeminarProposalDetailProps> = ({
               <CardTitle className="text-2xl font-heading font-black text-primary-foreground">
                 {seminar.title}
               </CardTitle>
-              <CardDescription className="text-primary-100 mt-1">
+              <div className="text-primary-100 mt-1">
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
                   <div className="flex items-center">
                     <Calendar className="mr-1 h-4 w-4" />
@@ -84,7 +83,7 @@ const SeminarProposalDetail: React.FC<SeminarProposalDetailProps> = ({
                     <span>{seminar.room}</span>
                   </div>
                 </div>
-              </CardDescription>
+              </div>
             </div>
             <Badge
               variant="outline"
