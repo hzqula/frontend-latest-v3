@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { CalendarDays, Clock, University} from "lucide-react";
+import { CalendarDays, Clock, University } from "lucide-react";
 import { CardContent } from "../ui/card";
 import { fetchSeminars } from "../../api/apiClient";
 import {
@@ -168,9 +168,11 @@ export default function SeminarScrollerGrid() {
         {selectedSeminar && (
           <DialogContent className="sm:max-w-lg">
             <DialogHeader className="bg-gradient-to-r from-primary-500 to-primary-700 p-4 -m-4 mb-4 rounded-t-lg text-white">
-              <DialogTitle className="text-xl sm:text-2xl font-bold break-words">
-                {selectedSeminar.title}
+              <DialogTitle className="text-base sm:text-xl md:text-2xl font-bold break-words text-center">
+                {selectedSeminar.title.split(" ").slice(0, 10).join(" ") +
+                  (selectedSeminar.title.split(" ").length > 10 ? "..." : "")}
               </DialogTitle>
+
               <DialogDescription className="text-gray-100 mt-2 flex items-center gap-2">
                 <img
                   src={
@@ -383,49 +385,50 @@ function SeminarCard({
   onClickDetail: (seminar: Seminar) => void;
 }) {
   return (
-    <CardContent className="group overflow-hidden relative border-0 shadow-xl rounded-lg h-full">
-      <div className="absolute inset-[1px] bg-white dark:bg-gray-800 rounded-lg z-0"></div>
-      <div className="relative z-10 p-6 h-full flex flex-col">
-        <h3 className="text-xl font-bold mb-2 group-hover:text-emerald-600 dark:group-hover:text-primary-600 transition-colors text-center">
-          {seminar.title}
-        </h3>
+<CardContent className="group overflow-hidden relative border-0 shadow-xl rounded-lg h-96">
+  <div className="absolute inset-[1px] bg-primary-50 dark:bg-gray-800 rounded-lg z-0"></div>
+  <div className="relative z-10 p-6 h-full flex flex-col">
+    <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2 text-center group-hover:text-emerald-600 dark:group-hover:text-primary-600 transition-colors">
+      {seminar.title.split(" ").slice(0, 10).join(" ") +
+        (seminar.title.split(" ").length > 10 ? "..." : "")}
+    </h3>
 
-        <div className="flex items-center gap-2 mb-4">
-          <img
-            src={
-              seminar.student.profilePicture
-                ? seminar.student.profilePicture
-                : "https://robohash.org/mail@ashallendesign.co.uk"
-            }
-            alt="student-image"
-            className="w-8 h-8 border rounded-full bg-white"
-          />
-          <p className="text-gray-600 dark:text-gray-300">
-            {seminar.student.name} ({seminar.studentNIM})
-          </p>
-        </div>
+    <div className="flex items-center gap-2 mb-4">
+      <img
+        src={
+          seminar.student.profilePicture
+            ? seminar.student.profilePicture
+            : "https://robohash.org/mail@ashallendesign.co.uk"
+        }
+        alt="student-image"
+        className="w-8 h-8 border rounded-full bg-white"
+      />
+      <p className="text-gray-600 dark:text-gray-300">
+        {seminar.student.name} ({seminar.studentNIM})
+      </p>
+    </div>
 
-        <div className="space-y-2 mb-6">
-          <div className="flex items-center text-sm">
-            <CalendarDays className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-400" />
-            <span>{formatDate(seminar.time)}</span>
-          </div>
-          <div className="flex items-center text-sm">
-            <Clock className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-400" />
-            <span>{formatTime(seminar.time)}</span>
-          </div>
-          <div className="flex items-center text-sm">
-            <University className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-400" />
-            <span>{seminar.room || "TBD"}</span>
-          </div>
-        </div>
-        <button
-          onClick={() => onClickDetail(seminar)}
-          className="w-full py-2 px-4 rounded-md bg-gradient-to-r from-primary-300 to-primary-600 hover:from-primary-700 hover:to-primary-400 text-white font-medium transition-colors mt-auto"
-        >
-          Detail
-        </button>
+    <div className="space-y-2 mb-6">
+      <div className="flex items-center text-sm">
+        <CalendarDays className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-400" />
+        <span>{formatDate(seminar.time)}</span>
       </div>
-    </CardContent>
+      <div className="flex items-center text-sm">
+        <Clock className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-400" />
+        <span>{formatTime(seminar.time)}</span>
+      </div>
+      <div className="flex items-center text-sm">
+        <University className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-400" />
+        <span>{seminar.room || "TBD"}</span>
+      </div>
+    </div>
+    <button
+      onClick={() => onClickDetail(seminar)}
+      className="w-full py-2 px-4 rounded-md bg-gradient-to-r from-primary-300 to-primary-600 hover:from-primary-700 hover:to-primary-400 text-white font-medium transition-colors mt-auto"
+    >
+      Detail
+    </button>
+  </div>
+</CardContent>
   );
 }

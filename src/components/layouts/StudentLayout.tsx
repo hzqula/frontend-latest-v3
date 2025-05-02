@@ -4,11 +4,10 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import {
   HomeIcon,
-  File,
   PanelLeft,
   LogOutIcon,
-  BookOpen,
-  FileText,
+  BookOpenText,
+  BookText,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate, useLocation } from "react-router";
@@ -120,17 +119,12 @@ const StudentLayout: React.FC<StudentLayoutProps> = ({ children }) => {
       label: "Dashboard",
     },
     {
-      icon: BookOpen,
+      icon: BookOpenText,
       path: "/seminar-proposal",
       label: "Seminar Proposal",
     },
     {
-      icon: File,
-      path: "/seminar-proposal-2",
-      label: "Seminar Proposal-2",
-    },
-    {
-      icon: FileText,
+      icon: BookText,
       path: "/seminar-hasil",
       label: "Seminar Hasil",
     },
