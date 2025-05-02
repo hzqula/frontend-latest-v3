@@ -69,7 +69,7 @@
   --color-destructive: var(--color-destructive-500);
   --color-destructive-foreground: var(--color-white);
   --color-success: var(
-    --color-primary-500
+    --color-secondary-600
   ); /* Updated to use primary for success */
   --color-warning: var(--color-warning-500); /* New warning color */
   --color-error: var(--color-destructive-500); /* Reuse destructive for error */

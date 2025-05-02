@@ -114,71 +114,73 @@ const DocumentUploadModal = ({
         </DialogHeader>
 
         <ScrollArea className="space-y-4 max-h-[60vh] pr-2">
-          {requiredDocuments.map((document) => (
-            <div key={document.id} className="border rounded-lg p-4">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <h3 className="text-sm font-bold font-heading text-primary-800">
-                    {document.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    {document.description}
-                  </p>
-                </div>
-                {uploadedStatus[document.id] && (
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
-                )}
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-2 mt-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                  onClick={() => window.open(document.template, "_blank")}
-                >
-                  <Download className="h-4 w-4" />
-                  Download Template
-                </Button>
-
-                <div className="relative">
-                  <Button
-                    variant={
-                      uploadedStatus[document.id] ||
-                      uploadedDocuments[document.id]
-                        ? "outline"
-                        : "default"
-                    }
-                    size="sm"
-                    className="flex items-center gap-2 w-full sm:w-auto"
-                    disabled={isSubmitting}
-                  >
-                    <Upload className="h-4 w-4" />
-                    {uploadedStatus[document.id]
-                      ? "Perbarui Dokumen"
-                      : "Unggah Dokumen"}
-                    <Input
-                      type="file"
-                      accept=".pdf"
-                      className="absolute inset-0 opacity-0 cursor-pointer"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0] || null;
-                        handleFileUpload(document.id, file);
-                      }}
-                      disabled={isSubmitting}
-                    />
-                  </Button>
-                </div>
-
-                {uploadedDocuments[document.id] && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <FileText className="h-4 w-4" />
-                    {uploadedDocuments[document.id]?.name}
+          <div className="space-y-4">
+            {requiredDocuments.map((document) => (
+              <div key={document.id} className="border rounded-lg p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 className="text-sm font-bold font-heading text-primary-800">
+                      {document.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {document.description}
+                    </p>
                   </div>
-                )}
+                  {uploadedStatus[document.id] && (
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-2 mt-4">
+                  <div className="relative gap-2 flex">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                      onClick={() => window.open(document.template, "_blank")}
+                    >
+                      <Download className="h-4 w-4" />
+                      Download Template
+                    </Button>
+
+                    <Button
+                      variant={
+                        uploadedStatus[document.id] ||
+                        uploadedDocuments[document.id]
+                          ? "outline"
+                          : "default"
+                      }
+                      size="sm"
+                      className="flex items-center gap-2 w-full sm:w-auto"
+                      disabled={isSubmitting}
+                    >
+                      <Upload className="h-4 w-4" />
+                      {uploadedStatus[document.id]
+                        ? "Perbarui Dokumen"
+                        : "Unggah Dokumen"}
+                      <Input
+                        type="file"
+                        accept=".pdf"
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          handleFileUpload(document.id, file);
+                        }}
+                        disabled={isSubmitting}
+                      />
+                    </Button>
+                  </div>
+
+                  {uploadedDocuments[document.id] && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <FileText className="h-4 w-4" />
+                      {uploadedDocuments[document.id]?.name}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </ScrollArea>
 
         <DialogFooter>
