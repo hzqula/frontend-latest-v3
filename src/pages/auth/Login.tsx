@@ -116,8 +116,13 @@ const Login: React.FC = () => {
       // Simpan token dan data user ke AuthContext
       login(token, user);
 
-      toast.success("Login berhasil");
-      navigate("/dashboard");
+      // Tampilkan pesan sukses
+
+      // Tambahkan jeda 2 detik sebelum navigasi
+      setTimeout(() => {
+        toast.success("Login berhasil");
+        navigate("/dashboard");
+      }, 1000);
     } catch (error) {
       console.error("Terjadi kesalahan: ", error);
       toast.error(
@@ -125,7 +130,6 @@ const Login: React.FC = () => {
           ? error.response.data.error
           : "Terjadi kesalahan saat login"
       );
-    } finally {
       setIsLoading(false);
     }
   };
