@@ -99,7 +99,7 @@ const Header = () => {
             afterColor="white"
             hover="animate-left"
             padding="default"
-            href="/"
+            href="/kalender-akademik"
           >
             Kalender Akademik
           </NavLink>
@@ -160,7 +160,7 @@ const Header = () => {
           <a href="/galeri" className="block text-white">
             Galeri
           </a>
-          <a href="/" className="block text-white">
+          <a href="/kalender-akademik" className="block text-white">
             Kalender Akademik
           </a>
           <a href="/" className="block text-white">
