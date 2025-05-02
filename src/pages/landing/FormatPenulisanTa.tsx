@@ -14,7 +14,7 @@ export default function FormatPenulisanTa() {
           style={{ backgroundImage: `url(${BackgroundHeader})` }}
         ></div>
         <div className="relative flex items-center justify-center h-full">
-          <h1 className="text-white text-7xl font-light">FormatPenulisanTa</h1>
+          <h1 className="text-white text-4xl sm:text-5xl lg:text-7xl font-light">Format Penulisan Ta</h1>
         </div>
       </div>
 

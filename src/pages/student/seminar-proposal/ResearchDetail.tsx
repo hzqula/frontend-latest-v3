@@ -101,12 +101,12 @@ const ResearchDetailsModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="text-2xl -mb-1 font-heading font-black text-primary-800">
+      <DialogContent className="sm:max-w-[500px] w-[95%] max-h-[90vh] overflow-y-auto mx-auto p-4 sm:p-6">
+        <DialogHeader className="space-y-2">
+          <DialogTitle className="text-xl sm:text-2xl font-heading font-black text-primary-800">
             Detail Seminar Proposal
           </DialogTitle>
-          <DialogDescription className="text-primary text-sm">
+          <DialogDescription className="text-primary text-xs sm:text-sm">
             Masukkan judul penelitian dan dosen pembimbing Anda.
           </DialogDescription>
         </DialogHeader>
@@ -114,44 +114,48 @@ const ResearchDetailsModal = ({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6"
+            className="space-y-4 sm:space-y-6 mt-2"
           >
             <FormField
               control={form.control}
               name="researchTitle"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-bold font-heading text-primary-800">
+                  <FormLabel className="text-xs sm:text-sm font-bold font-heading text-primary-800">
                     Judul Penelitian
                   </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Masukkan judul penelitian Anda"
+                      className="text-sm"
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div className="flex justify-end items-center">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
+                  className="text-xs sm:text-sm py-1 h-auto"
                   onClick={toggleSecondSupervisor}
                   disabled={showSecondSupervisor && !form.getValues("advisor2")}
                 >
                   {showSecondSupervisor ? (
-                    <Minus className="h-4 w-4 mr-2" />
+                    <Minus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                   ) : (
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                   )}
-                  {showSecondSupervisor
-                    ? "Hapus Dosen Pembimbing"
-                    : "Tambah Dosen Pembimbing"}
+                  <span className="whitespace-nowrap">
+                    {showSecondSupervisor
+                      ? "Hapus Dosen Pembimbing"
+                      : "Tambah Dosen Pembimbing"}
+                  </span>
                 </Button>
               </div>
 
@@ -160,7 +164,7 @@ const ResearchDetailsModal = ({
                 name="advisor1"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-bold font-heading text-primary-800">
+                    <FormLabel className="text-xs sm:text-sm font-bold font-heading text-primary-800">
                       Dosen Pembimbing I
                     </FormLabel>
                     <Select
@@ -168,24 +172,27 @@ const ResearchDetailsModal = ({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="text-sm">
                           <SelectValue placeholder="Pilih dosen" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="max-h-60">
                         {availableSupervisors.map(
                           (supervisor: { nip: string; name: string }) => (
                             <SelectItem
                               key={supervisor.nip}
                               value={supervisor.nip}
+                              className="text-sm"
                             >
-                              {supervisor.name} ({supervisor.nip})
+                              <span className="truncate block">
+                                {supervisor.name}
+                              </span>
                             </SelectItem>
                           )
                         )}
                       </SelectContent>
                     </Select>
-                    <FormMessage />
+                    <FormMessage className="text-xs" />
                   </FormItem>
                 )}
               />
@@ -196,7 +203,7 @@ const ResearchDetailsModal = ({
                   name="advisor2"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-bold font-heading text-primary-800">
+                      <FormLabel className="text-xs sm:text-sm font-bold font-heading text-primary-800">
                         Dosen Pembimbing II
                       </FormLabel>
                       <Select
@@ -204,11 +211,11 @@ const ResearchDetailsModal = ({
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="text-sm">
                             <SelectValue placeholder="Pilih dosen" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="max-h-60">
                           {availableSupervisors
                             .filter(
                               (supervisor: { nip: string }) =>
@@ -219,30 +226,37 @@ const ResearchDetailsModal = ({
                                 <SelectItem
                                   key={supervisor.nip}
                                   value={supervisor.nip}
+                                  className="text-sm"
                                 >
-                                  {supervisor.name} ({supervisor.nip})
+                                  <span className="truncate block">
+                                    {supervisor.name}
+                                  </span>
                                 </SelectItem>
                               )
                             )}
                         </SelectContent>
                       </Select>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
               )}
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4 px-4 sm:px-6 py-4 sm:py-6 border-t">
               <Button
                 type="button"
                 variant="destructive"
-                className="w-1/3"
+                className="w-full sm:w-1/2 order-2 sm:order-1"
                 onClick={() => onOpenChange(false)}
               >
                 Batal
               </Button>
-              <Button className="w-2/3" type="submit" disabled={isSubmitting}>
+              <Button
+                className="w-full sm:w-1/2 bg-primary hover:bg-primary-700 text-primary-foreground"
+                type="submit"
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? "Menyimpan..." : "Simpan"}
               </Button>
             </DialogFooter>
