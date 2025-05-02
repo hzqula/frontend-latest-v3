@@ -26,7 +26,7 @@ interface Seminar {
   }[];
   assessments: {
     lecturerNIP: string;
-    writingScore: number;
+    writingScore: number | null;
     presentationScore: number;
     masteryScore: number;
     characteristicScore: number | null;
@@ -140,7 +140,7 @@ const SeminarProposalDetail: React.FC<SeminarProposalDetailProps> = ({
                 {seminar.advisors.map((advisor, index) => (
                   <div
                     key={index}
-                    className="flex border-l-2 border-primary rounded-md items-center px-4 py-0.5 space-x-2"
+                    className="flex border-l-2 border-primary-200 rounded-md items-center px-2 pb-1 space-x-2"
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarImage
@@ -178,7 +178,10 @@ const SeminarProposalDetail: React.FC<SeminarProposalDetailProps> = ({
               </h4>
               <div className="space-y-2">
                 {seminar.assessors.map((assessor, index) => (
-                  <div key={index} className="flex items-center space-x-2">
+                  <div
+                    key={index}
+                    className="flex border-l-2 border-primary-200 rounded-md items-center px-2 pb-1 space-x-2"
+                  >
                     <Avatar className="h-8 w-8">
                       <AvatarImage
                         src={
