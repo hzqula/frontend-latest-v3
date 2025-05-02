@@ -45,7 +45,7 @@ interface Seminar {
   }[];
   assessments: {
     lecturerNIP: string;
-    writingScore: number;
+    writingScore: number | null;
     presentationScore: number;
     masteryScore: number;
     characteristicScore: number | null;
@@ -56,9 +56,9 @@ interface Seminar {
 
 interface ScoreVisualizationProps {
   scores: {
-    writing: number;
     presentation: number;
     mastery: number;
+    writing?: number;
     characteristic?: number;
   };
   isAdvisor: boolean;
@@ -70,31 +70,32 @@ const ScoreVisualization: React.FC<ScoreVisualizationProps> = ({
 }) => {
   const data = [
     {
-      name: "Penulisan",
-      score: scores.writing,
-      description:
-        "Kualitas dokumen penelitian, kejelasan ide, kutipan dan referensi yang tepat",
-    },
-    {
-      name: "Presentasi",
+      name: "Penyajian Makalah / Presentasi",
       score: scores.presentation,
       description:
-        "Kejelasan presentasi, kualitas slide, efektivitas komunikasi, manajemen waktu",
+        "Kejelasan materi yang disampaikan, sikap, kejelasan vokal dan body language, interaksi dan komunikasi, tampilan/design materi presentasi",
     },
     {
-      name: "Penguasaan",
+      name: "Penguasaan Materi",
       score: scores.mastery,
       description:
         "Pemahaman materi, kemampuan menjawab pertanyaan, kedalaman pengetahuan",
     },
   ];
 
-  if (isAdvisor && scores.characteristic !== undefined) {
+  if (isAdvisor) {
     data.push({
-      name: "Karakteristik",
-      score: scores.characteristic,
+      name: "Karakteristik Mahasiswa",
+      score: scores.characteristic || 0,
       description:
         "Inisiatif, ketekunan, adaptabilitas, respons terhadap umpan balik dan bimbingan",
+    });
+  } else {
+    data.push({
+      name: "Penulisan Makalah",
+      score: scores.writing || 0,
+      description:
+        "Kualitas dokumen penelitian, kejelasan ide, kutipan dan referensi yang tepat",
     });
   }
 
@@ -107,7 +108,7 @@ const ScoreVisualization: React.FC<ScoreVisualizationProps> = ({
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload; // Get the data for the hovered bar
+      const data = payload[0].payload;
       return (
         <div
           className="bg-white border border-gray-200 rounded-lg shadow-md p-3"
@@ -148,7 +149,7 @@ const ScoreVisualization: React.FC<ScoreVisualizationProps> = ({
               type="category"
               dataKey="name"
               tick={{ fontSize: 14, fill: "#334155" }}
-              width={100}
+              width={150}
             />
             <Tooltip content={<CustomTooltip />} />
             <Bar
@@ -203,9 +204,6 @@ const AssessSeminarProposal = () => {
     }
   }, [user]);
 
-  // if (!user || !user.profile?.nip) {
-  //   return null;
-  // }
   // Navigasi ke login jika user tidak valid
   useEffect(() => {
     if (
@@ -252,7 +250,7 @@ const AssessSeminarProposal = () => {
         setHasAssessed(true);
         setAssessmentData(existingAssessment);
         setScores({
-          writingScore: existingAssessment.writingScore.toString(),
+          writingScore: existingAssessment.writingScore?.toString() || "",
           presentationScore: existingAssessment.presentationScore.toString(),
           masteryScore: existingAssessment.masteryScore.toString(),
           characteristicScore:
@@ -307,21 +305,22 @@ const AssessSeminarProposal = () => {
 
   const calculateAverage = () => {
     const {
-      writingScore,
       presentationScore,
       masteryScore,
+      writingScore,
       characteristicScore,
     } = scores;
-    const writing = parseFloat(writingScore) || 0;
     const presentation = parseFloat(presentationScore) || 0;
     const mastery = parseFloat(masteryScore) || 0;
     let weightedAverage;
 
     if (isAdvisor) {
       const characteristic = parseFloat(characteristicScore) || 0;
-      weightedAverage = (writing + presentation + mastery + characteristic) / 4;
+      weightedAverage =
+        presentation * 0.25 + mastery * 0.4 + characteristic * 0.35;
     } else {
-      weightedAverage = writing * 0.25 + presentation * 0.4 + mastery * 0.35;
+      const writing = parseFloat(writingScore) || 0;
+      weightedAverage = presentation * 0.25 + mastery * 0.4 + writing * 0.35;
     }
 
     return weightedAverage.toFixed(1);
@@ -331,14 +330,12 @@ const AssessSeminarProposal = () => {
     e.preventDefault();
     if (isSubmitting) return;
 
-    const requiredScores = [
-      scores.writingScore,
-      scores.presentationScore,
-      scores.masteryScore,
-    ];
+    const requiredScores = [scores.presentationScore, scores.masteryScore];
 
     if (isAdvisor) {
       requiredScores.push(scores.characteristicScore);
+    } else {
+      requiredScores.push(scores.writingScore);
     }
 
     for (const score of requiredScores) {
@@ -352,13 +349,14 @@ const AssessSeminarProposal = () => {
     setIsSubmitting(true);
     try {
       const payload: any = {
-        writingScore: parseFloat(scores.writingScore),
         presentationScore: parseFloat(scores.presentationScore),
         masteryScore: parseFloat(scores.masteryScore),
       };
 
       if (isAdvisor) {
         payload.characteristicScore = parseFloat(scores.characteristicScore);
+      } else {
+        payload.writingScore = parseFloat(scores.writingScore);
       }
 
       const method = hasAssessed ? "put" : "post";
@@ -389,11 +387,11 @@ const AssessSeminarProposal = () => {
   };
 
   const handleCancel = () => {
-    if (hasAssessed) {
+    if (hasAssessed && assessmentData) {
       setScores({
-        writingScore: assessmentData.writingScore.toString(),
-        presentationScore: assessmentData.presentationScore.toString(),
-        masteryScore: assessmentData.masteryScore.toString(),
+        writingScore: assessmentData.writingScore?.toString() || "",
+        presentationScore: assessmentData.presentationScore?.toString() || "",
+        masteryScore: assessmentData.masteryScore?.toString() || "",
         characteristicScore:
           assessmentData.characteristicScore?.toString() || "",
       });
@@ -408,30 +406,21 @@ const AssessSeminarProposal = () => {
     setIsEditing(false);
   };
 
-  const weightedWriting = (parseFloat(scores.writingScore) || 0) * 0.35;
   const weightedPresentation =
     (parseFloat(scores.presentationScore) || 0) * 0.25;
   const weightedMastery = (parseFloat(scores.masteryScore) || 0) * 0.4;
+  const weightedWriting = !isAdvisor
+    ? (parseFloat(scores.writingScore) || 0) * 0.35
+    : 0;
   const weightedCharacteristic = isAdvisor
     ? (parseFloat(scores.characteristicScore) || 0) * 0.35
     : 0;
 
-  let finalScore = 0;
-  if (isAdvisor) {
-    if (scores.characteristicScore !== undefined) {
-      finalScore =
-        ((parseFloat(scores.writingScore) || 0) +
-          (parseFloat(scores.presentationScore) || 0) +
-          (parseFloat(scores.masteryScore) || 0) +
-          (parseFloat(scores.characteristicScore) || 0)) /
-        4;
-    } else {
-      finalScore = weightedWriting + weightedPresentation + weightedMastery;
-    }
-  } else {
-    finalScore = weightedWriting + weightedPresentation + weightedMastery;
-  }
-
+  const finalScore =
+    weightedPresentation +
+    weightedMastery +
+    weightedWriting +
+    weightedCharacteristic;
   const formattedFinal = finalScore.toFixed(1);
 
   const getScoreColor = (score: number) => {
@@ -444,9 +433,9 @@ const AssessSeminarProposal = () => {
   const scoreColor = getScoreColor(finalScore);
 
   const visualizationScores = {
-    writing: assessmentData?.writingScore || 0,
     presentation: assessmentData?.presentationScore || 0,
     mastery: assessmentData?.masteryScore || 0,
+    writing: !isAdvisor ? assessmentData?.writingScore || 0 : undefined,
     characteristic: isAdvisor
       ? assessmentData?.characteristicScore || 0
       : undefined,
@@ -524,22 +513,11 @@ const AssessSeminarProposal = () => {
             ) : (
               <>
                 <AssessmentCriterion
-                  id="writing-score"
-                  icon={FilePenLine}
-                  title="Penulisan Makalah"
-                  weight={35}
-                  description="Kerajinan / kemauan berusaha, inisiatif dan mengembangkan pola pikir, adab kesopanan dan tepat waktu"
-                  value={scores.writingScore}
-                  onChange={(value) => handleScoreChange("writingScore", value)}
-                  disabled={isSubmitting}
-                />
-
-                <AssessmentCriterion
                   id="presentation-score"
                   icon={PresentationIcon}
                   title="Penyajian Makalah / Presentasi"
                   weight={25}
-                  description="Kejelasan materi yang disampaikan, Sikap, kejelasan vokal dan body language, Interaksi dan komunikasi, Tampilan / design materi presentasi"
+                  description="Kejelasan materi yang disampaikan, sikap, kejelasan vokal dan body language, interaksi dan komunikasi, tampilan/design materi presentasi"
                   value={scores.presentationScore}
                   onChange={(value) =>
                     handleScoreChange("presentationScore", value)
@@ -552,22 +530,35 @@ const AssessSeminarProposal = () => {
                   icon={BrainCircuit}
                   title="Penguasaan Materi"
                   weight={40}
-                  description="Kemampuan menjawab dan kualitas jawaban"
+                  description="Pemahaman materi, kemampuan menjawab pertanyaan, kedalaman pengetahuan"
                   value={scores.masteryScore}
                   onChange={(value) => handleScoreChange("masteryScore", value)}
                   disabled={isSubmitting}
                 />
 
-                {isAdvisor && (
+                {isAdvisor ? (
                   <AssessmentCriterion
                     id="characteristic-score"
                     icon={UserCog}
                     title="Karakteristik Mahasiswa"
                     weight={35}
-                    description="Kerajinan / kemauan berusaha, inisiatif dan mengembangkan pola pikir, adab kesopanan dan tepat waktu"
+                    description="Inisiatif, ketekunan, adaptabilitas, respons terhadap umpan balik dan bimbingan"
                     value={scores.characteristicScore}
                     onChange={(value) =>
                       handleScoreChange("characteristicScore", value)
+                    }
+                    disabled={isSubmitting}
+                  />
+                ) : (
+                  <AssessmentCriterion
+                    id="writing-score"
+                    icon={FilePenLine}
+                    title="Penulisan Makalah"
+                    weight={35}
+                    description="Kualitas dokumen penelitian, kejelasan ide, kutipan dan referensi yang tepat"
+                    value={scores.writingScore}
+                    onChange={(value) =>
+                      handleScoreChange("writingScore", value)
                     }
                     disabled={isSubmitting}
                   />
@@ -598,15 +589,7 @@ const AssessSeminarProposal = () => {
             <div className="space-y-3 mb-6">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground font-semibold text-lg">
-                  Penulisan (35%)
-                </span>
-                <div className="font-semibold text-lg">
-                  {weightedWriting.toFixed(1)}
-                </div>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground font-semibold text-lg">
-                  Presentasi (25%)
+                  Penyajian Makalah / Presentasi (25%)
                 </span>
                 <div className="font-semibold text-lg">
                   {weightedPresentation.toFixed(1)}
@@ -614,19 +597,28 @@ const AssessSeminarProposal = () => {
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground font-semibold text-lg">
-                  Penguasaan (40%)
+                  Penguasaan Materi (40%)
                 </span>
                 <div className="font-semibold text-lg">
                   {weightedMastery.toFixed(1)}
                 </div>
               </div>
-              {isAdvisor && scores.characteristicScore !== undefined && (
+              {isAdvisor ? (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">
-                    Karakteristik (35%)
+                  <span className="text-muted-foreground font-semibold text-lg">
+                    Karakteristik Mahasiswa (35%)
                   </span>
                   <div className="font-semibold text-lg">
                     {weightedCharacteristic.toFixed(1)}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground font-semibold text-lg">
+                    Penulisan Makalah (35%)
+                  </span>
+                  <div className="font-semibold text-lg">
+                    {weightedWriting.toFixed(1)}
                   </div>
                 </div>
               )}
