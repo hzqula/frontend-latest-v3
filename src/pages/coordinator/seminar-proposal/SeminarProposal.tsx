@@ -40,6 +40,7 @@ const CoordinatorSeminarProposal = () => {
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedSeminar, setSelectedSeminar] = useState<any>(null);
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const seminarsQuery = useApiData({ type: "seminars" });
   const lecturersQuery = useApiData({ type: "lecturers" });
@@ -84,23 +85,34 @@ const CoordinatorSeminarProposal = () => {
   );
 
   // Filter seminars berdasarkan pencarian
-  const filteredSubmittedSeminars = submittedSeminars.filter(
-    (seminar: any) =>
+  const filteredSubmittedSeminars = submittedSeminars.filter((seminar: any) => {
+    const matchesSearch =
       seminar.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      seminar.studentNIM.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      seminar.studentNIM.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      seminar.student.name.toLowerCase().includes(searchQuery.toLowerCase());
 
-  const filteredScheduledSeminars = scheduledSeminars.filter(
-    (seminar: any) =>
-      seminar.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      seminar.studentNIM.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    const matchesType = statusFilter === "all" || seminar.type === statusFilter;
+    return matchesSearch && matchesType;
+  });
 
-  const filteredCompletedSeminars = completedSeminars.filter(
-    (seminar: any) =>
+  const filteredScheduledSeminars = scheduledSeminars.filter((seminar: any) => {
+    const matchesSearch =
       seminar.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      seminar.studentNIM.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      seminar.studentNIM.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      seminar.student.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesType = statusFilter === "all" || seminar.type === statusFilter;
+    return matchesSearch && matchesType;
+  });
+  const filteredCompletedSeminars = completedSeminars.filter((seminar: any) => {
+    const matchesSearch =
+      seminar.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      seminar.studentNIM.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      seminar.student.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesType = statusFilter === "all" || seminar.type === statusFilter;
+    return matchesSearch && matchesType;
+  });
 
   // Fungsi untuk format tanggal
   const formatDate = (dateString: string) => {
@@ -184,33 +196,27 @@ const CoordinatorSeminarProposal = () => {
         {/* Tabs - Scrollable on small screens */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="overflow-x-auto pb-2">
-            <TabsList className="grid w-full grid-cols-3 mb-6 bg-primary overflow-hidden text-sm md:text-base">
+            <TabsList className="grid grid-cols-3 mb-6 bg-primary">
               <TabsTrigger
                 value="submitted"
-                className={`py-2 px-1 md:px-3 text-primary-foreground whitespace-nowrap ${
-                  activeTab === "submitted"
-                    ? "text-primary-800 font-medium"
-                    : ""
+                className={`text-primary-foreground ${
+                  activeTab === "submitted" ? "text-primary-800" : ""
                 }`}
               >
                 Diajukan ({submittedSeminars.length})
               </TabsTrigger>
               <TabsTrigger
                 value="scheduled"
-                className={`py-2 px-1 md:px-3 text-primary-foreground whitespace-nowrap ${
-                  activeTab === "scheduled"
-                    ? "text-primary-800 font-medium"
-                    : ""
+                className={`text-primary-foreground ${
+                  activeTab === "scheduled" ? "text-primary-800" : ""
                 }`}
               >
                 Dijadwalkan ({scheduledSeminars.length})
               </TabsTrigger>
               <TabsTrigger
                 value="completed"
-                className={`py-2 px-1 md:px-3 text-primary-foreground whitespace-nowrap ${
-                  activeTab === "completed"
-                    ? "text-primary-800 font-medium"
-                    : ""
+                className={`text-primary-foreground ${
+                  activeTab === "completed" ? "text-primary-800" : ""
                 }`}
               >
                 Selesai ({completedSeminars.length})
@@ -243,9 +249,6 @@ const CoordinatorSeminarProposal = () => {
                         <th className="p-3 lg:p-4 w-[35%]">Judul</th>
                         <th className="p-3 lg:p-4 w-[20%]">Mahasiswa</th>
                         <th className="p-3 lg:p-4 w-[20%]">Tanggal Diajukan</th>
-                        <th className="p-3 lg:p-4 w-[10%] text-center">
-                          Status
-                        </th>
                         <th className="p-3 lg:p-4 w-[15%] text-center">Aksi</th>
                       </tr>
                     </thead>
@@ -270,11 +273,8 @@ const CoordinatorSeminarProposal = () => {
                             <td className="p-3 lg:p-4">
                               <div>{formatDate(seminar.createdAt)}</div>
                               <div className="text-xs text-primary">
-                                {formatTime(seminar.createdAt)}
+                                {formatTime(seminar.createdAt)} WIB
                               </div>
-                            </td>
-                            <td className="p-3 lg:p-4 text-center">
-                              {getStatusBadge(seminar.status)}
                             </td>
                             <td className="p-3 lg:p-4 text-center space-x-1 lg:space-x-2">
                               <Button
@@ -290,7 +290,7 @@ const CoordinatorSeminarProposal = () => {
                       ) : (
                         <tr>
                           <td
-                            colSpan={5}
+                            colSpan={6}
                             className="p-4 text-center text-primary-600"
                           >
                             Tidak ada pengajuan seminar proposal yang ditemukan.
@@ -339,15 +339,9 @@ const CoordinatorSeminarProposal = () => {
                                   {formatDate(seminar.createdAt)}
                                 </p>
                                 <p className="text-xs text-primary-600">
-                                  {formatTime(seminar.createdAt)}
+                                  {formatTime(seminar.createdAt)} WIB
                                 </p>
                               </div>
-                            </div>
-                            <div>
-                              <h3 className="text-xs font-bold text-primary-600">
-                                Status
-                              </h3>
-                              {getStatusBadge(seminar.status)}
                             </div>
                             <div className="flex flex-col xs:flex-row gap-2 pt-1">
                               <Button
@@ -406,10 +400,7 @@ const CoordinatorSeminarProposal = () => {
                         <th className="p-3 lg:p-4 w-[35%]">Judul</th>
                         <th className="p-3 lg:p-4 w-[20%]">Mahasiswa</th>
                         <th className="p-3 lg:p-4 w-[20%]">Tanggal & Waktu</th>
-                        <th className="p-3 lg:p-4 w-[20%]">Ruangan</th>
-                        <th className="p-3 lg:p-4 w-[10%] text-center">
-                          Status
-                        </th>
+                        <th className="p-3 lg:p-4 w-[20%]">Tempat</th>
                         <th className="p-3 lg:p-4 w-[15%] text-center">Aksi</th>
                       </tr>
                     </thead>
@@ -447,6 +438,7 @@ const CoordinatorSeminarProposal = () => {
                                   {seminar.time
                                     ? formatTime(seminar.time)
                                     : "TBD"}{" "}
+                                  WIB
                                 </div>
                               </td>
                               <td className="p-3 lg:p-4">
@@ -454,10 +446,6 @@ const CoordinatorSeminarProposal = () => {
                                   {seminar.room || "TBD"}
                                 </div>
                               </td>
-                              <td className="p-3 lg:p-4 text-center">
-                                {getStatusBadge(seminar.status)}
-                              </td>
-
                               <td className="p-3 lg:p-4 text-center space-x-1 lg:space-x-2">
                                 <Button
                                   variant="outline"
@@ -471,9 +459,14 @@ const CoordinatorSeminarProposal = () => {
                             </tr>
                           ))
                       ) : (
-                        <div className="p-4 text-center text-primary-600">
-                          Tidak ada seminar dibimbing yang sudah diselesaikan.
-                        </div>
+                        <tr>
+                          <td
+                            colSpan={6}
+                            className="p-4 text-center text-primary-600"
+                          >
+                            Tidak ada seminar proposal yang sudah diselesaikan.
+                          </td>
+                        </tr>
                       )}
                     </tbody>
                   </table>
@@ -497,7 +490,7 @@ const CoordinatorSeminarProposal = () => {
                                 {seminar.title}
                               </p>
                             </div>
-                            <div className="flex flex-col xs:flex-row xs:justify-between gap-2">
+                            <div className="grid grid-cols-2 gap-2 sm:gap-4">
                               <div>
                                 <h3 className="text-xs font-bold text-primary-600">
                                   Mahasiswa
@@ -521,21 +514,20 @@ const CoordinatorSeminarProposal = () => {
                                 <p className="text-xs text-primary-600">
                                   {seminar.time
                                     ? formatTime(seminar.time)
-                                    : "TBD"}
+                                    : "TBD"}{" "}
+                                  WIB
                                 </p>
                               </div>
                             </div>
-                            <div>
-                              <h3 className="text-xs font-bold text-primary-600">
-                                Ruangan
-                              </h3>
-                              <p className="text-sm">{seminar.room || "TBD"}</p>
-                            </div>
-                            <div>
-                              <h3 className="text-xs font-bold text-primary-600">
-                                Status
-                              </h3>
-                              {getStatusBadge(seminar.status)}
+                            <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                              <div>
+                                <h3 className="text-xs font-bold text-primary-600">
+                                  Tempat
+                                </h3>
+                                <p className="text-sm">
+                                  {seminar.room || "TBD"}
+                                </p>
+                              </div>
                             </div>
 
                             <div className="flex flex-col xs:flex-row gap-2 pt-1">

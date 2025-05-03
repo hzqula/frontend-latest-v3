@@ -7,6 +7,7 @@ import {
   DialogFooter,
 } from "../../../components/ui/dialog";
 import { Button } from "../../../components/ui/button";
+import { ScrollArea } from "../../../components/ui/scroll-area";
 
 interface SeminarDetailsModalProps {
   open: boolean;
@@ -37,7 +38,7 @@ const SeminarDetailsModal = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 mt-3 sm:mt-4 overflow-y-auto max-h-[60vh] pr-1">
+        <ScrollArea className="space-y-4 mt-3 sm:mt-4 max-h-[60vh] pr-1">
           {/* Judul Penelitian - Full width on all screens */}
           <div className="border-b pb-3 border-gray-100">
             <h3 className="text-sm font-bold font-heading text-primary-800 mb-1">
@@ -49,26 +50,21 @@ const SeminarDetailsModal = ({
           </div>
 
           {/* Responsive grid for student and schedule info */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
             {/* Mahasiswa */}
             <div>
-              <h3 className="text-xs sm:text-sm font-bold font-heading text-primary-800">
-                Mahasiswa
+            <h3 className="text-sm font-bold font-heading text-primary-800 mb-1">
+            Mahasiswa
               </h3>
-              <p className="text-primary-800 break-words">
+              <p className="text-primary-800">
+                <span className="block">
                 {seminar.student?.name || "N/A"}
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xs sm:text-sm font-bold font-heading text-primary-800">
-                NIM
-              </h3>
-              <p className="text-primary-800 break-words">
+                </span>
+              <span className="text-sm text-primary-600">
                 {seminar.studentNIM}
+              </span>
               </p>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Jadwal Seminar */}
               <div>
                 <h3 className="text-sm font-bold font-heading text-primary-800 mb-1">
@@ -83,7 +79,6 @@ const SeminarDetailsModal = ({
                   </span>
                 </p>
               </div>
-            </div>
 
             {/* Tempat Seminar */}
             <div className="border-t border-b py-3 border-gray-100">
@@ -146,7 +141,7 @@ const SeminarDetailsModal = ({
               )}
             </div>
           </div>
-        </div>
+        </ScrollArea>
 
         <DialogFooter className="mt-6">
           <Button

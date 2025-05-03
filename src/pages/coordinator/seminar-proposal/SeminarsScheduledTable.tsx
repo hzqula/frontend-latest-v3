@@ -75,7 +75,7 @@ const SeminarsScheduledTable = ({
                     <td className="p-3 lg:p-4">
                       <div>{formatDate(seminar.time)}</div>
                       <div className="text-xs text-primary-600">
-                        {formatTime(seminar.time)}
+                        {formatTime(seminar.time)} WIB
                       </div>
                     </td>
                     <td className="p-3 lg:p-4">{seminar.room || "TBD"}</td>
@@ -109,7 +109,7 @@ const SeminarsScheduledTable = ({
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="p-4 text-center text-primary-600">
+                  <td colSpan={6} className="p-4 text-center text-primary-600">
                     Tidak ada seminar proposal yang dijadwalkan ditemukan.
                   </td>
                 </tr>
@@ -136,8 +136,7 @@ const SeminarsScheduledTable = ({
                         {seminar.title}
                       </p>
                     </div>
-
-                    <div className="flex flex-col xs:flex-row xs:justify-between gap-2">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-4">
                       <div>
                         <h3 className="text-xs font-bold text-primary-600">
                           Mahasiswa
@@ -156,7 +155,7 @@ const SeminarsScheduledTable = ({
                         </h3>
                         <p className="text-sm">{formatDate(seminar.time)}</p>
                         <p className="text-xs text-primary-600">
-                          {formatTime(seminar.time)}
+                          {formatTime(seminar.time)} WIB
                         </p>
                       </div>
                     </div>
