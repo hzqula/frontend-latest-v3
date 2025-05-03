@@ -184,27 +184,33 @@ const CoordinatorSeminarProposal = () => {
         {/* Tabs - Scrollable on small screens */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="overflow-x-auto pb-2">
-            <TabsList className="grid min-w-[400px] grid-cols-3 mb-6 bg-primary">
+            <TabsList className="grid w-full grid-cols-3 mb-6 bg-primary overflow-hidden text-sm md:text-base">
               <TabsTrigger
                 value="submitted"
-                className={`text-primary-foreground ${
-                  activeTab === "submitted" ? "text-primary-800" : ""
+                className={`py-2 px-1 md:px-3 text-primary-foreground whitespace-nowrap ${
+                  activeTab === "submitted"
+                    ? "text-primary-800 font-medium"
+                    : ""
                 }`}
               >
                 Diajukan ({submittedSeminars.length})
               </TabsTrigger>
               <TabsTrigger
                 value="scheduled"
-                className={`text-primary-foreground ${
-                  activeTab === "scheduled" ? "text-primary-800" : ""
+                className={`py-2 px-1 md:px-3 text-primary-foreground whitespace-nowrap ${
+                  activeTab === "scheduled"
+                    ? "text-primary-800 font-medium"
+                    : ""
                 }`}
               >
                 Dijadwalkan ({scheduledSeminars.length})
               </TabsTrigger>
               <TabsTrigger
                 value="completed"
-                className={`text-primary-foreground ${
-                  activeTab === "completed" ? "text-primary-800" : ""
+                className={`py-2 px-1 md:px-3 text-primary-foreground whitespace-nowrap ${
+                  activeTab === "completed"
+                    ? "text-primary-800 font-medium"
+                    : ""
                 }`}
               >
                 Selesai ({completedSeminars.length})

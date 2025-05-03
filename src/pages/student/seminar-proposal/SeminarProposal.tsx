@@ -818,6 +818,9 @@ const StudentSeminarProposal = () => {
                     </div>
                   ) : (
                     <div className="bg-primary-50 p-3 rounded-lg">
+                      <h3 className="text-xs sm:text-sm font-bold font-heading text-primary">
+                        Dosen Penguji
+                      </h3>
                       <p className="text-primary-800 text-base sm:text-lg font-bold">
                         Belum ditentukan
                       </p>
