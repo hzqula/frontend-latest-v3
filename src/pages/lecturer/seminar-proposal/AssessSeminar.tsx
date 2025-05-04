@@ -354,6 +354,9 @@ const AssessSeminarProposal = () => {
     setIsSubmitting(true);
     setIsLoadingSubmit(true);
 
+    const startTime = Date.now(); // Catat waktu mulai
+    const minLoadingTime = 2000; // Minimum 2 detik untuk animasi loading
+
     try {
       const payload: any = {
         presentationScore: parseFloat(scores.presentationScore),
@@ -374,8 +377,16 @@ const AssessSeminarProposal = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Menunda eksekusi selama 2 detik untuk menampilkan animasi loading
-      await delay(2000);
+      await seminarQuery.refetch(); // Refetch data setelah API selesai
+
+      // Hitung waktu yang sudah berlalu
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = minLoadingTime - elapsedTime;
+
+      // Jika waktu yang sudah berlalu kurang dari 2 detik, tunggu sisa waktu
+      if (remainingTime > 0) {
+        await delay(remainingTime);
+      }
 
       setHasAssessed(true);
       setIsEditing(false);
@@ -384,13 +395,19 @@ const AssessSeminarProposal = () => {
           ? "Berhasil memperbarui penilaian seminar!"
           : "Berhasil menilai seminar!"
       );
-      await seminarQuery.refetch();
     } catch (error: any) {
       const message =
         error.response?.data?.error ||
         "Terjadi kesalahan saat menilai seminar.";
       toast.error(message);
       console.error(error);
+
+      // Pastikan animasi loading tetap muncul setidaknya 2 detik meskipun ada error
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = minLoadingTime - elapsedTime;
+      if (remainingTime > 0) {
+        await delay(remainingTime);
+      }
     } finally {
       setIsSubmitting(false);
       setIsLoadingSubmit(false);
@@ -730,7 +747,7 @@ const AssessSeminarProposal = () => {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
                       </svg>
-                      Menyimpan...
+                      Memuat...
                     </span>
                   ) : isSubmitting ? (
                     "Menyimpan..."
