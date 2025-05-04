@@ -239,18 +239,20 @@ const SeminarInvitation = ({
       </p>
 
       {/* Tanda Tangan */}
-      <div className="text-sm text-right">
-        <p className="mb-20">
-          Pekanbaru,{" "}
-          {seminar.time ? seminarDate!.toLocaleDateString("id-ID") : "N/A"}
-          <br />
-          Koordinator Prodi Teknik Lingkungan
-        </p>
-        <p className="font-bold">
-          <span className="underline">Aryo Sasmita, S.T., M.T</span>
-          <br />
-          NIP. 19860612 201212 1 003
-        </p>
+      <div className="flex justify-end pr-12">
+        <div className="text-sm ">
+          <p className="mb-20">
+            Pekanbaru,{" "}
+            {seminar.time ? seminarDate!.toLocaleDateString("id-ID") : "N/A"}
+            <br />
+            Koordinator Prodi Teknik Lingkungan
+          </p>
+          <p className="font-bold">
+            <span className="underline">Aryo Sasmita, S.T., M.T</span>
+            <br />
+            NIP. 19860612 201212 1 003
+          </p>
+        </div>
       </div>
 
       {/* Footer (Visi) */}
