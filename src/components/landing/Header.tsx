@@ -47,12 +47,11 @@ const Header = () => {
           </NavLink>
 
           {/* Panduan Dropdown */}
-          <NavLink
-            textColor="white"
-            afterColor="white"
-            hover="animate-left"
-            padding="default"
-            href="/"
+          <div
+            className="relative group font-body inline-block text-xs font-semibold text-white after:bg-white after:h-0.5 after:w-0 after:transition-all after:duration-300 hover:after:w-full"
+            ref={dropdownRef}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
           >
             <div className="relative group" ref={dropdownRef}>
               <button
@@ -66,7 +65,7 @@ const Header = () => {
                 <ChevronDown className="ml-1 h-4 w-4 transition-transform duration-300 group-hover:rotate-180" />
               </button>
 
-              <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 ease-in-out">
+              <div className="absolute left-0 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 ease-in-out">
                 <div className="py-1 text-sm">
                   <a
                     href="/panduan/sop"
@@ -83,7 +82,7 @@ const Header = () => {
                 </div>
               </div>
             </div>
-          </NavLink>
+          </div>
 
           <NavLink
             textColor="white"
