@@ -18,6 +18,8 @@ import {
   PresentationIcon,
   BrainCircuit,
   UserCog,
+  Info,
+  TriangleAlert,
 } from "lucide-react";
 import AssessmentCriterion from "../../../components/SeminarCriterion";
 import {
@@ -30,6 +32,11 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import SeminarProposalDetail from "./SeminarProposalDetail";
+import {
+  Alert,
+  AlertTitle,
+  AlertDescription,
+} from "../../../components/ui/alert";
 
 interface Seminar {
   id: number;
@@ -197,6 +204,7 @@ const AssessSeminarProposal = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [canUpdate, setCanUpdate] = useState(false);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const [daysRemaining, setDaysRemaining] = useState<number | null>(null);
 
   // Fungsi untuk menunda eksekusi menggunakan Promise
   const delay = (ms: number) =>
@@ -232,6 +240,7 @@ const AssessSeminarProposal = () => {
     setAssessmentData(null);
     setIsEditing(false);
     setCanUpdate(false);
+    setDaysRemaining(null);
 
     if (seminarId) {
       seminarQuery.refetch();
@@ -266,10 +275,16 @@ const AssessSeminarProposal = () => {
         const now = new Date();
         const assessmentDate = new Date(existingAssessment.createdAt);
         const timeDiff = now.getTime() - assessmentDate.getTime();
+        const daysLeft = Math.max(
+          0,
+          Math.ceil((oneWeekInMs - timeDiff) / (24 * 60 * 60 * 1000))
+        );
+        setDaysRemaining(daysLeft);
         setCanUpdate(timeDiff <= oneWeekInMs);
       } else {
         setHasAssessed(false);
         setAssessmentData(null);
+        setDaysRemaining(null);
       }
     }
   }, [seminarQuery.data, user?.profile?.nip]);
@@ -354,8 +369,8 @@ const AssessSeminarProposal = () => {
     setIsSubmitting(true);
     setIsLoadingSubmit(true);
 
-    const startTime = Date.now(); // Catat waktu mulai
-    const minLoadingTime = 2000; // Minimum 2 detik untuk animasi loading
+    const startTime = Date.now();
+    const minLoadingTime = 1500;
 
     try {
       const payload: any = {
@@ -506,6 +521,7 @@ const AssessSeminarProposal = () => {
       <h1 className="text-4xl font-heading font-black mb-3 text-primary-800">
         Penilaian Seminar Proposal
       </h1>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <SeminarProposalDetail
           seminar={seminar}
@@ -532,14 +548,32 @@ const AssessSeminarProposal = () => {
               </div>
             </CardHeader>
           </div>
-          <CardContent className="space-y-8 p-6">
+          <CardContent className="p-6">
             {hasAssessed && !isEditing ? (
-              <ScoreVisualization
-                scores={visualizationScores}
-                isAdvisor={isAdvisor}
-              />
+              <div className="flex flex-col gap-6 py-6 min-h-[400px]">
+                <ScoreVisualization
+                  scores={visualizationScores}
+                  isAdvisor={isAdvisor}
+                />
+                {daysRemaining !== null && (
+                  <>
+                    <Alert
+                      variant={canUpdate ? "info" : "warning"}
+                      className="w-full"
+                    >
+                      {canUpdate ? <Info /> : <TriangleAlert />}
+                      <AlertTitle>{canUpdate ? "Info" : "Warning"}</AlertTitle>
+                      <AlertDescription>
+                        {canUpdate
+                          ? `Anda masih bisa memperbarui nilai selama ${daysRemaining} hari lagi.`
+                          : "Masa pembaruan nilai telah berakhir (lebih dari 7 hari sejak penilaian disubmit)."}
+                      </AlertDescription>
+                    </Alert>
+                  </>
+                )}
+              </div>
             ) : (
-              <>
+              <div className="space-y-8">
                 <AssessmentCriterion
                   id="presentation-score"
                   icon={PresentationIcon}
@@ -591,7 +625,7 @@ const AssessSeminarProposal = () => {
                     disabled={isSubmitting}
                   />
                 )}
-              </>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -747,7 +781,7 @@ const AssessSeminarProposal = () => {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
                       </svg>
-                      Memuat...
+                      Menyimpan...
                     </span>
                   ) : isSubmitting ? (
                     "Menyimpan..."
