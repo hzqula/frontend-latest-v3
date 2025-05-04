@@ -143,7 +143,7 @@ export default function SeminarScrollerGrid() {
         </TabsList>
 
         <TabsContent value="proposal">
-          <div className="h-[600px] w-full lg:w-[1300px] mx-auto px-4">
+          <div className="h-[800px] w-full lg:w-[1300px] mx-auto px-4">
             <ScrollingColumn
               items={proposalSeminars}
               onClickDetail={handleOpenModal}
@@ -152,7 +152,7 @@ export default function SeminarScrollerGrid() {
         </TabsContent>
 
         <TabsContent value="hasil">
-          <div className="h-[600px] w-full lg:w-[1300px] mx-auto px-4">
+          <div className="h-[800px] w-full lg:w-[1300px] mx-auto px-4">
             <ScrollingColumn
               items={hasilSeminars}
               onClickDetail={handleOpenModal}
@@ -323,18 +323,40 @@ function ScrollingColumn({
 }) {
   const controls = useAnimation();
   const [paused, setPaused] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [screenSize, setScreenSize] = useState("large");
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setScreenSize("small");
+      } else if (width < 1024) {
+        setScreenSize("medium");
+      } else {
+        setScreenSize("large");
+      }
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
-  const shouldScroll =
-    (isMobile && items.length > 1) || (!isMobile && items.length >= 5);
+  // Define scroll threshold based on screen size
+  const getScrollThreshold = () => {
+    switch (screenSize) {
+      case "small":
+        return 2;
+      case "medium":
+        return 4;
+      case "large":
+        return 6;
+      default:
+        return 6;
+    }
+  };
 
+  const shouldScroll = items.length > getScrollThreshold();
   useEffect(() => {
     if (paused || !shouldScroll || items.length === 0) {
       controls.stop();
@@ -356,7 +378,7 @@ function ScrollingColumn({
 
   return (
     <div
-      className="overflow-hidden h-full"
+      className="overflow-hidden max-h-[800px]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -385,50 +407,55 @@ function SeminarCard({
   onClickDetail: (seminar: Seminar) => void;
 }) {
   return (
-<CardContent className="group overflow-hidden relative border-0 shadow-xl rounded-lg h-96">
-  <div className="absolute inset-[1px] bg-primary-50 dark:bg-gray-800 rounded-lg z-0"></div>
-  <div className="relative z-10 p-6 h-full flex flex-col">
-    <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2 text-center group-hover:text-emerald-600 dark:group-hover:text-primary-600 transition-colors">
-      {seminar.title.split(" ").slice(0, 10).join(" ") +
-        (seminar.title.split(" ").length > 10 ? "..." : "")}
-    </h3>
+    <CardContent className="group overflow-hidden relative border-0 shadow-xl rounded-lg h-96">
+      <div className="absolute inset-[1px] bg-primary-50 dark:bg-gray-800 rounded-lg z-0"></div>
+      <ScrollArea className="relative z-10 p-6 h-full flex flex-col">
+        <h3
+          className={`font-bold mb-2 line-clamp-3 min-h-[4.2rem] group-hover:text-emerald-600 dark:group-hover:text-primary-600 transition-colors ${
+            seminar.title.split(" ").length >= 10
+              ? "text-sm sm:text-base"
+              : "text-base sm:text-lg"
+          }`}
+        >
+          {seminar.title}
+        </h3>
 
-    <div className="flex items-center gap-2 mb-4">
-      <img
-        src={
-          seminar.student.profilePicture
-            ? seminar.student.profilePicture
-            : "https://robohash.org/mail@ashallendesign.co.uk"
-        }
-        alt="student-image"
-        className="w-8 h-8 border rounded-full bg-white"
-      />
-      <p className="text-gray-600 dark:text-gray-300">
-        {seminar.student.name} ({seminar.studentNIM})
-      </p>
-    </div>
+        <div className="flex items-center gap-2 mb-4">
+          <img
+            src={
+              seminar.student.profilePicture
+                ? seminar.student.profilePicture
+                : "https://robohash.org/mail@ashallendesign.co.uk"
+            }
+            alt="student-image"
+            className="w-8 h-8 border rounded-full bg-white"
+          />
+          <p className="text-gray-600 dark:text-gray-300">
+            {seminar.student.name} ({seminar.studentNIM})
+          </p>
+        </div>
 
-    <div className="space-y-2 mb-6">
-      <div className="flex items-center text-sm">
-        <CalendarDays className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-400" />
-        <span>{formatDate(seminar.time)}</span>
-      </div>
-      <div className="flex items-center text-sm">
-        <Clock className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-400" />
-        <span>{formatTime(seminar.time)}</span>
-      </div>
-      <div className="flex items-center text-sm">
-        <University className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-400" />
-        <span>{seminar.room || "TBD"}</span>
-      </div>
-    </div>
-    <button
-      onClick={() => onClickDetail(seminar)}
-      className="w-full py-2 px-4 rounded-md bg-gradient-to-r from-primary-300 to-primary-600 hover:from-primary-700 hover:to-primary-400 text-white font-medium transition-colors mt-auto"
-    >
-      Detail
-    </button>
-  </div>
-</CardContent>
+        <div className="space-y-2 mb-6">
+          <div className="flex items-center text-sm">
+            <CalendarDays className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-400" />
+            <span>{formatDate(seminar.time)}</span>
+          </div>
+          <div className="flex items-center text-sm">
+            <Clock className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-400" />
+            <span>{formatTime(seminar.time)}</span>
+          </div>
+          <div className="flex items-center text-sm">
+            <University className="h-4 w-4 mr-2 text-emerald-600 dark:text-emerald-400" />
+            <span>{seminar.room || "TBD"}</span>
+          </div>
+        </div>
+        <button
+          onClick={() => onClickDetail(seminar)}
+          className="w-full py-2 px-4 rounded-md bg-gradient-to-r from-primary-300 to-primary-600 hover:from-primary-700 hover:to-primary-400 text-white font-medium transition-colors mt-auto"
+        >
+          Detail
+        </button>
+      </ScrollArea>
+    </CardContent>
   );
 }
