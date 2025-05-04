@@ -58,6 +58,20 @@
   --color-warning-700: oklch(55% 0.08 90);
   --color-warning-800: oklch(45% 0.06 90);
   --color-warning-900: oklch(35% 0.04 90);
+  --color-warning-foreground: oklch(20% 0.05 90); /* Dark yellow */
+
+  /* Info (Blue, New) */
+  --color-info-50: oklch(98% 0.015 240); /* Very light blue */
+  --color-info-100: oklch(95% 0.03 240);
+  --color-info-200: oklch(90% 0.05 240);
+  --color-info-300: oklch(85% 0.07 240);
+  --color-info-400: oklch(80% 0.09 240);
+  --color-info-500: oklch(75% 0.11 240); /* Main info color */
+  --color-info-600: oklch(65% 0.1 240);
+  --color-info-700: oklch(55% 0.08 240);
+  --color-info-800: oklch(45% 0.06 240);
+  --color-info-900: oklch(35% 0.04 240);
+  --color-info-foreground: oklch(20% 0.05 240); /* Dark blue */
 
   /* UI */
   --color-primary: var(--color-primary-600);
@@ -73,5 +87,6 @@
   ); /* Updated to use primary for success */
   --color-warning: var(--color-warning-500); /* New warning color */
   --color-error: var(--color-destructive-500); /* Reuse destructive for error */
+  --color-info: var(--color-info-500); /* New info color */
   --color-muted-foreground: var(--color-gray-500); /* Define muted-foreground */
 }
