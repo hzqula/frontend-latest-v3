@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { useApiData } from "../../../hooks/useApiData";
-import { toast } from "react-toastify";
 import {
   Card,
   CardContent,
@@ -11,8 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-import { Badge } from "../../../components/ui/badge";
 import {
   Tabs,
   TabsContent,
@@ -25,6 +22,8 @@ import CoordinatorLayout from "../../../components/layouts/CoordinatorLayout";
 import SchedulingModal from "./Scheduling";
 import SeminarsScheduledTable from "./SeminarsScheduledTable";
 import SeminarDetailsModal from "./SeminarDetailModal";
+import SeminarsSubmittedTable from "./SeminarsSubmittedTable";
+import SeminarsCompletedTable from "./SeminarsCompletedTable";
 
 const CoordinatorSeminarProposal = () => {
   const { user, token } = useAuth();
@@ -80,18 +79,21 @@ const CoordinatorSeminarProposal = () => {
   const filteredSubmittedSeminars = submittedSeminars.filter(
     (seminar: any) =>
       seminar.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      seminar.student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       seminar.studentNIM.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const filteredScheduledSeminars = scheduledSeminars.filter(
     (seminar: any) =>
       seminar.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      seminar.student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       seminar.studentNIM.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const filteredCompletedSeminars = completedSeminars.filter(
     (seminar: any) =>
       seminar.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      seminar.student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       seminar.studentNIM.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -113,32 +115,6 @@ const CoordinatorSeminarProposal = () => {
     });
   };
 
-  // Fungsi untuk badge status
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "SUBMITTED":
-        return (
-          <Badge variant="outline" className="bg-primary-200 text-primary-800">
-            Diajukan
-          </Badge>
-        );
-      case "SCHEDULED":
-        return (
-          <Badge variant="outline" className="bg-primary-300 text-primary-800">
-            Dijadwalkan
-          </Badge>
-        );
-      case "COMPLETED":
-        return (
-          <Badge variant="outline" className="bg-primary-400 text-primary-800">
-            Selesai
-          </Badge>
-        );
-      default:
-        return <Badge variant="outline">Tidak Diketahui</Badge>;
-    }
-  };
-
   // Fungsi untuk membuka modal penjadwalan
   const openScheduleModal = (seminar: any) => {
     setSelectedSeminar(seminar);
@@ -153,137 +129,67 @@ const CoordinatorSeminarProposal = () => {
 
   return (
     <CoordinatorLayout>
-      <div className="container mx-auto p-4">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-          <div>
-            <h1 className="text-4xl font-heading font-black text-primary-800">
-              Seminar Proposal
-            </h1>
-            <p className="text-primary">Kelola seminar proposal mahasiswa</p>
-          </div>
-          <div className="relative">
-            <Search className="absolute left-2.5 top-3 h-4 w-4 text-primary-600" />
-            <Input
-              type="search"
-              placeholder="Cari seminar..."
-              className="w-full md:w-[200px] pl-8 border-primary-400"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </div>
+      <div className="flex flex-col mb-4">
+        <h1 className="text-4xl font-heading font-black text-primary-800">
+          Seminar Proposal
+        </h1>
+        <p>Kelola seminar proposal mahasiswa</p>
+      </div>
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-3 mb-6 bg-primary">
-            <TabsTrigger
-              value="submitted"
-              className={`text-primary-foreground ${
-                activeTab === "submitted" ? "text-primary-800" : ""
-              }`}
-            >
-              Diajukan ({submittedSeminars.length})
-            </TabsTrigger>
-            <TabsTrigger
-              value="scheduled"
-              className={`text-primary-foreground ${
-                activeTab === "scheduled" ? "text-primary-800" : ""
-              }`}
-            >
-              Dijadwalkan ({scheduledSeminars.length})
-            </TabsTrigger>
-            <TabsTrigger
-              value="completed"
-              className={`text-primary-foreground ${
-                activeTab === "completed" ? "text-primary-800" : ""
-              }`}
-            >
-              Selesai ({completedSeminars.length})
-            </TabsTrigger>
-          </TabsList>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="col-span-1 sm:col-span-2 lg:col-span-4 overflow-hidden pt-2 pr-1"
+        >
+          <div className="flex gap-4 items-center w-full mb-4 justify-between">
+            <TabsList className="bg-primary">
+              <TabsTrigger
+                value="submitted"
+                className={`text-primary-foreground ${
+                  activeTab === "submitted" ? "text-primary-800" : ""
+                }`}
+              >
+                Diajukan ({submittedSeminars.length})
+              </TabsTrigger>
+              <TabsTrigger
+                value="scheduled"
+                className={`text-primary-foreground ${
+                  activeTab === "scheduled" ? "text-primary-800" : ""
+                }`}
+              >
+                Dijadwalkan ({scheduledSeminars.length})
+              </TabsTrigger>
+              <TabsTrigger
+                value="completed"
+                className={`text-primary-foreground ${
+                  activeTab === "completed" ? "text-primary-800" : ""
+                }`}
+              >
+                Selesai ({completedSeminars.length})
+              </TabsTrigger>
+            </TabsList>
+            <div className="relative w-full">
+              <Search className="absolute left-2.5 top-3 h-4 w-4 text-primary-600" />
+              <Input
+                type="search"
+                placeholder="Cari seminar berdasarkan judul penelitian | nama | nim"
+                className="w-full pl-8 border-primary-400"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </div>
 
           {/* Tab: Diajukan (SUBMITTED) */}
           <TabsContent value="submitted">
-            <Card className="bg-white">
-              <CardHeader>
-                <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-                  <div>
-                    <CardTitle className="text-2xl -mb-1 font-heading font-black text-primary-800">
-                      Pengajuan Seminar Proposal
-                    </CardTitle>
-                    <CardDescription className="text-primary">
-                      Seminar proposal yang menunggu dijadwalkan
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-sm overflow-hidden border border-primary">
-                  <div className="grid grid-cols-12 gap-2 p-4 font-medium border-b bg-primary text-primary-foreground font-heading">
-                    <div className="col-span-5">Judul</div>
-                    <div className="col-span-2">Mahasiswa</div>
-                    <div className="col-span-2">Tanggal Diajukan</div>
-                    <div className="col-span-1 text-center">Status</div>
-                    <div className="col-span-2 text-center">Aksi</div>
-                  </div>
-                  <div className="divide-y">
-                    {filteredSubmittedSeminars.length > 0 ? (
-                      filteredSubmittedSeminars.map((seminar: any) => (
-                        <div
-                          key={seminar.id}
-                          className="grid grid-cols-12 gap-2 p-4 items-center text-primary-800"
-                        >
-                          <div className="col-span-5">
-                            <div className="font-bold">{seminar.title}</div>
-                          </div>
-                          <div className="col-span-2">
-                            <div className="font-medium text-primary-800">
-                              {seminar.student?.name || "N/A"}
-                            </div>
-                            <div className="text-sm text-primary">
-                              {seminar.studentNIM}
-                            </div>
-                          </div>
-                          <div className="col-span-2">
-                            <div className="text-sm text-primary-800">
-                              {formatDate(seminar.createdAt)}
-                            </div>
-                            <div className="text-xs text-primary">
-                              {formatTime(seminar.createdAt)}
-                            </div>
-                          </div>
-                          <div className="col-span-1 text-center">
-                            {getStatusBadge(seminar.status)}
-                          </div>
-                          <div className="col-span-2 text-right space-x-2">
-                            <Button
-                              size="sm"
-                              className="bg-primary text-primary-foreground hover:bg-primary-700"
-                              onClick={() => openScheduleModal(seminar)}
-                            >
-                              Jadwalkan
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="border-primary-400 text-primary-700"
-                              onClick={() => openDetailsModal(seminar)}
-                            >
-                              Lihat
-                            </Button>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="p-4 text-center text-primary-600">
-                        Tidak ada pengajuan seminar proposal yang ditemukan.
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <SeminarsSubmittedTable
+              seminars={filteredSubmittedSeminars}
+              formatDate={formatDate}
+              formatTime={formatTime}
+              onSchedule={openScheduleModal}
+              onViewDetails={openDetailsModal}
+            />
           </TabsContent>
 
           {/* Tab: Dijadwalkan (SCHEDULED) */}
@@ -298,80 +204,12 @@ const CoordinatorSeminarProposal = () => {
 
           {/* Tab: Selesai (COMPLETED) */}
           <TabsContent value="completed">
-            <Card className="bg-white">
-              <CardHeader>
-                <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-                  <div>
-                    <CardTitle className="text-2xl -mb-1 font-heading font-black text-primary-800">
-                      Seminar Proposal Selesai
-                    </CardTitle>
-                    <CardDescription className="text-primary">
-                      Seminar proposal yang telah selesai
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-sm overflow-hidden border border-primary">
-                  <div className="grid grid-cols-12 gap-2 p-4 font-medium border-b bg-primary text-primary-foreground">
-                    <div className="col-span-4">Judul</div>
-                    <div className="col-span-2">Mahasiswa</div>
-                    <div className="col-span-2">Tanggal & Waktu</div>
-                    <div className="col-span-1">Ruangan</div>
-                    <div className="col-span-1 text-center">Status</div>
-                    <div className="col-span-2 text-center">Aksi</div>
-                  </div>
-                  <div className="divide-y">
-                    {filteredCompletedSeminars.length > 0 ? (
-                      filteredCompletedSeminars.map((seminar: any) => (
-                        <div
-                          key={seminar.id}
-                          className="grid grid-cols-12 gap-2 p-4 items-center text-primary-800"
-                        >
-                          <div className="col-span-4">
-                            <div className="font-medium">{seminar.title}</div>
-                          </div>
-                          <div className="col-span-2">
-                            <div className="font-medium text-primary-800">
-                              {seminar.student?.name || "N/A"}
-                            </div>
-                            <div className="text-sm text-primary">
-                              {seminar.studentNIM}
-                            </div>
-                          </div>
-                          <div className="col-span-2">
-                            <div>{formatDate(seminar.time)}</div>
-                            <div className="text-sm text-primary-600">
-                              {formatTime(seminar.time)}
-                            </div>
-                          </div>
-                          <div className="col-span-1">
-                            {seminar.room || "TBD"}
-                          </div>
-                          <div className="col-span-1 text-center">
-                            {getStatusBadge(seminar.status)}
-                          </div>
-                          <div className="col-span-2 text-right space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="border-primary-400 text-primary-700"
-                              onClick={() => openDetailsModal(seminar)}
-                            >
-                              Lihat
-                            </Button>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="p-4 text-center text-primary-600">
-                        Tidak ada seminar proposal yang selesai ditemukan.
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <SeminarsCompletedTable
+              seminars={filteredCompletedSeminars}
+              formatDate={formatDate}
+              formatTime={formatTime}
+              onViewDetails={openDetailsModal}
+            />
           </TabsContent>
         </Tabs>
 
