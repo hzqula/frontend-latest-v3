@@ -26,6 +26,7 @@ import {
   BookOpen,
   ClipboardList,
   ClipboardPenLine,
+  Search,
 } from "lucide-react";
 import {
   Select,
@@ -35,6 +36,7 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import LecturerLayout from "../../components/layouts/LecturerLayout";
+import { Input } from "../../components/ui/input";
 
 const LecturerDashboard = () => {
   const { user, token } = useAuth();
@@ -68,13 +70,8 @@ const LecturerDashboard = () => {
     );
   }
 
-  const students = studentsQuery.data || [];
   const seminars = seminarsQuery.data || [];
 
-  // Hitung statistik seminar berdasarkan status
-  const scheduledSeminars = seminars.filter(
-    (seminar: any) => seminar.status === "SCHEDULED"
-  );
   const completedSeminars = seminars.filter(
     (seminar: any) => seminar.status === "COMPLETED"
   );
@@ -82,13 +79,6 @@ const LecturerDashboard = () => {
   const seminarTypes = ["PROPOSAL", "HASIL"];
   const capitalize = (str: string) =>
     str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-
-  const filteredCompletedSeminars = completedSeminars.filter(
-    (seminar: any) =>
-      (statusFilter === "all" || seminar.type === statusFilter) &&
-      (seminar.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        seminar.studentNIM.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
 
   // Modified code - don't filter by scheduledSeminars:
   const advisedSeminars = seminars.filter((seminar: any) =>
@@ -104,22 +94,31 @@ const LecturerDashboard = () => {
     )
   );
 
-  // Filter berdasarkan pencarian
-  const filteredAdvisedSeminars = advisedSeminars.filter(
-    (seminar: any) =>
+  // Combined filtering logic for advised seminars
+  const filteredAdvisedSeminars = advisedSeminars.filter((seminar: any) => {
+    const matchesSearch =
       seminar.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      seminar.studentNIM.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      seminar.studentNIM.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      seminar.student.name.toLowerCase().includes(searchQuery.toLowerCase());
 
-  const filteredAssessedSeminars = assessedSeminars.filter(
-    (seminar: any) =>
+    const matchesType = statusFilter === "all" || seminar.type === statusFilter;
+    return matchesSearch && matchesType;
+  });
+
+  // Combined filtering logic for assessed seminars
+  const filteredAssessedSeminars = assessedSeminars.filter((seminar: any) => {
+    const matchesSearch =
       seminar.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      seminar.studentNIM.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      seminar.studentNIM.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      seminar.student.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesType = statusFilter === "all" || seminar.type === statusFilter;
+    return matchesSearch && matchesType;
+  });
 
   // Fungsi untuk format tanggal
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString("en-ID", {
       weekday: "short",
       year: "numeric",
       month: "short",
@@ -129,42 +128,10 @@ const LecturerDashboard = () => {
 
   // Fungsi untuk format waktu
   const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString("en-US", {
+    return new Date(dateString).toLocaleTimeString("en-ID", {
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
-
-  // Fungsi untuk badge status
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "DRAFT":
-        return (
-          <Badge variant="outline" className="bg-primary-100 text-primary-800">
-            Draft
-          </Badge>
-        );
-      case "SUBMITTED":
-        return (
-          <Badge variant="outline" className="bg-primary-200 text-primary-800">
-            Submitted
-          </Badge>
-        );
-      case "SCHEDULED":
-        return (
-          <Badge variant="outline" className="bg-primary-300 text-primary-800">
-            Scheduled
-          </Badge>
-        );
-      case "COMPLETED":
-        return (
-          <Badge variant="outline" className="bg-primary-400 text-primary-800">
-            Completed
-          </Badge>
-        );
-      default:
-        return <Badge variant="outline">Unknown</Badge>;
-    }
   };
 
   return (
@@ -300,32 +267,34 @@ const LecturerDashboard = () => {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-3 mb-6 bg-primary">
-            <TabsTrigger
-              value="overview"
-              className={`text-primary-foreground ${
-                activeTab === "overview" ? "text-primary-800" : ""
-              }`}
-            >
-              Dibimbing
-            </TabsTrigger>
-            <TabsTrigger
-              value="submissions"
-              className={`text-primary-foreground ${
-                activeTab === "submissions" ? "text-primary-800" : ""
-              }`}
-            >
-              Diuji
-            </TabsTrigger>
-            <TabsTrigger
-              value="completed"
-              className={`text-primary-foreground ${
-                activeTab === "completed" ? "text-primary-800" : ""
-              }`}
-            >
-              Selesai
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto pb-2">
+            <TabsList className="grid grid-cols-3 mb-6 bg-primary">
+              <TabsTrigger
+                value="overview"
+                className={`text-primary-foreground ${
+                  activeTab === "overview" ? "text-primary-800" : ""
+                }`}
+              >
+                Dibimbing
+              </TabsTrigger>
+              <TabsTrigger
+                value="submissions"
+                className={`text-primary-foreground ${
+                  activeTab === "submissions" ? "text-primary-800" : ""
+                }`}
+              >
+                Diuji
+              </TabsTrigger>
+              <TabsTrigger
+                value="completed"
+                className={`text-primary-foreground ${
+                  activeTab === "completed" ? "text-primary-800" : ""
+                }`}
+              >
+                Selesai
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Overview Tab - Now using a 4-column grid with minmax 200px */}
           <TabsContent value="overview">
@@ -341,6 +310,16 @@ const LecturerDashboard = () => {
                     </CardDescription>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-3 h-4 w-4 text-primary-600" />
+                      <Input
+                        type="search"
+                        placeholder="Cari seminar..."
+                        className="w-full md:w-[200px] pl-8 border-primary-400"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
                     <Select defaultValue="all" onValueChange={setStatusFilter}>
                       <SelectTrigger className="w-[180px] border-primary-400">
                         <SelectValue placeholder="Filter by type" />
@@ -357,17 +336,81 @@ const LecturerDashboard = () => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="rounded-sm overflow-hidden border border-primary">
-                  <div className="grid grid-cols-12 gap-2 p-4 font-medium border-b bg-primary text-primary-foreground">
-                    <div className="col-span-5">Judul Penelitian</div>
-                    <div className="col-span-2">Mahasiswa</div>
-                    <div className="col-span-2">Jadwal Seminar</div>
-                    <div className="col-span-1">Ruangan</div>
-                    <div className="col-span-1">Status</div>
-                    <div className="col-span-1 text-center">Aksi</div>
-                  </div>
-                  <div className="divide-y">
+              <CardContent className="px-3 sm:px-6 pb-6">
+                {/* Desktop View */}
+                <div className="hidden md:block rounded-sm overflow-x-auto border border-primary">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-primary text-primary-foreground font-heading font-medium text-xs lg:text-sm">
+                        <th className="p-3 lg:p-4 w-[30%]">Judul Penelitian</th>
+                        <th className="p-3 lg:p-4 w-[20%]">Mahasiswa</th>
+                        <th className="p-3 lg:p-4 w-[15%]">Jadwal Seminar</th>
+                        <th className="p-3 lg:p-4 w-[10%]">Tempat</th>
+                        <th className="p-3 lg:p-4 w-[10%]">Jenis Seminar</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredAdvisedSeminars.filter(
+                        (seminar: any) => seminar.status === "SCHEDULED"
+                      ).length > 0 ? (
+                        filteredAdvisedSeminars
+                          .filter(
+                            (seminar: any) => seminar.status === "SCHEDULED"
+                          )
+                          .map((seminar: any) => (
+                            <tr
+                              key={seminar.id}
+                              className="border-b border-primary-200 text-primary-800 text-xs lg:text-sm"
+                            >
+                              <td className="p-3 lg:p-4">
+                                <div className="font-medium">
+                                  {seminar.title}
+                                </div>
+                              </td>
+                              <td className="p-3 lg:p-4">
+                                <div className="font-medium text-primary-800">
+                                  {seminar.student?.name || "N/A"}
+                                </div>
+                                <div className="text-sm text-primary-600">
+                                  {seminar.studentNIM}
+                                </div>
+                              </td>
+                              <td className="p-3 lg:p-4">
+                                <div>{formatDate(seminar.time)}</div>
+                                <div className="text-sm text-primary-600">
+                                  {formatTime(seminar.time)} WIB
+                                </div>
+                              </td>
+                              <td className="p-3 lg:p-4">
+                                {seminar.room || "TBD"}
+                              </td>
+                              <td className="p-3 lg:p-4">
+                                <Badge
+                                  variant="outline"
+                                  className="mt-1 text-primary-800"
+                                >
+                                  {seminar.type}
+                                </Badge>
+                              </td>
+                            </tr>
+                          ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={6}
+                            className="p-4 text-center text-primary-600"
+                          >
+                            Tidak ada mahasiswa yang dibimbing.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile View */}
+                <div className="md:hidden">
+                  <div className="space-y-3 sm:space-y-4">
                     {filteredAdvisedSeminars.filter(
                       (seminar: any) => seminar.status === "SCHEDULED"
                     ).length > 0 ? (
@@ -378,50 +421,76 @@ const LecturerDashboard = () => {
                         .map((seminar: any) => (
                           <div
                             key={seminar.id}
-                            className="grid grid-cols-12 gap-2 p-4 items-center text-primary-800"
+                            className="border border-primary rounded-sm p-2 sm:p-3 text-primary-800 shadow-sm"
                           >
-                            <div className="col-span-5">
-                              <div className="font-medium">{seminar.title}</div>
-                              <Badge
-                                variant={seminar.type ? "outline" : "secondary"}
-                                className="mt-1 text-primary-800"
-                              >
-                                {seminar.type}
-                              </Badge>
-                            </div>
-                            <div className="col-span-2">
-                              {seminar.student.name}
-                            </div>
-                            <div className="col-span-2">
+                            <div className="space-y-2 sm:space-y-3">
                               <div>
-                                {formatDate(seminar.time || seminar.createdAt)}
+                                <h3 className="text-xs font-bold text-primary-600">
+                                  Judul
+                                </h3>
+                                <p className="font-medium text-xs sm:text-sm break-words line-clamp-2 sm:line-clamp-none">
+                                  {seminar.title}
+                                </p>
                               </div>
-                              <div className="text-sm text-primary-600">
-                                {seminar.time
-                                  ? formatTime(seminar.time)
-                                  : "TBD"}
+
+                              <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                                <div>
+                                  <h3 className="text-xs font-bold text-primary-600">
+                                    Mahasiswa
+                                  </h3>
+                                  <p className="text-xs sm:text-sm truncate">
+                                    {seminar.student?.name || "N/A"}
+                                  </p>
+                                  <p className="text-xs text-primary-600">
+                                    {seminar.studentNIM}
+                                  </p>
+                                </div>
+                                <div>
+                                  <h3 className="text-xs font-bold text-primary-600">
+                                    Tanggal & Waktu
+                                  </h3>
+                                  <p className="text-xs sm:text-sm">
+                                    {formatDate(
+                                      seminar.time || seminar.createdAt
+                                    )}
+                                  </p>
+                                  <p className="text-xs text-primary-600">
+                                    {seminar.time
+                                      ? formatTime(seminar.time)
+                                      : "TBD"}
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                            <div className="col-span-1">
-                              {seminar.room || "TBD"}
-                            </div>
-                            <div className="col-span-1">
-                              {getStatusBadge(seminar.status)}
-                            </div>
-                            <div className="col-span-1 text-right">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-primary-700"
-                              >
-                                Details
-                              </Button>
+
+                              <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                                <div>
+                                  <h3 className="text-xs font-bold text-primary-600">
+                                    Ruangan
+                                  </h3>
+                                  <p className="text-xs sm:text-sm">
+                                    {seminar.room || "TBD"}
+                                  </p>
+                                </div>
+                                <div>
+                                  <h3 className="text-xs font-bold text-primary-600">
+                                    Jenis Seminar
+                                  </h3>
+                                  <p className="text-xs sm:text-sm">
+                                    <Badge
+                                      variant="outline"
+                                      className="mt-1 text-primary-800"
+                                    >
+                                      {seminar.type}
+                                    </Badge>
+                                  </p>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         ))
                     ) : (
-                      <div className="p-4 text-center text-primary-600">
-                        No seminars found matching your search.
+                      <div className="border border-primary rounded-sm p-3 text-center text-primary-600 text-xs sm:text-sm">
+                        Tidak ada mahasiswa yang dibimbing.
                       </div>
                     )}
                   </div>
@@ -444,6 +513,16 @@ const LecturerDashboard = () => {
                     </CardDescription>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-3 h-4 w-4 text-primary-600" />
+                      <Input
+                        type="search"
+                        placeholder="Cari seminar..."
+                        className="w-full md:w-[200px] pl-8 border-primary-400"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
                     <Select defaultValue="all" onValueChange={setStatusFilter}>
                       <SelectTrigger className="w-[180px] border-primary-400">
                         <SelectValue placeholder="Filter by type" />
@@ -460,17 +539,81 @@ const LecturerDashboard = () => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="rounded-sm overflow-hidden border border-primary">
-                  <div className="grid grid-cols-12 gap-2 p-4 font-medium border-b bg-primary text-primary-foreground">
-                    <div className="col-span-5">Judul Penelitian</div>
-                    <div className="col-span-2">Mahasiswa</div>
-                    <div className="col-span-2">Jadwal Seminar</div>
-                    <div className="col-span-1">Ruangan</div>
-                    <div className="col-span-1">Status</div>
-                    <div className="col-span-1 text-center">Aksi</div>
-                  </div>
-                  <div className="divide-y">
+              <CardContent className="px-3 sm:px-6 pb-6">
+                {/* Desktop View */}
+                <div className="hidden md:block rounded-sm overflow-x-auto border border-primary">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-primary text-primary-foreground font-heading font-medium text-xs lg:text-sm">
+                        <th className="p-3 lg:p-4 w-[30%]">Judul Penelitian</th>
+                        <th className="p-3 lg:p-4 w-[20%]">Mahasiswa</th>
+                        <th className="p-3 lg:p-4 w-[15%]">Jadwal Seminar</th>
+                        <th className="p-3 lg:p-4 w-[10%]">Tempat</th>
+                        <th className="p-3 lg:p-4 w-[10%]">Jenis Seminar</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredAssessedSeminars.filter(
+                        (seminar: any) => seminar.status === "SCHEDULED"
+                      ).length > 0 ? (
+                        filteredAssessedSeminars
+                          .filter(
+                            (seminar: any) => seminar.status === "SCHEDULED"
+                          )
+                          .map((seminar: any) => (
+                            <tr
+                              key={seminar.id}
+                              className="border-b border-primary-200 text-primary-800 text-xs lg:text-sm"
+                            >
+                              <td className="p-3 lg:p-4">
+                                <div className="font-medium">
+                                  {seminar.title}
+                                </div>
+                              </td>
+                              <td className="p-3 lg:p-4">
+                                <div className="font-medium text-primary-800">
+                                  {seminar.student?.name || "N/A"}
+                                </div>
+                                <div className="text-sm text-primary-600">
+                                  {seminar.studentNIM}
+                                </div>
+                              </td>
+                              <td className="p-3 lg:p-4">
+                                <div>{formatDate(seminar.time)}</div>
+                                <div className="text-sm text-primary-600">
+                                  {formatTime(seminar.time)} WIB
+                                </div>
+                              </td>
+                              <td className="p-3 lg:p-4">
+                                {seminar.room || "TBD"}
+                              </td>
+                              <td className="p-3 lg:p-4">
+                                <Badge
+                                  variant="outline"
+                                  className="mt-1 text-primary-800"
+                                >
+                                  {seminar.type}
+                                </Badge>
+                              </td>
+                            </tr>
+                          ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={6}
+                            className="p-4 text-center text-primary-600"
+                          >
+                            Tidak ada mahasiswa yang diuji.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile View */}
+                <div className="md:hidden">
+                  <div className="space-y-3 sm:space-y-4">
                     {filteredAssessedSeminars.filter(
                       (seminar: any) => seminar.status === "SCHEDULED"
                     ).length > 0 ? (
@@ -481,50 +624,76 @@ const LecturerDashboard = () => {
                         .map((seminar: any) => (
                           <div
                             key={seminar.id}
-                            className="grid grid-cols-12 gap-2 p-4 items-center text-primary-800"
+                            className="border border-primary rounded-sm p-2 sm:p-3 text-primary-800 shadow-sm"
                           >
-                            <div className="col-span-5">
-                              <div className="font-medium">{seminar.title}</div>
-                              <Badge
-                                variant={seminar.type ? "outline" : "secondary"}
-                                className="mt-1 text-primary-800"
-                              >
-                                {seminar.type}
-                              </Badge>
-                            </div>
-                            <div className="col-span-2">
-                              {seminar.student.name}
-                            </div>
-                            <div className="col-span-2">
+                            <div className="space-y-2 sm:space-y-3">
                               <div>
-                                {formatDate(seminar.time || seminar.createdAt)}
+                                <h3 className="text-xs font-bold text-primary-600">
+                                  Judul
+                                </h3>
+                                <p className="font-medium text-xs sm:text-sm break-words line-clamp-2 sm:line-clamp-none">
+                                  {seminar.title}
+                                </p>
                               </div>
-                              <div className="text-sm text-primary-600">
-                                {seminar.time
-                                  ? formatTime(seminar.time)
-                                  : "TBD"}
+
+                              <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                                <div>
+                                  <h3 className="text-xs font-bold text-primary-600">
+                                    Mahasiswa
+                                  </h3>
+                                  <p className="text-xs sm:text-sm truncate">
+                                    {seminar.student?.name || "N/A"}
+                                  </p>
+                                  <p className="text-xs text-primary-600">
+                                    {seminar.studentNIM}
+                                  </p>
+                                </div>
+                                <div>
+                                  <h3 className="text-xs font-bold text-primary-600">
+                                    Tanggal & Waktu
+                                  </h3>
+                                  <p className="text-xs sm:text-sm">
+                                    {formatDate(
+                                      seminar.time || seminar.createdAt
+                                    )}
+                                  </p>
+                                  <p className="text-xs text-primary-600">
+                                    {seminar.time
+                                      ? formatTime(seminar.time)
+                                      : "TBD"}
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                            <div className="col-span-1">
-                              {seminar.room || "TBD"}
-                            </div>
-                            <div className="col-span-1">
-                              {getStatusBadge(seminar.status)}
-                            </div>
-                            <div className="col-span-1 text-right">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-primary-700"
-                              >
-                                Details
-                              </Button>
+
+                              <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                                <div>
+                                  <h3 className="text-xs font-bold text-primary-600">
+                                    Ruangan
+                                  </h3>
+                                  <p className="text-xs sm:text-sm">
+                                    {seminar.room || "TBD"}
+                                  </p>
+                                </div>
+                                <div>
+                                  <h3 className="text-xs font-bold text-primary-600">
+                                    Jenis Seminar
+                                  </h3>
+                                  <p className="text-xs sm:text-sm">
+                                    <Badge
+                                      variant="outline"
+                                      className="mt-1 text-primary-800"
+                                    >
+                                      {seminar.type}
+                                    </Badge>
+                                  </p>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         ))
                     ) : (
-                      <div className="p-4 text-center text-primary-600">
-                        No seminars found matching your search.
+                      <div className="border border-primary rounded-sm p-3 text-center text-primary-600 text-xs sm:text-sm">
+                        Tidak ada mahasiswa yang diuji.
                       </div>
                     )}
                   </div>
@@ -547,8 +716,18 @@ const LecturerDashboard = () => {
                     </CardDescription>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-3 h-4 w-4 text-primary-600" />
+                      <Input
+                        type="search"
+                        placeholder="Cari seminar..."
+                        className="w-full md:w-[200px] pl-8 border-primary-400"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
                     <Select defaultValue="all" onValueChange={setStatusFilter}>
-                      <SelectTrigger className="w-[180px] border-primary-400">
+                      <SelectTrigger className="w-full sm:w-[180px] border-primary-400">
                         <SelectValue placeholder="Filter by type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -583,16 +762,86 @@ const LecturerDashboard = () => {
 
                   {/* Dibimbing Tab */}
                   <TabsContent value="dibimbing">
-                    <div className="rounded-sm overflow-hidden border border-primary">
-                      <div className="grid grid-cols-12 gap-2 p-4 font-medium border-b bg-primary text-primary-foreground">
-                        <div className="col-span-5">Judul Penelitian</div>
-                        <div className="col-span-2">Mahasiswa</div>
-                        <div className="col-span-2">Jadwal Seminar</div>
-                        <div className="col-span-1">Ruangan</div>
-                        <div className="col-span-1">Status</div>
-                        <div className="col-span-1 text-center">Aksi</div>
-                      </div>
-                      <div className="divide-y">
+                    {/* Desktop View */}
+                    <div className="hidden md:block rounded-sm overflow-x-auto border border-primary">
+                      <table className="w-full text-left">
+                        <thead>
+                          <tr className="bg-primary text-primary-foreground font-heading font-medium text-xs lg:text-sm">
+                            <th className="p-3 lg:p-4 w-[30%]">
+                              Judul Penelitian
+                            </th>
+                            <th className="p-3 lg:p-4 w-[20%]">Mahasiswa</th>
+                            <th className="p-3 lg:p-4 w-[15%]">
+                              Jadwal Seminar
+                            </th>
+                            <th className="p-3 lg:p-4 w-[10%]">Tempat</th>
+                            <th className="p-3 lg:p-4 w-[10%]">
+                              Jenis Seminar
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredAdvisedSeminars.filter(
+                            (seminar: any) => seminar.status === "COMPLETED"
+                          ).length > 0 ? (
+                            filteredAdvisedSeminars
+                              .filter(
+                                (seminar: any) => seminar.status === "COMPLETED"
+                              )
+                              .map((seminar: any) => (
+                                <tr
+                                  key={seminar.id}
+                                  className="border-b border-primary-200 text-primary-800 text-xs lg:text-sm"
+                                >
+                                  <td className="p-3 lg:p-4">
+                                    <div className="font-medium">
+                                      {seminar.title}
+                                    </div>
+                                  </td>
+                                  <td className="p-3 lg:p-4">
+                                    <div className="font-medium text-primary-800">
+                                      {seminar.student?.name || "N/A"}
+                                    </div>
+                                    <div className="text-sm text-primary-600">
+                                      {seminar.studentNIM}
+                                    </div>
+                                  </td>
+                                  <td className="p-3 lg:p-4">
+                                    <div>{formatDate(seminar.time)}</div>
+                                    <div className="text-sm text-primary-600">
+                                      {formatTime(seminar.time)} WIB
+                                    </div>
+                                  </td>
+                                  <td className="p-3 lg:p-4">
+                                    {seminar.room || "TBD"}
+                                  </td>
+                                  <td className="p-3 lg:p-4">
+                                    <Badge
+                                      variant="outline"
+                                      className="mt-1 text-primary-800"
+                                    >
+                                      {seminar.type}
+                                    </Badge>
+                                  </td>
+                                </tr>
+                              ))
+                          ) : (
+                            <tr>
+                              <td
+                                colSpan={6}
+                                className="p-4 text-center text-primary-600"
+                              >
+                                Tidak ada seminar yang telah selesai.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile View */}
+                    <div className="md:hidden">
+                      <div className="space-y-3 sm:space-y-4">
                         {filteredAdvisedSeminars.filter(
                           (seminar: any) => seminar.status === "COMPLETED"
                         ).length > 0 ? (
@@ -603,54 +852,76 @@ const LecturerDashboard = () => {
                             .map((seminar: any) => (
                               <div
                                 key={seminar.id}
-                                className="grid grid-cols-12 gap-2 p-4 items-center text-primary-800"
+                                className="border border-primary rounded-sm p-2 sm:p-3 text-primary-800 shadow-sm"
                               >
-                                <div className="col-span-5">
-                                  <div className="font-medium">
-                                    {seminar.title}
-                                  </div>
-                                  <Badge
-                                    variant="outline"
-                                    className="mt-1 text-primary-800"
-                                  >
-                                    {seminar.type}
-                                  </Badge>
-                                </div>
-                                <div className="col-span-2">
-                                  {seminar.student?.name}
-                                </div>
-                                <div className="col-span-2">
+                                <div className="space-y-2 sm:space-y-3">
                                   <div>
-                                    {formatDate(
-                                      seminar.time || seminar.createdAt
-                                    )}
+                                    <h3 className="text-xs font-bold text-primary-600">
+                                      Judul
+                                    </h3>
+                                    <p className="font-medium text-xs sm:text-sm break-words line-clamp-2 sm:line-clamp-none">
+                                      {seminar.title}
+                                    </p>
                                   </div>
-                                  <div className="text-sm text-primary-600">
-                                    {seminar.time
-                                      ? formatTime(seminar.time)
-                                      : "TBD"}
+
+                                  <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                                    <div>
+                                      <h3 className="text-xs font-bold text-primary-600">
+                                        Mahasiswa
+                                      </h3>
+                                      <p className="text-xs sm:text-sm truncate">
+                                        {seminar.student?.name || "N/A"}
+                                      </p>
+                                      <p className="text-xs text-primary-600">
+                                        {seminar.studentNIM}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <h3 className="text-xs font-bold text-primary-600">
+                                        Tanggal & Waktu
+                                      </h3>
+                                      <p className="text-xs sm:text-sm">
+                                        {formatDate(
+                                          seminar.time || seminar.createdAt
+                                        )}
+                                      </p>
+                                      <p className="text-xs text-primary-600">
+                                        {seminar.time
+                                          ? formatTime(seminar.time)
+                                          : "TBD"}
+                                      </p>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="col-span-1">
-                                  {seminar.room || "TBD"}
-                                </div>
-                                <div className="col-span-1">
-                                  {getStatusBadge(seminar.status)}
-                                </div>
-                                <div className="col-span-1 text-right">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-primary-700"
-                                  >
-                                    Details
-                                  </Button>
+
+                                  <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                                    <div>
+                                      <h3 className="text-xs font-bold text-primary-600">
+                                        Ruangan
+                                      </h3>
+                                      <p className="text-xs sm:text-sm">
+                                        {seminar.room || "TBD"}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <h3 className="text-xs font-bold text-primary-600">
+                                        Jenis Seminar
+                                      </h3>
+                                      <p className="text-xs sm:text-sm">
+                                        <Badge
+                                          variant="outline"
+                                          className="mt-1 text-primary-800"
+                                        >
+                                          {seminar.type}
+                                        </Badge>
+                                      </p>
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
                             ))
                         ) : (
-                          <div className="p-4 text-center text-primary-600">
-                            Tidak ada seminar dibimbing yang sudah diselesaikan.
+                          <div className="border border-primary rounded-sm p-3 text-center text-primary-600 text-xs sm:text-sm">
+                            Tidak seminar yang telah selesai.
                           </div>
                         )}
                       </div>
@@ -659,16 +930,86 @@ const LecturerDashboard = () => {
 
                   {/* Diuji Tab */}
                   <TabsContent value="diuji">
-                    <div className="rounded-sm overflow-hidden border border-primary">
-                      <div className="grid grid-cols-12 gap-2 p-4 font-medium border-b bg-primary text-primary-foreground">
-                        <div className="col-span-5">Judul Penelitian</div>
-                        <div className="col-span-2">Mahasiswa</div>
-                        <div className="col-span-2">Jadwal Seminar</div>
-                        <div className="col-span-1">Ruangan</div>
-                        <div className="col-span-1">Status</div>
-                        <div className="col-span-1 text-center">Aksi</div>
-                      </div>
-                      <div className="divide-y">
+                    {/* Desktop View */}
+                    <div className="hidden md:block rounded-sm overflow-x-auto border border-primary">
+                      <table className="w-full text-left">
+                        <thead>
+                          <tr className="bg-primary text-primary-foreground font-heading font-medium text-xs lg:text-sm">
+                            <th className="p-3 lg:p-4 w-[30%]">
+                              Judul Penelitian
+                            </th>
+                            <th className="p-3 lg:p-4 w-[20%]">Mahasiswa</th>
+                            <th className="p-3 lg:p-4 w-[15%]">
+                              Jadwal Seminar
+                            </th>
+                            <th className="p-3 lg:p-4 w-[10%]">Tempat</th>
+                            <th className="p-3 lg:p-4 w-[10%]">
+                              Jenis Seminar
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredAssessedSeminars.filter(
+                            (seminar: any) => seminar.status === "COMPLETED"
+                          ).length > 0 ? (
+                            filteredAssessedSeminars
+                              .filter(
+                                (seminar: any) => seminar.status === "COMPLETED"
+                              )
+                              .map((seminar: any) => (
+                                <tr
+                                  key={seminar.id}
+                                  className="border-b border-primary-200 text-primary-800 text-xs lg:text-sm"
+                                >
+                                  <td className="p-3 lg:p-4">
+                                    <div className="font-medium">
+                                      {seminar.title}
+                                    </div>
+                                  </td>
+                                  <td className="p-3 lg:p-4">
+                                    <div className="font-medium text-primary-800">
+                                      {seminar.student?.name || "N/A"}
+                                    </div>
+                                    <div className="text-sm text-primary-600">
+                                      {seminar.studentNIM}
+                                    </div>
+                                  </td>
+                                  <td className="p-3 lg:p-4">
+                                    <div>{formatDate(seminar.time)}</div>
+                                    <div className="text-sm text-primary-600">
+                                      {formatTime(seminar.time)} WIB
+                                    </div>
+                                  </td>
+                                  <td className="p-3 lg:p-4">
+                                    {seminar.room || "TBD"}
+                                  </td>
+                                  <td className="p-3 lg:p-4">
+                                    <Badge
+                                      variant="outline"
+                                      className="mt-1 text-primary-800"
+                                    >
+                                      {seminar.type}
+                                    </Badge>
+                                  </td>
+                                </tr>
+                              ))
+                          ) : (
+                            <tr>
+                              <td
+                                colSpan={6}
+                                className="p-4 text-center text-primary-600"
+                              >
+                                Tidak ada seminar yang telah selesai
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile View */}
+                    <div className="md:hidden">
+                      <div className="space-y-3 sm:space-y-4">
                         {filteredAssessedSeminars.filter(
                           (seminar: any) => seminar.status === "COMPLETED"
                         ).length > 0 ? (
@@ -679,54 +1020,76 @@ const LecturerDashboard = () => {
                             .map((seminar: any) => (
                               <div
                                 key={seminar.id}
-                                className="grid grid-cols-12 gap-2 p-4 items-center text-primary-800"
+                                className="border border-primary rounded-sm p-2 sm:p-3 text-primary-800 shadow-sm"
                               >
-                                <div className="col-span-5">
-                                  <div className="font-medium">
-                                    {seminar.title}
-                                  </div>
-                                  <Badge
-                                    variant="outline"
-                                    className="mt-1 text-primary-800"
-                                  >
-                                    {seminar.type}
-                                  </Badge>
-                                </div>
-                                <div className="col-span-2">
-                                  {seminar.student?.name}
-                                </div>
-                                <div className="col-span-2">
+                                <div className="space-y-2 sm:space-y-3">
                                   <div>
-                                    {formatDate(
-                                      seminar.time || seminar.createdAt
-                                    )}
+                                    <h3 className="text-xs font-bold text-primary-600">
+                                      Judul
+                                    </h3>
+                                    <p className="font-medium text-xs sm:text-sm break-words line-clamp-2 sm:line-clamp-none">
+                                      {seminar.title}
+                                    </p>
                                   </div>
-                                  <div className="text-sm text-primary-600">
-                                    {seminar.time
-                                      ? formatTime(seminar.time)
-                                      : "TBD"}
+
+                                  <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                                    <div>
+                                      <h3 className="text-xs font-bold text-primary-600">
+                                        Mahasiswa
+                                      </h3>
+                                      <p className="text-xs sm:text-sm truncate">
+                                        {seminar.student?.name || "N/A"}
+                                      </p>
+                                      <p className="text-xs text-primary-600">
+                                        {seminar.studentNIM}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <h3 className="text-xs font-bold text-primary-600">
+                                        Tanggal & Waktu
+                                      </h3>
+                                      <p className="text-xs sm:text-sm">
+                                        {formatDate(
+                                          seminar.time || seminar.createdAt
+                                        )}
+                                      </p>
+                                      <p className="text-xs text-primary-600">
+                                        {seminar.time
+                                          ? formatTime(seminar.time)
+                                          : "TBD"}
+                                      </p>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="col-span-1">
-                                  {seminar.room || "TBD"}
-                                </div>
-                                <div className="col-span-1">
-                                  {getStatusBadge(seminar.status)}
-                                </div>
-                                <div className="col-span-1 text-right">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-primary-700"
-                                  >
-                                    Details
-                                  </Button>
+
+                                  <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                                    <div>
+                                      <h3 className="text-xs font-bold text-primary-600">
+                                        Ruangan
+                                      </h3>
+                                      <p className="text-xs sm:text-sm">
+                                        {seminar.room || "TBD"}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <h3 className="text-xs font-bold text-primary-600">
+                                        Jenis Seminar
+                                      </h3>
+                                      <p className="text-xs sm:text-sm">
+                                        <Badge
+                                          variant="outline"
+                                          className="mt-1 text-primary-800"
+                                        >
+                                          {seminar.type}
+                                        </Badge>
+                                      </p>
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
                             ))
                         ) : (
-                          <div className="p-4 text-center text-primary-600">
-                            Tidak ada seminar diuji yang sudah diselesaikan.
+                          <div className="border border-primary rounded-sm p-3 text-center text-primary-600 text-xs sm:text-sm">
+                            Tidak ada seminar yang telah selesai
                           </div>
                         )}
                       </div>

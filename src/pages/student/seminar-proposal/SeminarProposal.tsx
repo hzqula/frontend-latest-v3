@@ -14,7 +14,14 @@ import {
   CardTitle,
 } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
-import { FileText, Upload, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  FileText,
+  Upload,
+  CheckCircle2,
+  AlertCircle,
+  Copy,
+  CopyCheck,
+} from "lucide-react";
 import {
   Alert,
   AlertDescription,
@@ -50,8 +57,20 @@ const StudentSeminarProposal = () => {
   const [currentStep, setCurrentStep] = useState<string>("step1");
   const [maxStepReached, setMaxStepReached] = useState<number>(1);
   const { user, token } = useAuth();
+  const [copied, setCopied] = useState(false);
   const lecturersQuery = useApiData({ type: "lecturers" });
   const lecturers = lecturersQuery.data || [];
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(String(seminar.id || "N/A"));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
   const seminarQuery = useApiData({
     type: "seminarByStudentNIM",
     param: user?.profile.nim,
@@ -462,12 +481,12 @@ const StudentSeminarProposal = () => {
 
               <CardHeader className="relative z-10 ">
                 <div className="flex justify-between items-center">
-                  <CardTitle className="text-2xl -mb-1 font-heading font-black text-primary-foreground">
+                  <CardTitle className="text-xl sm:text-2xl font-heading font-black text-primary-foreground">
                     Detail Seminar
                   </CardTitle>
                   {getStatusBadge("step3")}
                 </div>
-                <CardDescription className="text-primary-foreground text-sm">
+                <CardDescription className="text-primary-foreground text-xs sm:text-sm mt-1">
                   Masukkan judul penelitian dan dosen pembimbing Anda.
                 </CardDescription>
               </CardHeader>
@@ -489,11 +508,14 @@ const StudentSeminarProposal = () => {
                     </h3>
                     <div>
                       <div>
-                        <p className="text-primary-800 text-lg font-bold">
+                        <p className="text-primary-800 text-base sm:text-lg font-bold">
                           {seminar.advisors[0]?.lecturerName}
                         </p>
-                        <p className="text-primary-800 text-lg font-bold">
-                          {seminar.advisors[0]?.lecturerNIP}
+                        <p className="text-primary-800 font-bold">
+                          NIP:{" "}
+                          <span className="text-primary-400 font-medium">
+                            {seminar.advisors[0]?.lecturerNIP}
+                          </span>
                         </p>
                       </div>
                     </div>
@@ -503,8 +525,14 @@ const StudentSeminarProposal = () => {
                       <h3 className="text-sm font-bold font-heading text-primary">
                         Dosen Pembimbing II
                       </h3>
-                      <p className="text-primary-800 text-lg font-bold">
+                      <p className="text-primary-800 text-base sm:text-lg font-bold">
                         {seminar.advisors[1]?.lecturerName}
+                      </p>
+                      <p className="text-primary-800 font-bold">
+                        NIP:{" "}
+                        <span className="text-primary-400 font-medium">
+                          {seminar.advisors[1]?.lecturerNIP}
+                        </span>
                       </p>
                     </div>
                   )}
@@ -518,13 +546,13 @@ const StudentSeminarProposal = () => {
                 </div>
               )}
             </CardContent>
-            <CardFooter className="flex justify-end">
-              <div className="space-x-2">
+            <CardFooter className="flex flex-col sm:flex-row justify-end gap-4">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto order-1 sm:order-2">
                 <Button
                   onClick={() => setResearchDetailsModalOpen(true)}
                   disabled={seminar.status === "SCHEDULED"}
                   variant="outline"
-                  className="border-2 border-primary text-primary-800"
+                  className="w-full sm:w-auto border-2 border-primary text-primary-800"
                 >
                   {seminar.title
                     ? "Perbarui Detail Seminar"
@@ -532,7 +560,7 @@ const StudentSeminarProposal = () => {
                 </Button>
                 <Button
                   onClick={handleNextStep}
-                  className="bg-primary hover:bg-primary-700 text-primary-foreground"
+                  className="w-full sm:w-auto bg-primary hover:bg-primary-700 text-primary-foreground"
                 >
                   Lanjut
                 </Button>
@@ -542,57 +570,62 @@ const StudentSeminarProposal = () => {
         )}
 
         {currentStep === "step2" && (
-          <Card className="bg-white overflow-hidden">
+          <Card className="bg-white overflow-hidden w-full">
             <div className="relative">
               <div className="absolute inset-0 bg-primary opacity-100"></div>
               <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10"></div>
 
-              <CardHeader className="relative z-10 ">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-2xl -mb-1 font-heading font-black text-primary-foreground">
+              <CardHeader className="relative z-10 px-4 sm:px-6">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                  <CardTitle className="text-xl sm:text-2xl font-heading font-black text-primary-foreground">
                     Dokumen yang Dibutuhkan
                   </CardTitle>
                   {getStatusBadge("step3")}
                 </div>
-                <CardDescription className="text-primary-foreground text-sm">
+                <CardDescription className="text-primary-foreground text-xs sm:text-sm mt-1">
                   Upload semua dokumen yang dibutuhkan untuk seminar proposal.
                 </CardDescription>
               </CardHeader>
             </div>
-            <CardContent>
+
+            <CardContent className="px-4 sm:px-6 py-4 sm:py-6">
               {allDocumentsUploaded() ? (
-                <div className="space-y-4 mt-6">
+                <div className="space-y-3 sm:space-y-4">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary-600" />
-                    <p className="text-primary-800">
+                    <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600 flex-shrink-0" />
+                    <p className="text-sm sm:text-base text-primary-800">
                       Semua dokumen yang dibutuhkan sudah berhasil diunggah.
                     </p>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     {Object.entries(seminar.documents).map(([key, doc]) => {
                       const reqDoc = requiredDocuments.find(
                         (d) => d.id === key
                       );
                       return (
-                        <div key={key} className="flex flex-col">
-                          <h1 className="font-bold text-lg font-heading text-primary-800">
+                        <div
+                          key={key}
+                          className="flex flex-col border rounded-lg p-3 bg-primary-50"
+                        >
+                          <h1 className="font-bold text-base sm:text-lg font-heading text-primary-800 truncate">
                             {reqDoc ? reqDoc.name : key}
                           </h1>
-                          <div className="flex items-center gap-1">
-                            <FileText className="h-4 w-4 text-primary-600" />
-                            <span className="text-sm text-primary-800">
+                          <div className="flex items-center gap-1 mt-1 flex-wrap">
+                            <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-primary-600 flex-shrink-0" />
+                            <span className="text-xs sm:text-sm text-primary-800 truncate max-w-full">
                               {doc.uploaded ? doc.fileName : "Belum diunggah"}
                             </span>
                             {doc.uploaded && doc.fileURL && (
                               <Button
                                 variant="link"
                                 size="sm"
-                                className="text-primary-600 hover:text-primary-800 p-0"
+                                className="text-primary-600 hover:text-primary-800 p-0 h-auto text-xs sm:text-sm"
                               >
                                 <Link
                                   to={doc.fileURL}
                                   target="_blank"
                                   rel="noopener noreferrer"
+                                  className="flex items-center gap-1"
                                 >
                                   Lihat File
                                 </Link>
@@ -605,29 +638,33 @@ const StudentSeminarProposal = () => {
                   </div>
                 </div>
               ) : (
-                <div className="py-8 mt-4 text-center">
-                  <Upload className="h-12 w-12 text-primary-800 mx-auto mb-4" />
-                  <p className="text-primary-600 mb-4">
+                <div
+                  className="border-2 border-dashed border-primary-400 rounded-lg text-center p-10"
+                  onClick={() => setDocumentUploadModalOpen(true)}
+                >
+                  <Upload className="h-8 w-8 sm:h-12 sm:w-12 text-primary-800 mx-auto mb-3 sm:mb-4" />
+                  <p className="text-sm sm:text-base text-primary-600 mb-2 sm:mb-4 px-2">
                     Silakan upload semua dokumen yang dibutuhkan, untuk
                     diproses.
                   </p>
                 </div>
               )}
             </CardContent>
-            <CardFooter className="flex justify-between">
+
+            <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4 px-4 sm:px-6 py-4 sm:py-6 border-t">
               <Button
                 variant="secondary"
                 onClick={handlePrevStep}
-                className="border-primary-400 text-primary-700 hover:bg-accent hover:text-accent-foreground"
+                className="w-full sm:w-auto border-primary-400 text-primary-700 hover:bg-accent hover:text-accent-foreground order-2 sm:order-1"
               >
                 Kembali
               </Button>
-              <div className="space-x-2">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto order-1 sm:order-2">
                 <Button
                   onClick={() => setDocumentUploadModalOpen(true)}
                   disabled={seminar.status === "SCHEDULED"}
                   variant="outline"
-                  className="border-2 border-primary text-primary-800"
+                  className="w-full sm:w-auto border-2 border-primary text-primary-800"
                 >
                   {allDocumentsUploaded()
                     ? "Perbarui Dokumen"
@@ -635,7 +672,7 @@ const StudentSeminarProposal = () => {
                 </Button>
                 <Button
                   onClick={handleNextStep}
-                  className="bg-primary hover:bg-primary-700 text-primary-foreground"
+                  className="w-full sm:w-auto bg-primary hover:bg-primary-700 text-primary-foreground"
                 >
                   Lanjut
                 </Button>
@@ -645,36 +682,37 @@ const StudentSeminarProposal = () => {
         )}
 
         {currentStep === "step3" && (
-          <Card className="bg-white overflow-hidden">
+          <Card className="bg-white overflow-hidden w-full">
             <div className="relative">
               <div className="absolute inset-0 bg-primary opacity-100"></div>
               <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10"></div>
 
-              <CardHeader className="relative z-10 ">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-2xl -mb-1 font-heading font-black text-primary-foreground">
+              <CardHeader className="relative z-10 px-4 sm:px-6">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                  <CardTitle className="text-xl sm:text-2xl font-heading font-black text-primary-foreground">
                     Undangan Seminar
                   </CardTitle>
                   {getStatusBadge("step3")}
                 </div>
-                <CardDescription className="text-primary-foreground text-sm">
+                <CardDescription className="text-primary-foreground text-xs sm:text-sm mt-1">
                   Lihat detail seminar Anda dan unduh undangan seminar setelah
                   jadwal ditentukan.
                 </CardDescription>
               </CardHeader>
             </div>
-            <CardContent>
-              <div className="space-y-6 mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h3 className="text-sm font-bold font-heading text-primary">
+
+            <CardContent className="px-4 sm:px-6 py-4 sm:py-6">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="bg-primary-50 p-3 rounded-lg">
+                    <h3 className="text-xs sm:text-sm font-bold font-heading text-primary">
                       Mahasiswa
                     </h3>
                     <div className="flex flex-col">
-                      <p className="text-primary-800 -mb-2 text-lg font-bold">
+                      <p className="text-primary-800 text-base sm:text-lg font-bold truncate">
                         {seminar.student?.name}
                       </p>
-                      <p className="text-primary-800 font-bold">
+                      <p className="text-primary-800 text-sm font-bold">
                         NIM:{" "}
                         <span className="text-primary-400 font-medium">
                           {seminar.student?.nim}
@@ -683,23 +721,24 @@ const StudentSeminarProposal = () => {
                     </div>
                   </div>
 
-                  <div>
-                    <h3 className="text-sm font-bold font-heading text-primary">
+                  <div className="bg-primary-50 p-3 rounded-lg">
+                    <h3 className="text-xs sm:text-sm font-bold font-heading text-primary">
                       Judul Penelitian
                     </h3>
-                    <p className="text-primary-800 text-lg font-bold">
+                    <p className="text-primary-800 text-base sm:text-lg font-bold line-clamp-2">
                       {seminar.title}
                     </p>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-bold font-heading text-primary">
+
+                  <div className="bg-primary-50 p-3 rounded-lg">
+                    <h3 className="text-xs sm:text-sm font-bold font-heading text-primary">
                       Dosen Pembimbing I
                     </h3>
                     <div className="flex flex-col">
-                      <p className="text-primary-800 -mb-2 text-lg font-bold">
+                      <p className="text-primary-800 text-base sm:text-lg font-bold">
                         {seminar.advisors[0]?.lecturerName}
                       </p>
-                      <p className="text-primary-800 font-bold">
+                      <p className="text-primary-800 text-sm font-bold">
                         NIP:{" "}
                         <span className="text-primary-400 font-medium">
                           {seminar.advisors[0]?.lecturerNIP}
@@ -707,16 +746,17 @@ const StudentSeminarProposal = () => {
                       </p>
                     </div>
                   </div>
+
                   {seminar.advisors[1] && (
-                    <div>
-                      <h3 className="text-sm font-bold font-heading text-primary">
+                    <div className="bg-primary-50 p-3 rounded-lg">
+                      <h3 className="text-xs sm:text-sm font-bold font-heading text-primary">
                         Dosen Pembimbing II
                       </h3>
                       <div className="flex flex-col">
-                        <p className="text-primary-800 -mb-2 text-lg font-bold">
+                        <p className="text-primary-800 text-base sm:text-lg font-bold truncate">
                           {seminar.advisors[1]?.lecturerName}
                         </p>
-                        <p className="text-primary-800 font-bold">
+                        <p className="text-primary-800 text-sm font-bold">
                           NIP:{" "}
                           <span className="text-primary-400 font-medium">
                             {seminar.advisors[1]?.lecturerNIP}
@@ -726,12 +766,13 @@ const StudentSeminarProposal = () => {
                     </div>
                   )}
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h3 className="text-sm font-bold font-heading text-primary">
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="bg-primary-50 p-3 rounded-lg">
+                    <h3 className="text-xs sm:text-sm font-bold font-heading text-primary">
                       Waktu
                     </h3>
-                    <p className="text-primary-800 text-lg font-bold">
+                    <p className="text-primary-800 text-base sm:text-lg font-bold">
                       {seminar.time
                         ? `${formatDate(seminar.time)} • ${formatTime(
                             seminar.time
@@ -739,66 +780,87 @@ const StudentSeminarProposal = () => {
                         : "Belum ditentukan"}
                     </p>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-bold font-heading text-primary">
+
+                  <div className="bg-primary-50 p-3 rounded-lg">
+                    <h3 className="text-xs sm:text-sm font-bold font-heading text-primary">
                       Ruangan
                     </h3>
-                    <p className="text-primary-800 text-lg font-bold">
+                    <p className="text-primary-800 text-base sm:text-lg font-bold">
                       {seminar.room || "Belum ditentukan"}
                     </p>
                   </div>
                 </div>
-                <h3 className="text-sm font-bold font-heading text-primary">
-                  Dosen Penguji
-                </h3>
-                {seminar.assessors.length > 0 ? (
-                  <ul>
-                    {seminar.assessors.map((assessor, index) => (
-                      <li
-                        key={index}
-                        className="text-primary-800 text-lg font-bold"
-                      >
-                        {assessor.lecturerName || assessor.lecturerNIP}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-primary-800 text-lg font-bold">
-                    Belum ditentukan
-                  </p>
-                )}
-                <Alert className="bg-primary-50 border-primary-200">
-                  <AlertCircle className="h-4 w-4 text-primary-600" />
-                  <AlertTitle className="text-primary-800">
+
+                <div>
+                  {seminar.assessors.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                      {seminar.assessors.map((assessor, index) => (
+                        <div
+                          key={index}
+                          className="bg-primary-50 p-3 rounded-lg"
+                        >
+                          <h3 className="text-xs sm:text-sm font-bold font-heading text-primary">
+                            Dosen Penguji {index + 1}
+                          </h3>
+                          <div className="flex flex-col">
+                            <p className="text-primary-800 text-base sm:text-lg font-bold truncate">
+                              {assessor.lecturerName}
+                            </p>
+                            <p className="text-primary-800 text-sm font-bold">
+                              NIP:{" "}
+                              <span className="text-primary-400 font-medium">
+                                {assessor.lecturerNIP}
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="bg-primary-50 p-3 rounded-lg">
+                      <h3 className="text-xs sm:text-sm font-bold font-heading text-primary">
+                        Dosen Penguji
+                      </h3>
+                      <p className="text-primary-800 text-base sm:text-lg font-bold">
+                        Belum ditentukan
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <Alert className="bg-primary-300 border-primary-200">
+                  <AlertCircle className="h-4 w-4 text-primary-600 flex-shrink-0" />
+                  <AlertTitle className="text-primary-800 text-sm sm:text-base">
                     Informasi
                   </AlertTitle>
-                  <AlertDescription className="text-primary-700">
+                  <AlertDescription className="text-primary-700 text-xs sm:text-sm">
                     Undangan seminar akan tersedia setelah koordinator
                     menentukan jadwal dan penguji.
                   </AlertDescription>
                 </Alert>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between">
+
+            <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4 px-4 sm:px-6 py-4 sm:py-6 border-t">
               <Button
                 variant="secondary"
                 onClick={handlePrevStep}
-                className="border-primary-400 text-primary-700 hover:bg-accent hover:text-accent-foreground"
+                className="w-full sm:w-auto border-primary-400 text-primary-700 hover:bg-accent hover:text-accent-foreground order-2 sm:order-1"
               >
                 Kembali
               </Button>
-              <div className="space-x-2">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto order-1 sm:order-2">
                 <Button
                   onClick={handlePrintInvitation}
                   disabled={seminar.status !== "SCHEDULED"}
                   variant="outline"
-                  className="border-2 border-primary text-primary-800"
+                  className="w-full sm:w-auto border-2 border-primary text-primary-800"
                 >
                   Unduh Undangan
                 </Button>
                 <Button
                   onClick={handleNextStep}
-                  className="bg-primary hover:bg-primary-700 text-primary-foreground"
+                  className="w-full sm:w-auto bg-primary hover:bg-primary-700 text-primary-foreground"
                 >
                   Lanjut
                 </Button>
@@ -834,7 +896,23 @@ const StudentSeminarProposal = () => {
                   <p className="font-medium text-primary-800">
                     Registration ID:{" "}
                     <span className="font-mono">{seminar.id || "N/A"}</span>
+                    <button
+                      onClick={handleCopy}
+                      className="ml-4 p-1 text-xs text-primary-600 hover:text-primary-800 focus:outline-none focus:ring-1 focus:ring-primary-300 rounded"
+                      aria-label="Copy registration ID"
+                    >
+                      {copied ? (
+                        <span className="flex items-center">
+                          <CopyCheck className="h-3.5 w-3.5 mr-1" />
+                        </span>
+                      ) : (
+                        <span className="flex items-center">
+                          <Copy className="h-3.5 w-3.5 mr-1" />
+                        </span>
+                      )}
+                    </button>
                   </p>
+
                   <p className="text-sm text-primary-600">
                     Please keep this ID for your reference.
                   </p>
@@ -848,23 +926,6 @@ const StudentSeminarProposal = () => {
                 </Button>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button
-                variant="outline"
-                onClick={handlePrevStep}
-                disabled={currentStepIndex === 1 || isScheduled}
-                className="border-primary-400 text-primary-700 hover:bg-accent hover:text-accent-foreground"
-              >
-                Back
-              </Button>
-              <Button
-                onClick={handleNextStep}
-                disabled={true}
-                className="bg-primary hover:bg-primary-700 text-primary-foreground"
-              >
-                Next
-              </Button>
-            </CardFooter>
           </Card>
         )}
 

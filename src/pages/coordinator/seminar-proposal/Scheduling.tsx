@@ -146,9 +146,11 @@ const SchedulingModal = ({
               !currentValue && "text-muted-foreground"
             )}
           >
-            {currentValue
-              ? lecturers.find((l: any) => l.nip === currentValue)?.name
-              : "Pilih dosen penguji 1"}
+            <span className="truncate">
+              {currentValue
+                ? lecturers.find((l: any) => l.nip === currentValue)?.name
+                : "Pilih dosen penguji 1"}
+            </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -176,10 +178,12 @@ const SchedulingModal = ({
                       }}
                       className="cursor-pointer pointer-events-auto"
                     >
-                      {lecturer.name} ({lecturer.nip})
+                      <div className="truncate">
+                        {lecturer.name} ({lecturer.nip})
+                      </div>
                       <Check
                         className={cn(
-                          "ml-auto h-4 w-4",
+                          "ml-auto h-4 w-4 flex-shrink-0",
                           currentValue === lecturer.nip
                             ? "opacity-100"
                             : "opacity-0"
@@ -210,9 +214,11 @@ const SchedulingModal = ({
               !currentValue && "text-muted-foreground"
             )}
           >
-            {currentValue
-              ? lecturers.find((l: any) => l.nip === currentValue)?.name
-              : "Pilih dosen penguji 2"}
+            <span className="truncate">
+              {currentValue
+                ? lecturers.find((l: any) => l.nip === currentValue)?.name
+                : "Pilih dosen penguji 2"}
+            </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -240,10 +246,12 @@ const SchedulingModal = ({
                       }}
                       className="cursor-pointer pointer-events-auto"
                     >
-                      {lecturer.name} ({lecturer.nip})
+                      <div className="truncate">
+                        {lecturer.name} ({lecturer.nip})
+                      </div>
                       <Check
                         className={cn(
-                          "ml-auto h-4 w-4",
+                          "ml-auto h-4 w-4 flex-shrink-0",
                           currentValue === lecturer.nip
                             ? "opacity-100"
                             : "opacity-0"
@@ -261,22 +269,28 @@ const SchedulingModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="w-[95vw] max-w-[600px] p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl -mb-1 font-heading font-black text-primary-800">
+          <DialogTitle className="text-xl sm:text-2xl -mb-1 font-heading font-black text-primary-800">
             Penjadwalan Seminar Proposal
           </DialogTitle>
-          <DialogDescription className="text-primary text-sm">
+          <DialogDescription className="text-primary text-xs sm:text-sm">
             Atur jadwal seminar atau lihat detail seminar.
           </DialogDescription>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-2 mb-4 bg-primary-100">
-            <TabsTrigger value="schedule" className="text-primary-800">
+            <TabsTrigger
+              value="schedule"
+              className="text-primary-800 text-xs sm:text-sm"
+            >
               Jadwalkan
             </TabsTrigger>
-            <TabsTrigger value="details" className="text-primary-800">
+            <TabsTrigger
+              value="details"
+              className="text-primary-800 text-xs sm:text-sm"
+            >
               Detail Seminar
             </TabsTrigger>
           </TabsList>
@@ -286,24 +300,24 @@ const SchedulingModal = ({
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(handleScheduleSubmit)}
-                className="space-y-6"
+                className="space-y-4 sm:space-y-6"
               >
                 <FormField
                   control={form.control}
                   name="time"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-bold font-heading text-primary-800">
+                      <FormLabel className="text-xs sm:text-sm font-bold font-heading text-primary-800">
                         Waktu Seminar
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="datetime-local"
                           {...field}
-                          className="border-primary-400"
+                          className="border-primary-400 text-sm"
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -313,17 +327,17 @@ const SchedulingModal = ({
                   name="room"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-bold font-heading text-primary-800">
+                      <FormLabel className="text-xs sm:text-sm font-bold font-heading text-primary-800">
                         Ruangan
                       </FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Masukkan nama ruangan"
                           {...field}
-                          className="border-primary-400"
+                          className="border-primary-400 text-sm"
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -333,13 +347,13 @@ const SchedulingModal = ({
                   name="assessor1"
                   render={() => (
                     <FormItem>
-                      <FormLabel className="text-sm font-bold font-heading text-primary-800">
+                      <FormLabel className="text-xs sm:text-sm font-bold font-heading text-primary-800">
                         Dosen Penguji 1
                       </FormLabel>
                       <FormControl>
                         <Assessor1Combobox />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -349,27 +363,27 @@ const SchedulingModal = ({
                   name="assessor2"
                   render={() => (
                     <FormItem>
-                      <FormLabel className="text-sm font-bold font-heading text-primary-800">
+                      <FormLabel className="text-xs sm:text-sm font-bold font-heading text-primary-800">
                         Dosen Penguji 2
                       </FormLabel>
                       <FormControl>
                         <Assessor2Combobox />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
 
-                <DialogFooter>
+                <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-4 sm:mt-6">
                   <Button
                     type="button"
                     variant="destructive"
-                    className="w-1/3"
+                    className="w-full sm:w-1/3 text-sm order-1 sm:order-2"
                     onClick={() => onOpenChange(false)}
                   >
                     Batal
                   </Button>
-                  <Button className="w-2/3" type="submit">
+                  <Button className="w-full sm:w-2/3 text-sm" type="submit">
                     Simpan
                   </Button>
                 </DialogFooter>
@@ -379,50 +393,66 @@ const SchedulingModal = ({
 
           {/* Tab Detail Seminar */}
           <TabsContent value="details">
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4 text-sm">
               <div>
-                <h3 className="text-sm font-bold font-heading text-primary-800">
+                <h3 className="text-xs sm:text-sm font-bold font-heading text-primary-800">
                   Judul Penelitian
                 </h3>
-                <p className="text-primary-800 text-lg font-bold">
+                <p className="text-primary-800 text-base sm:text-lg font-bold break-words">
                   {seminar.title}
                 </p>
               </div>
-              <div>
-                <h3 className="text-sm font-bold font-heading text-primary-800">
-                  Mahasiswa
-                </h3>
-                <p className="text-primary-800">
-                  {seminar.student?.name || "N/A"} ({seminar.studentNIM})
-                </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold font-heading text-primary-800">
+                    Mahasiswa
+                  </h3>
+                  <p className="text-primary-800 break-words">
+                    {seminar.student?.name || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold font-heading text-primary-800">
+                    NIM
+                  </h3>
+                  <p className="text-primary-800 break-words">
+                    {seminar.studentNIM}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-sm font-bold font-heading text-primary-800">
-                  Tanggal Pengajuan
-                </h3>
-                <p className="text-primary-800">
-                  {formatDate(seminar.createdAt)}{" "}
-                  {formatTime(seminar.createdAt)}
-                </p>
-              </div>
-              <div>
-                <h3 className="text-sm font-bold font-heading text-primary-800">
-                  Dosen Pembimbing
-                </h3>
-                <ul className="list-disc pl-5">
-                  {seminar.advisors.map((advisor: any) => (
-                    <li key={advisor.lecturer.nip} className="text-primary-800">
-                      {advisor.lecturer.name} ({advisor.lecturer.nip})
-                    </li>
-                  ))}
-                </ul>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold font-heading text-primary-800">
+                    Dosen Pembimbing
+                  </h3>
+                  <ul className="list-disc pl-5">
+                    {seminar.advisors.map((advisor: any) => (
+                      <li
+                        key={advisor.lecturer.nip}
+                        className="text-primary-800 break-words"
+                      >
+                        {advisor.lecturer.name}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold font-heading text-primary-800">
+                    Tanggal Pengajuan
+                  </h3>
+                  <p className="text-primary-800">
+                    {formatDate(seminar.createdAt)}{" "}
+                    {formatTime(seminar.createdAt)}
+                  </p>
+                </div>
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="mt-4 sm:mt-6">
               <Button
                 type="button"
                 variant="outline"
-                className="w-full border-primary-400 text-primary-800"
+                className="w-full border-primary-400 text-primary-800 text-sm"
                 onClick={() => onOpenChange(false)}
               >
                 Tutup

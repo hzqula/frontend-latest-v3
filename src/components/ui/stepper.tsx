@@ -31,7 +31,7 @@ export function Stepper({ steps, currentStep, className }: StepperProps) {
                     transition={{ duration: 0.3 }}
                   >
                     <motion.div
-                      className="absolute w-8 h-8 bg-primary/20 rounded-full"
+                      className="absolute w-6 h-6 sm:w-8 sm:h-8 bg-primary/20 rounded-full"
                       animate={{
                         scale: [1, 1.2, 1],
                         opacity: [0.7, 0.9, 0.7],
@@ -42,14 +42,14 @@ export function Stepper({ steps, currentStep, className }: StepperProps) {
                         ease: "easeInOut",
                       }}
                     />
-                    <div className="w-7 h-7 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium">
+                    <div className="w-5 h-5 sm:w-7 sm:h-7 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-[10px] sm:text-xs font-medium">
                       {index + 1}
                     </div>
                   </motion.div>
                 ) : (
                   <div
                     className={cn(
-                      "w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors",
+                      "w-5 h-5 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-medium transition-colors",
                       isCompleted
                         ? "bg-primary text-primary-foreground"
                         : "bg-muted text-muted-foreground"
@@ -58,14 +58,15 @@ export function Stepper({ steps, currentStep, className }: StepperProps) {
                     {isCompleted ? (
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
+                        width="12"
+                        height="12"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="2.5"
+                        strokeWidth="3"
                         strokeLinecap="round"
                         strokeLinejoin="round"
+                        className="sm:w-4 sm:h-4"
                       >
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
@@ -74,9 +75,25 @@ export function Stepper({ steps, currentStep, className }: StepperProps) {
                     )}
                   </div>
                 )}
+
+                {/* Step Label - Hidden on extra small screens but visible from sm breakpoint */}
                 <span
                   className={cn(
-                    "text-xs mt-2 font-medium",
+                    "hidden sm:block text-[10px] sm:text-xs mt-1 sm:mt-2 font-medium max-w-[60px] sm:max-w-[80px] text-center",
+                    isCurrent
+                      ? "text-primary"
+                      : isCompleted
+                      ? "text-foreground"
+                      : "text-muted-foreground"
+                  )}
+                >
+                  {step}
+                </span>
+
+                {/* Mobile Number Only - Shown only on xs screens */}
+                <span
+                  className={cn(
+                    "sm:hidden text-[9px] mt-1 font-medium",
                     isCurrent
                       ? "text-primary"
                       : isCompleted
@@ -90,8 +107,8 @@ export function Stepper({ steps, currentStep, className }: StepperProps) {
 
               {/* Connector Line */}
               {index < steps.length - 1 && (
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="h-[2px] w-full flex relative -mt-[20px]">
+                <div className="flex-1 flex items-center justify-center max-w-16 sm:max-w-full">
+                  <div className="h-[1px] sm:h-[2px] w-full flex relative -mt-[16px] sm:-mt-[20px]">
                     <motion.div
                       className="bg-primary h-full"
                       initial={{ width: isCompleted ? "100%" : "0%" }}
