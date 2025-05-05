@@ -419,14 +419,16 @@ const StudentSeminarProposal = () => {
 
   return (
     <StudentLayout>
-      <div className="container mx-auto p-4">
+      <div className="flex flex-col mb-4">
         <h1 className="text-4xl font-heading font-black mb-3 text-primary-800">
           Pendaftaran Seminar Proposal
         </h1>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <Stepper
           steps={steps}
           currentStep={currentStepIndex}
-          className="mb-8"
+          className="mb-8 col-span-1 sm:col-span-2 lg:col-span-4"
         />
 
         {seminarQuery.isLoading && <div>Loading seminar data...</div>}
@@ -437,7 +439,7 @@ const StudentSeminarProposal = () => {
         )}
 
         {currentStep === "step1" && (
-          <Card className="bg-white sm:col-span-2 overflow-hidden">
+          <Card className="bg-white col-span-1 sm:col-span-2 lg:col-span-4 overflow-hidden ">
             <div className="relative">
               <div className="absolute inset-0 bg-primary opacity-100"></div>
               <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10"></div>
@@ -524,7 +526,7 @@ const StudentSeminarProposal = () => {
         )}
 
         {currentStep === "step2" && (
-          <Card className="bg-white overflow-hidden">
+          <Card className="bg-white col-span-1 sm:col-span-2 lg:col-span-4 overflow-hidden">
             <div className="relative">
               <div className="absolute inset-0 bg-primary opacity-100"></div>
               <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10"></div>
@@ -627,7 +629,7 @@ const StudentSeminarProposal = () => {
         )}
 
         {currentStep === "step3" && (
-          <Card className="bg-white overflow-hidden">
+          <Card className="bg-white col-span-1 sm:col-span-2 lg:col-span-4 overflow-hidden">
             <div className="relative">
               <div className="absolute inset-0 bg-primary opacity-100"></div>
               <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10"></div>
@@ -790,7 +792,7 @@ const StudentSeminarProposal = () => {
         )}
 
         {currentStep === "step4" && (
-          <Card className="bg-white">
+          <Card className="bg-white col-span-1 sm:col-span-2 lg:col-span-4 overflow-hidden">
             <CardHeader>
               <CardTitle className="text-primary-700">
                 Registration Complete
@@ -849,32 +851,33 @@ const StudentSeminarProposal = () => {
             </CardFooter>
           </Card>
         )}
-
-        <ResearchDetailsModal
-          open={researchDetailsModalOpen}
-          onOpenChange={setResearchDetailsModalOpen}
-          onSubmit={handleResearchDetailsSubmit}
-          initialData={{
-            researchTitle: seminar.title,
-            advisor1: seminar.advisors[0]?.lecturerNIP,
-            advisor2: seminar.advisors[1]?.lecturerNIP || "",
-          }}
-        />
-        <DocumentUploadModal
-          open={documentUploadModalOpen}
-          onOpenChange={setDocumentUploadModalOpen}
-          onSubmit={handleDocumentUpload}
-          initialData={Object.fromEntries(
-            Object.entries(seminar.documents).map(([key, _]) => [key, null])
-          )}
-          uploadedStatus={Object.fromEntries(
-            Object.entries(seminar.documents).map(([key, doc]) => [
-              key,
-              doc.uploaded,
-            ])
-          )}
-        />
       </div>
+
+      <ResearchDetailsModal
+        open={researchDetailsModalOpen}
+        onOpenChange={setResearchDetailsModalOpen}
+        onSubmit={handleResearchDetailsSubmit}
+        initialData={{
+          researchTitle: seminar.title,
+          advisor1: seminar.advisors[0]?.lecturerNIP,
+          advisor2: seminar.advisors[1]?.lecturerNIP || "",
+        }}
+      />
+      <DocumentUploadModal
+        open={documentUploadModalOpen}
+        onOpenChange={setDocumentUploadModalOpen}
+        onSubmit={handleDocumentUpload}
+        initialData={Object.fromEntries(
+          Object.entries(seminar.documents).map(([key, _]) => [key, null])
+        )}
+        uploadedStatus={Object.fromEntries(
+          Object.entries(seminar.documents).map(([key, doc]) => [
+            key,
+            doc.uploaded,
+          ])
+        )}
+      />
+
       <SeminarInvitation
         seminar={seminar}
         shouldPrint={shouldPrint}
