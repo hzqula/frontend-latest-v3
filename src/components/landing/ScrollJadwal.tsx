@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { CalendarDays, Clock, University} from "lucide-react";
+import { CalendarDays, Clock, University } from "lucide-react";
 import { CardContent } from "../ui/card";
 import { fetchSeminars } from "../../api/apiClient";
 import {
@@ -143,7 +143,7 @@ export default function SeminarScrollerGrid() {
         </TabsList>
 
         <TabsContent value="proposal">
-          <div className="h-[600px] w-full lg:w-[1300px] mx-auto px-4">
+          <div className="h-[800px] w-full lg:w-[1300px] mx-auto px-4">
             <ScrollingColumn
               items={proposalSeminars}
               onClickDetail={handleOpenModal}
@@ -152,7 +152,7 @@ export default function SeminarScrollerGrid() {
         </TabsContent>
 
         <TabsContent value="hasil">
-          <div className="h-[600px] w-full lg:w-[1300px] mx-auto px-4">
+          <div className="h-[800px] w-full lg:w-[1300px] mx-auto px-4">
             <ScrollingColumn
               items={hasilSeminars}
               onClickDetail={handleOpenModal}
@@ -168,9 +168,11 @@ export default function SeminarScrollerGrid() {
         {selectedSeminar && (
           <DialogContent className="sm:max-w-lg">
             <DialogHeader className="bg-gradient-to-r from-primary-500 to-primary-700 p-4 -m-4 mb-4 rounded-t-lg text-white">
-              <DialogTitle className="text-xl sm:text-2xl font-bold break-words">
-                {selectedSeminar.title}
+              <DialogTitle className="text-base sm:text-xl md:text-2xl font-bold break-words text-center">
+                {selectedSeminar.title.split(" ").slice(0, 10).join(" ") +
+                  (selectedSeminar.title.split(" ").length > 10 ? "..." : "")}
               </DialogTitle>
+
               <DialogDescription className="text-gray-100 mt-2 flex items-center gap-2">
                 <img
                   src={
@@ -321,18 +323,40 @@ function ScrollingColumn({
 }) {
   const controls = useAnimation();
   const [paused, setPaused] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [screenSize, setScreenSize] = useState("large");
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setScreenSize("small");
+      } else if (width < 1024) {
+        setScreenSize("medium");
+      } else {
+        setScreenSize("large");
+      }
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
-  const shouldScroll =
-    (isMobile && items.length > 1) || (!isMobile && items.length >= 5);
+  // Define scroll threshold based on screen size
+  const getScrollThreshold = () => {
+    switch (screenSize) {
+      case "small":
+        return 2;
+      case "medium":
+        return 4;
+      case "large":
+        return 6;
+      default:
+        return 6;
+    }
+  };
 
+  const shouldScroll = items.length > getScrollThreshold();
   useEffect(() => {
     if (paused || !shouldScroll || items.length === 0) {
       controls.stop();
@@ -354,7 +378,7 @@ function ScrollingColumn({
 
   return (
     <div
-      className="overflow-hidden h-full"
+      className="overflow-hidden max-h-[800px]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -383,10 +407,16 @@ function SeminarCard({
   onClickDetail: (seminar: Seminar) => void;
 }) {
   return (
-    <CardContent className="group overflow-hidden relative border-0 shadow-xl rounded-lg h-full">
-      <div className="absolute inset-[1px] bg-white dark:bg-gray-800 rounded-lg z-0"></div>
-      <div className="relative z-10 p-6 h-full flex flex-col">
-        <h3 className="text-xl font-bold mb-2 group-hover:text-emerald-600 dark:group-hover:text-primary-600 transition-colors text-center">
+    <CardContent className="group overflow-hidden relative border-0 shadow-xl rounded-lg h-96">
+      <div className="absolute inset-[1px] bg-primary-50 dark:bg-gray-800 rounded-lg z-0"></div>
+      <ScrollArea className="relative z-10 p-6 h-full flex flex-col">
+        <h3
+          className={`font-bold mb-2 line-clamp-3 min-h-[4.2rem] group-hover:text-emerald-600 dark:group-hover:text-primary-600 transition-colors ${
+            seminar.title.split(" ").length >= 10
+              ? "text-sm sm:text-base"
+              : "text-base sm:text-lg"
+          }`}
+        >
           {seminar.title}
         </h3>
 
@@ -425,7 +455,7 @@ function SeminarCard({
         >
           Detail
         </button>
-      </div>
+      </ScrollArea>
     </CardContent>
   );
 }

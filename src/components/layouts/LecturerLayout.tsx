@@ -6,8 +6,8 @@ import {
   HomeIcon,
   PanelLeft,
   LogOutIcon,
-  BookOpen,
-  FileText,
+  BookOpenText,
+  BookText,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate, useLocation } from "react-router";
@@ -119,12 +119,12 @@ const LecturerLayout: React.FC<LecturerLayoutProps> = ({ children }) => {
       label: "Dashboard",
     },
     {
-      icon: BookOpen,
+      icon: BookOpenText,
       path: "/seminar-proposal",
       label: "Seminar Proposal",
     },
     {
-      icon: FileText,
+      icon: BookText,
       path: "/seminar-hasil",
       label: "Seminar Hasil",
     },

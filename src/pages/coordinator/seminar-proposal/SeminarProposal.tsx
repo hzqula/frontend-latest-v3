@@ -4,13 +4,6 @@ import { useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { useApiData } from "../../../hooks/useApiData";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../../../components/ui/card";
-import {
   Tabs,
   TabsContent,
   TabsList,
