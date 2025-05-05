@@ -109,7 +109,7 @@ const SchedulingModal = ({
   const handleScheduleSubmit = async (data: ScheduleFormData) => {
     try {
       const response = await axios.put(
-        "http://localhost:5500/api/seminars/proposal-scheduled",
+        "http://localhost:5500/api/seminars/proposal-schedule",
         {
           seminarId: seminar.id,
           time: new Date(data.time).toISOString(),
