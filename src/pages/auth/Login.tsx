@@ -83,7 +83,6 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Validasi input dengan Zod
       const result = signInSchema.safeParse({ email, password });
       if (!result.success) {
         const errors = result.error.flatten().fieldErrors;
@@ -113,14 +112,10 @@ const Login: React.FC = () => {
 
       const { token, user } = response.data;
 
-      // Simpan token dan data user ke AuthContext
       login(token, user);
-
-      // Tampilkan pesan sukses
-
-      // Tambahkan jeda 2 detik sebelum navigasi
       setTimeout(() => {
         toast.success("Login berhasil");
+
         navigate("/dashboard");
       }, 1000);
     } catch (error) {

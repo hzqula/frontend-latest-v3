@@ -142,7 +142,11 @@ const LecturerSeminarProposal = () => {
         <h1 className="text-4xl font-heading font-black text-primary-800">
           Seminar Proposal
         </h1>
-        <p className="text-primary">Kelola seminar proposal mahasiswa</p>
+        <p className="text-primary">
+          {activeTab === "advised"
+            ? "Kelola seminar proposal mahasiswa yang Anda bimbing"
+            : "Kelola seminar proposal mahasiswa yang Anda uji"}
+        </p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <Tabs
@@ -203,7 +207,7 @@ const LecturerSeminarProposal = () => {
                         return (
                           <tr
                             key={seminar.id}
-                            className="border-b border-primary-200 text-primary-800"
+                            className="bg-white text-primary-800"
                           >
                             <td className="p-2">
                               <div className="font-medium text-center text-primary-800">
@@ -217,13 +221,13 @@ const LecturerSeminarProposal = () => {
                               <div className="font-medium text-primary-800">
                                 {seminar.student?.name || "N/A"}
                               </div>
-                              <div className="text-sm text-primary-600">
+                              <div className="text-sm text-primary">
                                 {seminar.studentNIM}
                               </div>
                             </td>
                             <td className="p-2">
                               <div>{formatDate(seminar.time)}</div>
-                              <div className="text-sm text-primary-600">
+                              <div className="text-sm text-primary">
                                 {formatTime(seminar.time)}
                               </div>
                             </td>
@@ -275,7 +279,7 @@ const LecturerSeminarProposal = () => {
                         colSpan={6}
                         className="p-4 text-center text-primary-600"
                       >
-                        Tidak ada seminar proposal yang dijadwalkan untuk Anda
+                        Belum ada seminar proposal yang dijadwalkan untuk Anda
                         bimbing.
                       </td>
                     </tr>

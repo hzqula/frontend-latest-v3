@@ -387,7 +387,7 @@ const AssessSeminarProposal = () => {
       const method = hasAssessed ? "put" : "post";
       await axios({
         method,
-        url: `http://localhost:5500/api/seminars/${seminarId}/assess`,
+        url: `http://localhost:5500/api/seminars/proposal/${seminarId}/assess`,
         data: payload,
         headers: { Authorization: `Bearer ${token}` },
       });
