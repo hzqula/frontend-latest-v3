@@ -28,6 +28,8 @@ import {
   Search,
   CopyCheck,
   Copy,
+  ChevronRight,
+  ChevronLeft,
 } from "lucide-react";
 import { Input } from "../../components/ui/input";
 import {
@@ -50,6 +52,7 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { ScrollArea } from "../../components/ui/scroll-area";
+import { PaginatedChart } from "./PaginatedChart";
 
 const CoordinatorDashboard = () => {
   const { user, token } = useAuth();
@@ -130,6 +133,174 @@ const CoordinatorDashboard = () => {
       (typeof student.semester === "number" &&
         student.semester.toString().includes(searchStudent))
   );
+
+  // Process seminars data for trend chart
+  const processSeminarTrends = () => {
+    // Create a map of months for the last 6 months
+    const months: {
+      month: string;
+      date: Date;
+      proposal: number;
+      hasil: number;
+    }[] = [];
+    const today = new Date();
+
+    for (let i = 5; i >= 0; i--) {
+      const month = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const monthName = month.toLocaleString("id-ID", { month: "short" });
+      months.push({
+        month: monthName,
+        date: month,
+        proposal: 0,
+        hasil: 0,
+      });
+    }
+
+    // Count seminars by month and type
+    seminars.forEach((seminar: any) => {
+      // Use time field for scheduled seminars (from the API)
+      if (!seminar.time) return;
+
+      const seminarDate = new Date(seminar.time);
+      const monthData = months.find(
+        (m) =>
+          m.date.getMonth() === seminarDate.getMonth() &&
+          m.date.getFullYear() === seminarDate.getFullYear()
+      );
+
+      if (monthData) {
+        if (seminar.type === "PROPOSAL") {
+          monthData.proposal += 1;
+        } else if (seminar.type === "HASIL") {
+          monthData.hasil += 1;
+        }
+      }
+    });
+
+    // Return just the formatted data for the chart
+    return months.map((m) => ({
+      month: m.month,
+      proposal: m.proposal,
+      hasil: m.hasil,
+    }));
+  };
+
+  // Create the data for the seminar trends chart
+  const seminarTrends = processSeminarTrends();
+
+  // Generate completion rate data based on seminars
+  const processCompletionRate = () => {
+    const months: {
+      month: string;
+      date: Date;
+      completed: number;
+      total: number;
+    }[] = [];
+    const today = new Date();
+
+    for (let i = 5; i >= 0; i--) {
+      const month = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const monthName = month.toLocaleString("id-ID", { month: "short" });
+      months.push({
+        month: monthName,
+        date: month,
+        completed: 0,
+        total: 0,
+      });
+    }
+
+    // Count completed vs total seminars by month
+    seminars.forEach((seminar: any) => {
+      if (!seminar.scheduleDate) return;
+
+      const seminarDate = new Date(seminar.scheduleDate);
+      const monthData = months.find(
+        (m) =>
+          m.date.getMonth() === seminarDate.getMonth() &&
+          m.date.getFullYear() === seminarDate.getFullYear()
+      );
+
+      if (monthData) {
+        monthData.total += 1;
+        if (seminar.status === "COMPLETED") {
+          monthData.completed += 1;
+        }
+      }
+    });
+
+    // Calculate completion rate as percentage
+    return months.map((m) => ({
+      month: m.month,
+      rate: m.total > 0 ? Math.round((m.completed / m.total) * 100) : 0,
+    }));
+  };
+
+  // Create the data for completion rate chart
+  const completionRate = processCompletionRate();
+
+  // Generate data for lecturer/student distribution
+  const generateLecturerStudentData = () => {
+    const lecturerMap = new Map();
+
+    // Count students per lecturer from seminar data - using advisors
+    seminars.forEach((seminar: { advisors: any[] }) => {
+      if (seminar.advisors && seminar.advisors.length > 0) {
+        // Each advisor in the seminar counts as one supervision
+        seminar.advisors.forEach((advisor) => {
+          if (advisor.lecturer && advisor.lecturer.name) {
+            const lecturerName = advisor.lecturer.name;
+            if (!lecturerMap.has(lecturerName)) {
+              lecturerMap.set(lecturerName, 0);
+            }
+            // Increment the count for this lecturer
+            lecturerMap.set(lecturerName, lecturerMap.get(lecturerName) + 1);
+          }
+        });
+      }
+    });
+
+    // Convert map to array format for chart
+    const chartData = Array.from(lecturerMap.entries())
+      .map(([dosen, mahasiswa]) => ({ dosen, mahasiswa }))
+      .sort((a, b) => b.mahasiswa - a.mahasiswa); // Sort from most to least students
+
+    return chartData;
+  };
+
+  // Generate data for lecturer/student distribution as assessors
+  const generateAssessorDistributionData = () => {
+    const assessorMap = new Map();
+
+    // Count students per lecturer from seminar data - using assessors
+    seminars.forEach((seminar: { assessors: any[] }) => {
+      if (seminar.assessors && seminar.assessors.length > 0) {
+        // Each assessor in the seminar counts as one examination
+        seminar.assessors.forEach((assessor) => {
+          if (assessor.lecturer && assessor.lecturer.name) {
+            const lecturerName = assessor.lecturer.name;
+            if (!assessorMap.has(lecturerName)) {
+              assessorMap.set(lecturerName, 0);
+            }
+            // Increment the count for this lecturer as assessor
+            assessorMap.set(lecturerName, assessorMap.get(lecturerName) + 1);
+          }
+        });
+      }
+    });
+
+    // Convert map to array format for chart
+    const assessorChartData = Array.from(assessorMap.entries())
+      .map(([dosen, mahasiswa]) => ({ dosen, mahasiswa }))
+      .sort((a, b) => b.mahasiswa - a.mahasiswa); // Sort from most to least students
+
+    return assessorChartData;
+  };
+
+  // Create data for lecturer-student distribution chart (as advisors)
+  const advisorChartData = generateLecturerStudentData();
+
+  // Create data for lecturer-student distribution chart (as assessorss)
+  const assessorChartData = generateAssessorDistributionData();
 
   // Fungsi untuk menyalin nomor telepon
   const handleCopy = (phoneNumber: string, studentId: string) => {
@@ -351,7 +522,7 @@ const CoordinatorDashboard = () => {
           {/* tinjauan Tab - Now using a 4-column grid with minmax 200px */}
           <TabsContent value="tinjauan">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 auto-rows-[minmax(200px,auto)] gap-6">
-              <Card className="bg-white sm:col-span-2 overflow-hidden">
+              <Card className="bg-white sm:col-span-4 overflow-hidden">
                 <CardHeader className="bg-primary">
                   <CardTitle className="text-2xl -mb-1 font-heading font-black text-primary-foreground">
                     Tren Seminar
@@ -373,12 +544,12 @@ const CoordinatorDashboard = () => {
                         <Tooltip />
                         <Bar
                           dataKey="proposal"
-                          name="Proposal Seminars"
+                          name="Seminar Proposal"
                           fill="var(--color-primary-600)"
                         />
                         <Bar
-                          dataKey="result"
-                          name="Result Seminars"
+                          dataKey="hasil"
+                          name="Seminar Hasil"
                           fill="var(--color-primary-400)"
                         />
                       </BarChart>
@@ -387,128 +558,23 @@ const CoordinatorDashboard = () => {
                 </CardContent>
               </Card>
 
-              {/* Completion Rate Chart - spans 2 columns */}
-              <Card className="bg-white sm:col-span-2">
-                <CardHeader>
-                  <CardTitle className="text-primary-700">
-                    Seminar Completion Rate
-                  </CardTitle>
-                  <CardDescription className="text-primary-600">
-                    Percentage of seminars completed successfully
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[200px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart
-                        data={completionRate}
-                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="month" />
-                        <YAxis />
-                        <Tooltip />
-                        <Line
-                          type="monotone"
-                          dataKey="rate"
-                          name="Completion Rate (%)"
-                          stroke="var(--color-primary-700)"
-                          activeDot={{ r: 8 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Chart Pembimbing - Menggunakan PaginatedChart */}
+              <div className="sm:col-span-2">
+                <PaginatedChart
+                  data={advisorChartData}
+                  title="Pembagian Mahasiswa Per Pembimbing"
+                  description="Jumlah mahasiswa bimbingan per dosen"
+                />
+              </div>
 
-              {/* Dosen Mahasiswa Chart */}
-              <Card className="bg-white sm:col-span-4">
-                <CardHeader className="flex flex-col sm:flex-row justify-between sm:items-center">
-                  <div>
-                    <CardTitle className="text-primary-700">
-                      Pembagian Mahasiswa Per Dosen Pembimbing
-                    </CardTitle>
-                    <CardDescription className="text-primary-600">
-                      January - June 2025
-                    </CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {/* Chart container with dynamic height based on screen size */}
-                  <div className="relative">
-                    {/* Small screen scrollable chart */}
-                    <div className="block sm:hidden h-[300px] overflow-y-auto">
-                      <div className="h-[600px] min-w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart
-                            data={chartData}
-                            layout="vertical"
-                            margin={{ top: 5, right: 10, left: 5, bottom: 5 }}
-                          >
-                            <CartesianGrid
-                              strokeDasharray="3 3"
-                              horizontal={false}
-                            />
-                            <XAxis type="number" tick={{ fontSize: 10 }} />
-                            <YAxis
-                              dataKey="dosen"
-                              type="category"
-                              width={140}
-                              tick={{ fontSize: 10 }}
-                              tickLine={false}
-                            />
-                            <Tooltip contentStyle={{ fontSize: "12px" }} />
-                            <Bar
-                              dataKey="mahasiswa"
-                              fill="var(--color-primary-600)"
-                              radius={[0, 4, 4, 0]}
-                              label={{ position: "right", fontSize: 10 }}
-                            />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </div>
-
-                    {/* Medium to large screen chart */}
-                    <ScrollArea className="hidden sm:block h-[350px] md:h-[400px] lg:h-[450px]">
-                      <div className="h-[600px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart
-                            data={chartData}
-                            layout="vertical"
-                            margin={{
-                              top: 10,
-                              right: 30,
-                              left: 20,
-                              bottom: 10,
-                            }}
-                          >
-                            <CartesianGrid
-                              strokeDasharray="3 3"
-                              horizontal={false}
-                            />
-                            <XAxis type="number" />
-                            <YAxis
-                              dataKey="dosen"
-                              type="category"
-                              width={180}
-                              tick={{ fontSize: 12 }}
-                              tickLine={false}
-                            />
-                            <Tooltip />
-                            <Bar
-                              dataKey="mahasiswa"
-                              fill="var(--color-primary-600)"
-                              radius={[0, 4, 4, 0]}
-                              label={{ position: "right", fill: "#666" }}
-                            />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </ScrollArea>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Chart Penguji - Menggunakan PaginatedChart */}
+              <div className="sm:col-span-2">
+                <PaginatedChart
+                  data={assessorChartData}
+                  title="Pembagian Mahasiswa Per Penguji"
+                  description="Jumlah mahasiswa yang diuji per dosen"
+                />
+              </div>
             </div>
           </TabsContent>
 
@@ -886,48 +952,3 @@ const CoordinatorDashboard = () => {
 };
 
 export default CoordinatorDashboard;
-
-// Mock data tetap untuk chart (bisa diganti dengan API jika tersedia)
-const seminarTrends = [
-  { month: "Jan", proposal: 4, result: 2 },
-  { month: "Feb", proposal: 3, result: 5 },
-  { month: "Mar", proposal: 6, result: 3 },
-  { month: "Apr", proposal: 8, result: 4 },
-  { month: "May", proposal: 5, result: 7 },
-  { month: "Jun", proposal: 9, result: 5 },
-  { month: "Jul", proposal: 7, result: 8 },
-  { month: "Aug", proposal: 10, result: 6 },
-  { month: "Sep", proposal: 8, result: 9 },
-  { month: "Oct", proposal: 12, result: 7 },
-  { month: "Nov", proposal: 9, result: 10 },
-  { month: "Dec", proposal: 6, result: 8 },
-];
-
-const completionRate = [
-  { month: "Jan", rate: 75 },
-  { month: "Feb", rate: 68 },
-  { month: "Mar", rate: 82 },
-  { month: "Apr", rate: 91 },
-  { month: "May", rate: 84 },
-  { month: "Jun", rate: 88 },
-  { month: "Jul", rate: 90 },
-  { month: "Aug", rate: 85 },
-  { month: "Sep", rate: 92 },
-  { month: "Oct", rate: 95 },
-  { month: "Nov", rate: 89 },
-  { month: "Dec", rate: 78 },
-];
-
-const chartData = [
-  { dosen: "Gunadi Priyambada, S.T., M.T", mahasiswa: 6 },
-  { dosen: "Shinta Elystia, S.T., M.Si", mahasiswa: 5 },
-  { dosen: "Muhammad Reza, S.T., M.Sc", mahasiswa: 5 },
-  { dosen: "Dr. Hafidawati, S.Tp., M.T", mahasiswa: 3 },
-  { dosen: "Ir. Syarfi Daud, M.T", mahasiswa: 3 },
-  { dosen: "Dr. David Andrio, S.T., M.Si", mahasiswa: 3 },
-  { dosen: "Dewi Fitria, S.T.,  M.T., Ph.D", mahasiswa: 3 },
-  { dosen: "Elvi Yenie, S.T., M.Eng", mahasiswa: 3 },
-  { dosen: "Aryo Sasmita, S.T., M.T", mahasiswa: 3 },
-  { dosen: "Dr. Lita Darmayanti, S.T., M.T", mahasiswa: 2 },
-  { dosen: "Jecky Asmura, S.T., M.T", mahasiswa: 1 },
-].sort((a, b) => b.mahasiswa - a.mahasiswa);
