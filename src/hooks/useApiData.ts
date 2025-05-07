@@ -8,7 +8,7 @@ import {
   fetchLecturerByNIP,
   fetchStudents,
   fetchSeminarProposalByStudentNIM,
-  fetchSeminarResultByStudentNIM,
+  fetchSeminarResultByStudentNIM 
 } from "../api/apiClient";
 
 type DataType =
@@ -28,9 +28,13 @@ interface UseApiDataOptions {
 }
 
 export const useApiData = ({ type, param, id }: UseApiDataOptions) => {
-  const { user, token } = useAuth();
+  const { token } = useAuth();
 
   const queryFn = async () => {
+    if (token) {
+
+    }
+
     switch (type) {
       case "students":
         return fetchStudents();
@@ -50,9 +54,9 @@ export const useApiData = ({ type, param, id }: UseApiDataOptions) => {
       case "seminarProposalByStudentNIM":
         if (!param) throw new Error("NIM mahasiswa harus ada");
         return fetchSeminarProposalByStudentNIM(param);
-        case "seminarResultByStudentNIM":
-          if (!param) throw new Error("NIM mahasiswa harus ada");
-          return fetchSeminarResultByStudentNIM(param);
+      case "seminarResultByStudentNIM":
+        if (!param) throw new Error("NIM mahasiswa harus ada");
+        return fetchSeminarResultByStudentNIM(param);
       default:
         throw new Error("Tipe data tidak diketahui");
     }
@@ -61,7 +65,7 @@ export const useApiData = ({ type, param, id }: UseApiDataOptions) => {
   return useQuery({
     queryKey: [type, param],
     queryFn,
-    enabled: !!token && !!user,
+    enabled: !!token,
     staleTime: 5 * 60 * 1000,
   });
 };
