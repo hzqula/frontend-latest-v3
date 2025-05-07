@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import axios from "axios";
 import { toast } from "react-toastify";
 import {
   Dialog,
@@ -70,7 +69,6 @@ const SchedulingModal = ({
   onOpenChange,
   seminar,
   lecturers,
-  token,
   onScheduleSuccess,
 }: SchedulingModalProps) => {
   const [activeTab, setActiveTab] = useState("schedule");
@@ -106,18 +104,8 @@ const SchedulingModal = ({
     });
 
   // Handle submit jadwal
-  const handleScheduleSubmit = async (data: ScheduleFormData) => {
+  const handleScheduleSubmit = async () => {
     try {
-      const response = await axios.put(
-        "http://localhost:5500/api/seminars/proposal-schedule",
-        {
-          seminarId: seminar.id,
-          time: new Date(data.time).toISOString(),
-          room: data.room,
-          assessorNIPs: [data.assessor1, data.assessor2],
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
 
       toast.success("Seminar berhasil dijadwalkan!");
       onScheduleSuccess();
