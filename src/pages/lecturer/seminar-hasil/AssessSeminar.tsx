@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams} from "react-router";
 import { useAuth } from "../../../context/AuthContext";
 import { useApiData } from "../../../hooks/useApiData";
 import axios from "axios";
@@ -183,7 +183,6 @@ const ScoreVisualization: React.FC<ScoreVisualizationProps> = ({
 const AssessSeminarHasil = () => {
   const { seminarId } = useParams<{ seminarId: string }>();
   const { user, token } = useAuth();
-  const navigate = useNavigate();
 
   const seminarQuery = useApiData({
     type: "seminarById",
@@ -217,16 +216,7 @@ const AssessSeminarHasil = () => {
     }
   }, [user]);
 
-  // Navigasi ke login jika user tidak valid
-  useEffect(() => {
-    if (
-      !isLoadingUser &&
-      (!user || !token || user.role !== "LECTURER" || !user.profile?.nip)
-    ) {
-      navigate("/login");
-    }
-  }, [isLoadingUser, user, token, navigate]);
-
+  
   // Reset state saat seminarId berubah
   useEffect(() => {
     setIsAdvisor(false);
