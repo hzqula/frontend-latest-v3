@@ -26,10 +26,6 @@ import {
   CheckCircle2,
   Calendar,
   Search,
-  CopyCheck,
-  Copy,
-  ChevronRight,
-  ChevronLeft,
 } from "lucide-react";
 import { Input } from "../../components/ui/input";
 import {
@@ -40,8 +36,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
 } from "recharts";
 import CoordinatorLayout from "../../components/layouts/CoordinatorLayout";
 import {
@@ -51,7 +45,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
-import { ScrollArea } from "../../components/ui/scroll-area";
 import PaginatedChart from "./PaginatedChart";
 import PaginatedStudentsCard from "./PaginatedStudent";
 
@@ -60,8 +53,6 @@ const CoordinatorDashboard = () => {
   const [activeTab, setActiveTab] = useState("tinjauan");
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchStudent, setSearchStudent] = useState("");
-  const [copied, setCopied] = useState<string | null>(null);
 
   const studentsQuery = useApiData({ type: "students" });
   const seminarsQuery = useApiData({ type: "seminars" });
@@ -125,16 +116,6 @@ const CoordinatorDashboard = () => {
   const capitalize = (str: string) =>
     str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
-  const filteredStudents = students.filter(
-    (student: any) =>
-      student.name.toLowerCase().includes(searchStudent.toLowerCase()) ||
-      student.nim.toLowerCase().includes(searchStudent.toLowerCase()) ||
-      (typeof student.semester === "string" &&
-        student.semester.toLowerCase().includes(searchStudent.toLowerCase())) ||
-      (typeof student.semester === "number" &&
-        student.semester.toString().includes(searchStudent))
-  );
-
   // Process seminars data for trend chart
   const processSeminarTrends = () => {
     // Create a map of months for the last 6 months
@@ -188,56 +169,6 @@ const CoordinatorDashboard = () => {
 
   // Create the data for the seminar trends chart
   const seminarTrends = processSeminarTrends();
-
-  // Generate completion rate data based on seminars
-  const processCompletionRate = () => {
-    const months: {
-      month: string;
-      date: Date;
-      completed: number;
-      total: number;
-    }[] = [];
-    const today = new Date();
-
-    for (let i = 5; i >= 0; i--) {
-      const month = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      const monthName = month.toLocaleString("id-ID", { month: "short" });
-      months.push({
-        month: monthName,
-        date: month,
-        completed: 0,
-        total: 0,
-      });
-    }
-
-    // Count completed vs total seminars by month
-    seminars.forEach((seminar: any) => {
-      if (!seminar.scheduleDate) return;
-
-      const seminarDate = new Date(seminar.scheduleDate);
-      const monthData = months.find(
-        (m) =>
-          m.date.getMonth() === seminarDate.getMonth() &&
-          m.date.getFullYear() === seminarDate.getFullYear()
-      );
-
-      if (monthData) {
-        monthData.total += 1;
-        if (seminar.status === "COMPLETED") {
-          monthData.completed += 1;
-        }
-      }
-    });
-
-    // Calculate completion rate as percentage
-    return months.map((m) => ({
-      month: m.month,
-      rate: m.total > 0 ? Math.round((m.completed / m.total) * 100) : 0,
-    }));
-  };
-
-  // Create the data for completion rate chart
-  const completionRate = processCompletionRate();
 
   // Generate data for lecturer/student distribution
   const generateLecturerStudentData = () => {
@@ -303,23 +234,6 @@ const CoordinatorDashboard = () => {
   // Create data for lecturer-student distribution chart (as assessorss)
   const assessorChartData = generateAssessorDistributionData();
 
-  // Fungsi untuk menyalin nomor telepon
-  const handleCopy = (phoneNumber: string, studentId: string) => {
-    navigator.clipboard
-      .writeText(phoneNumber)
-      .then(() => {
-        setCopied(studentId);
-
-        // Reset status copied setelah 2 detik
-        setTimeout(() => {
-          setCopied(null);
-        }, 2000);
-      })
-      .catch((err) => {
-        console.error("Gagal menyalin teks: ", err);
-      });
-  };
-
   // Fungsi untuk format tanggal
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -352,16 +266,6 @@ const CoordinatorDashboard = () => {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-3 h-4 w-4 text-primary-600" />
-              <Input
-                type="search"
-                placeholder="Cari seminar..."
-                className="w-full md:w-[200px] pl-8 border-primary-400"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
             <Button className="bg-primary text-primary-foreground hover:bg-primary-700">
               <Calendar className="mr-2 h-4 w-4" />
               Lihat Kalender
@@ -602,8 +506,8 @@ const CoordinatorDashboard = () => {
                       <Search className="absolute left-2.5 top-3 h-4 w-4 text-primary-600" />
                       <Input
                         type="search"
-                        placeholder="Cari seminar..."
-                        className="w-full md:w-[200px] pl-8 border-primary-400"
+                        placeholder="Cari seminar berdasarkan judul penelitian | nama | nim"
+                        className="w-full md:w-[500px] pl-8 border-primary-400"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
