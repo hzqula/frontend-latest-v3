@@ -2,13 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "../../../context/AuthContext";
 import { useApiData } from "../../../hooks/useApiData";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
 import {
   Tabs,
