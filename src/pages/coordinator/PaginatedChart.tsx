@@ -17,12 +17,10 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
 } from "recharts";
 import { ScrollArea } from "../../components/ui/scroll-area";
 
-export const PaginatedChart = ({
+const PaginatedChart = ({
   data,
   title,
   description,
@@ -163,3 +161,5 @@ export const PaginatedChart = ({
     </Card>
   );
 };
+
+export default PaginatedChart;
