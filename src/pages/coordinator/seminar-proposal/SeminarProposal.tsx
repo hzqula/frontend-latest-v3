@@ -13,10 +13,10 @@ import { Search } from "lucide-react";
 import { Input } from "../../../components/ui/input";
 import CoordinatorLayout from "../../../components/layouts/CoordinatorLayout";
 import SchedulingModal from "./Scheduling";
-import SeminarsScheduledTable from "./SeminarsScheduledTable";
-import SeminarDetailsModal from "./SeminarDetailModal";
-import SeminarsSubmittedTable from "./SeminarsSubmittedTable";
-import SeminarsCompletedTable from "./SeminarsCompletedTable";
+import SeminarsScheduledTable from "../SeminarsScheduledTable";
+import SeminarDetailsModal from "../SeminarDetailModal";
+import SeminarsSubmittedTable from "../SeminarsSubmittedTable";
+import SeminarsCompletedTable from "../SeminarsCompletedTable";
 
 const CoordinatorSeminarProposal = () => {
   const { user, token } = useAuth();

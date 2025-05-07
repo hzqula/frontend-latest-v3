@@ -20,7 +20,7 @@ import {
 import { Search } from "lucide-react";
 import { Input } from "../../../components/ui/input";
 import LecturerLayout from "../../../components/layouts/LecturerLayout";
-import SeminarDetailsModal from "./SeminarDetailsModal";
+import SeminarDetailsModal from "../SeminarDetailsModal";
 import { Badge } from "../../../components/ui/badge";
 
 const LecturerSeminarProposal = () => {

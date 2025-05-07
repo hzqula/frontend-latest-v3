@@ -1,22 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "../../../components/ui/button";
+import { Button } from "../../components/ui/button";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { toast } from "react-toastify";
 
-interface SeminarsCompletedTableProps {
+interface SeminarsSubmittedTableProps {
   seminars: any[];
   formatDate: (dateString: string) => string;
   formatTime: (dateString: string) => string;
+  onSchedule: (seminar: any) => void;
   onViewDetails: (seminar: any) => void;
 }
 
-const SeminarsCompletedTable = ({
+const SeminarsSubmittedTable = ({
   seminars,
   formatDate,
   formatTime,
-  onViewDetails,
-}: SeminarsCompletedTableProps) => {
+  onSchedule,
+}: SeminarsSubmittedTableProps) => {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(
     null
   );
@@ -47,9 +49,9 @@ const SeminarsCompletedTable = ({
             <th className="p-4 w-[1%] text-center">No.</th>
             <th className="px-2 py-4 w-[40%]">Judul Penelitian</th>
             <th className="px-2 py-4 w-[25%]">Mahasiswa</th>
-            <th className="p-4 w-[10%] ">
+            <th className="p-4 w-[25%] ">
               <div className="flex justify-center items-center gap-1">
-                Pada
+                Diajukan Pada
                 <button
                   onClick={handleSort}
                   className="focus:outline-none hover:text-primary-200"
@@ -64,8 +66,7 @@ const SeminarsCompletedTable = ({
                 </button>
               </div>
             </th>
-            <th className="p-4 w-[10%] text-center">Tempat</th>
-            <th className="p-4 w-[14%] text-center">Aksi</th>
+            <th className="p-4 w-[19%] text-center">Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -92,28 +93,45 @@ const SeminarsCompletedTable = ({
                   </div>
                 </td>
                 <td className="p-2 flex flex-col justify-center items-center">
-                  <div>{formatDate(seminar.time)}</div>
-                  <div className="text-sm text-primary-600">
-                    {formatTime(seminar.time)}
+                  <div className="text-sm text-primary-800">
+                    {formatDate(seminar.createdAt)}
+                  </div>
+                  <div className="text-xs text-primary">
+                    {formatTime(seminar.createdAt)}
                   </div>
                 </td>
-                <td className="p-2">{seminar.room || "TBD"}</td>
                 <td className="p-2 text-center space-x-2">
                   <Button
-                    variant="outline"
                     size="sm"
-                    className="border-primary-400 text-primary-700"
-                    onClick={() => onViewDetails(seminar)}
+                    variant="outline"
+                    className="border-primary-400 text-primary-700 mb-2"
+                    onClick={() => {
+                      if (seminar.folderId) {
+                        window.open(
+                          `https://drive.google.com/drive/u/4/folders/${seminar.folderId}`,
+                          "_blank"
+                        );
+                      } else {
+                        toast.error("Link Google Drive tidak tersedia.");
+                      }
+                    }}
                   >
-                    Lihat
+                    Folder
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="bg-primary-600 text-white hover:bg-primary-700"
+                    onClick={() => onSchedule(seminar)}
+                  >
+                    Jadwalkan
                   </Button>
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={7} className="p-4 text-center text-primary-600">
-                Belum ada seminar proposal yang selesai.
+              <td colSpan={6} className="p-4 text-center text-primary-600">
+                Belum ada pengajuan seminar proposal.
               </td>
             </tr>
           )}
@@ -123,4 +141,4 @@ const SeminarsCompletedTable = ({
   );
 };
 
-export default SeminarsCompletedTable;
+export default SeminarsSubmittedTable;

@@ -5,8 +5,8 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "../../../components/ui/dialog";
-import { Button } from "../../../components/ui/button";
+} from "../../components/ui/dialog";
+import { Button } from "../../components/ui/button";
 
 interface SeminarDetailsModalProps {
   open: boolean;
@@ -30,10 +30,10 @@ const SeminarDetailsModal = ({
       <DialogContent className="w-full max-w-[90vw] sm:max-w-[500px] md:max-w-[600px] p-4 sm:p-6">
         <DialogHeader className="space-y-2">
           <DialogTitle className="text-xl sm:text-2xl font-heading font-black text-primary-800">
-            Detail Seminar Proposal
+            Detail Seminar
           </DialogTitle>
           <DialogDescription className="text-primary text-xs sm:text-sm">
-            Informasi lengkap tentang seminar proposal
+            Informasi lengkap tentang seminar
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3 sm:space-y-4 mt-2 sm:mt-4">

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useApiData } from "../../../hooks/useApiData";
+import { useApiData } from "../../hooks/useApiData";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../../../components/ui/dialog";
+} from "../../components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -20,16 +20,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../../../components/ui/form";
-import { Input } from "../../../components/ui/input";
-import { Button } from "../../../components/ui/button";
+} from "../../components/ui/form";
+import { Input } from "../../components/ui/input";
+import { Button } from "../../components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../components/ui/select";
+} from "../../components/ui/select";
 import { Plus, Minus } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -104,7 +104,7 @@ const ResearchDetailsModal = ({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="text-2xl -mb-1 font-heading font-black text-primary-800">
-            Detail Seminar Proposal
+            Detail Seminar
           </DialogTitle>
           <DialogDescription className="text-primary text-sm">
             Masukkan judul penelitian dan dosen pembimbing Anda.
