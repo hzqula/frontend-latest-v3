@@ -17,7 +17,7 @@ export function Stepper({ steps, currentStep, className }: StepperProps) {
         {steps.map((step, index) => {
           const isCompleted = currentStep > index + 1;
           const isCurrent = currentStep === index + 1;
-          const isPending = currentStep < index + 1;
+          // const isPending = currentStep < index + 1;
 
           return (
             <React.Fragment key={index}>
