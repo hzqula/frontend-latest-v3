@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
 import { Navigate } from "react-router";
+import { useAuth } from "../../context/AuthContext";
 import StudentSeminarHasil from "../student/seminar-hasil/SeminarHasil";
 import CoordinatorSeminarHasil from "../coordinator/seminar-hasil/SeminarHasil";
 import LecturerSeminarHasil from "../lecturer/seminar-hasil/SeminarHasil";
+import AssessSeminarHasil from "../lecturer/seminar-hasil/AssessSeminar";
 
 enum UserRole {
   STUDENT = "STUDENT",
@@ -11,26 +12,7 @@ enum UserRole {
 }
 
 const SeminarHasil: React.FC = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [userData, setUserData] = useState<any>(null);
-
-  useEffect(() => {
-    const storedUserData = localStorage.getItem("userData");
-
-    if (storedUserData) {
-      try {
-        setUserData(JSON.parse(storedUserData));
-      } catch (error) {
-        console.error("Terjadi kesalahan saat nge-parsing data", error);
-      }
-    }
-    setIsLoading(false);
-  }, []);
-
-  const token = localStorage.getItem("token");
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+  const { token, userRole, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -40,13 +22,19 @@ const SeminarHasil: React.FC = () => {
     );
   }
 
-  switch (userData.role) {
+  if (!token || !userRole) {
+    return <Navigate to="/login" replace />;
+  }
+
+  switch (userRole) {
     case UserRole.STUDENT:
-      return <StudentSeminarHasil />;
+      return <StudentSeminarHasil/>;
     case UserRole.COORDINATOR:
-      return <CoordinatorSeminarHasil />;
+      return <CoordinatorSeminarHasil/>;
     case UserRole.LECTURER:
-      return <LecturerSeminarHasil />;
+      return <LecturerSeminarHasil/>;
+    case UserRole.LECTURER:
+      return <AssessSeminarHasil />;
     default:
       return <Navigate to="/login" replace />;
   }
