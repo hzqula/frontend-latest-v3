@@ -1,6 +1,8 @@
 import { useRef, useEffect } from "react";
 import { useReactToPrint } from "react-to-print";
 import Logo from "../assets/img/logo.png"; // Ensure this path is correct
+import QRCode from "react-qr-code"; // Impor QRCode dari react-qr-code
+import CryptoJS from "crypto-js";
 
 interface Seminar {
   id: number | null;
@@ -72,6 +74,22 @@ const SeminarInvitation = ({
       handlePrint();
     }
   }, [shouldPrint, handlePrint]);
+
+
+   // Salt untuk hashing (simpan di .env untuk produksi)
+ const SALT = import.meta.env.VITE_QR_HASH_SALT ;
+
+ // Fungsi untuk menghasilkan hash dari seminar.id
+ const generateQrHash = (seminarId: number): string => {
+   return CryptoJS.SHA256(`${seminarId}${SALT}`).toString(CryptoJS.enc.Hex);
+ };
+
+ // URL untuk QR code menggunakan hash
+ const qrCodeUrl = seminar.id
+   ? `${window.location.origin}/seminar-detail?id=${generateQrHash(seminar.id)}:su${seminar.id}`
+   : "";
+
+
 
   return (
     <div ref={contentRef} className="printable hidden print:block text-black">
@@ -231,6 +249,22 @@ const SeminarInvitation = ({
           <span>: {seminar.room || "N/A"}</span>
         </div>
       </div>
+
+       {/* QR Code di Kiri Bawah */}
+       {seminar.id && (
+        <div className="absolute bottom-25 left-20">
+          <div className="bg-white p-2 inline-block">
+            <QRCode
+              value={qrCodeUrl}
+              size={80}
+              level="H"
+              bgColor="#FFFFFF"
+              fgColor="#000000"
+            />
+          </div>
+          {/* <p className="text-xs mt-1 text-center">Scan untuk verifikasi</p> */}
+        </div>
+      )}
 
       {/* Penutup */}
       <p className="text-sm mb-6">
