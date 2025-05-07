@@ -21,7 +21,7 @@ import {
   AlertTitle,
 } from "../../../components/ui/alert";
 import { Badge } from "../../../components/ui/badge";
-import ResearchDetailsModal from "./ResearchDetail";
+import ResearchDetailsModal from "../ResearchDetail";
 import DocumentUploadModal from "./DocumentUpload";
 import StudentLayout from "../../../components/layouts/StudentLayout";
 import { Stepper } from "../../../components/ui/stepper";
@@ -53,8 +53,7 @@ const StudentSeminarProposal = () => {
   const lecturersQuery = useApiData({ type: "lecturers" });
   const lecturers = lecturersQuery.data || [];
   const seminarQuery = useApiData({
-    type: "seminarByStudentNIM",
-    seminarType: "proposal",
+    type: "seminarProposalByStudentNIM",
     param: user?.profile.nim,
   });
 
