@@ -1,4 +1,4 @@
-import { useState, useMemo, SetStateAction } from "react";
+import { useState, useMemo} from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Search, Copy, CopyCheck, ChevronLeft, ChevronRight } from "lucide-react";
@@ -284,9 +284,9 @@ const PaginatedStudentsCard = ({ students }: { students: Student[] }) => {
         {filteredStudents.length > 0 && (
           <div className="flex items-center justify-between mt-4 px-2">
             <div className="text-xs text-primary-600">
-              Menampilkan {indexOfFirstStudent + 1}-
-              {Math.min(indexOfLastStudent, filteredStudents.length)} dari{" "}
-              {filteredStudents.length} mahasiswa
+              Showing {indexOfFirstStudent + 1}-
+              {Math.min(indexOfLastStudent, filteredStudents.length)} of {" "}
+              {filteredStudents.length}
             </div>
             <div className="flex items-center space-x-1">
               <Button
