@@ -244,7 +244,6 @@ const LecturerLayout: React.FC<LecturerLayoutProps> = ({ children }) => {
               <p className="text-body-bold text-sm font-semibold ">
                 {user?.profile?.name}
               </p>
-              <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
             </div>
             <img
               src={
