@@ -29,7 +29,7 @@ const SeminarProposal: React.FC = () => {
 
   const token = localStorage.getItem("token");
   if (!token) {
-    return <Navigate to="/sign-in" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   if (isLoading) {
@@ -48,7 +48,7 @@ const SeminarProposal: React.FC = () => {
     case UserRole.LECTURER:
       return <LecturerSeminarProposal />;
     default:
-      return <Navigate to="/sign-in" replace />;
+      return <Navigate to="/login" replace />;
   }
 };
 
