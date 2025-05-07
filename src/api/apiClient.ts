@@ -9,7 +9,7 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token"); // Sesuaikan dengan AuthContext
+    const token = localStorage.getItem("token"); 
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
@@ -23,7 +23,7 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config; // Perbaiki typo dari 'comfig' ke 'config'
+    const originalRequest = error.config; 
     if (error.response?.status === 403 && !originalRequest._retry) {
       originalRequest._retry = true;
       const refreshToken = localStorage.getItem("refreshToken");

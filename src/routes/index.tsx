@@ -12,6 +12,9 @@ import SeminarProposal from "../pages/redirect/SeminarProposal";
 import SeminarHasil from "../pages/redirect/SeminarHasil";
 import AssessSeminarProposal from "../pages/lecturer/seminar-proposal/AssessSeminar";
 import AssessSeminarHasil from "../pages/lecturer/seminar-hasil/AssessSeminar";
+import SeminarDetail from "../pages/SeminarDetail";
+import SecurityLog from "../pages/coordinator/SecurityLog";
+import ResetPassword from "../pages/auth/ResetPassword";
 
 export const publicRoutes: RouteObject[] = [
   { path: "/", element: <Landing /> },
@@ -21,6 +24,10 @@ export const publicRoutes: RouteObject[] = [
   { path: "/kalender-akademik", element: <KalenderAkademik /> },
   { path: "/login", element: <Login /> },
   { path: "/register", element: <Register /> },
+  { path: "/seminar-detail", element: <SeminarDetail /> },
+  { path: "/reset-password", element: <ResetPassword /> }, 
+ 
+
 ];
 
 export const privateRoutes: RouteObject[] = [
@@ -44,5 +51,9 @@ export const privateRoutes: RouteObject[] = [
   {
     path: "/seminar-hasil/assess/:seminarId",
     element: <AssessSeminarHasil />,
+  },
+  {
+    path: "/security-logs",
+    element: <SecurityLog />,
   },
 ];

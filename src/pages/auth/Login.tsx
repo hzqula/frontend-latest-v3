@@ -21,7 +21,6 @@ import { EyeIcon, EyeOffIcon, BookOpen, KeyRound, Mail } from "lucide-react";
 import { Alert, AlertDescription } from "../../components/ui/alert";
 import axios from "axios";
 
-// Skema validasi Zod
 const signInSchema = z.object({
   email: z
     .string()
@@ -112,12 +111,15 @@ const Login: React.FC = () => {
 
       const { token, user } = response.data;
 
-      login(token, user);
-      setTimeout(() => {
-        toast.success("Login berhasil");
+      // Tunggu login selesai (termasuk verifikasi role)
+      await login(token, {
+        id: user.id,
+        email: user.email,
+        profile: user.profile,
+      });
 
-        navigate("/dashboard");
-      }, 1000);
+      toast.success("Login berhasil");
+      navigate("/dashboard");
     } catch (error) {
       console.error("Terjadi kesalahan: ", error);
       toast.error(
@@ -125,6 +127,7 @@ const Login: React.FC = () => {
           ? error.response.data.error
           : "Terjadi kesalahan saat login"
       );
+    } finally {
       setIsLoading(false);
     }
   };
@@ -179,7 +182,7 @@ const Login: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password">Password</Label>
                     <Link
-                      to="/forgot-password"
+                      to="/reset-password"
                       className="text-sm text-primary hover:underline"
                     >
                       Forgot password?

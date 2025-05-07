@@ -14,7 +14,16 @@ import {
   CardTitle,
 } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
-import { FileText, Upload, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  FileText,
+  Upload,
+  CheckCircle2,
+  AlertCircle,
+  Calendar,
+  Loader,
+  Info,
+  Download,
+} from "lucide-react";
 import {
   Alert,
   AlertDescription,
@@ -27,8 +36,11 @@ import StudentLayout from "../../../components/layouts/StudentLayout";
 import { Stepper } from "../../../components/ui/stepper";
 import { Link } from "react-router";
 import SeminarInvitation from "../../../components/SeminarInvitation";
+import EvenReport from "../../../components/EventReport";
+import studentImg from "../../../assets/img/student-ill.png";
+import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 
-export interface Seminar {
+export interface SeminarProposal {
   id: number | null;
   title: string;
   student?: {
@@ -36,19 +48,27 @@ export interface Seminar {
     name: string;
   } | null;
   status: "DRAFT" | "SUBMITTED" | "SCHEDULED" | "COMPLETED" | null;
-  advisors: { lecturerNIP: string; lecturerName?: string }[];
+  advisors: {
+    lecturerNIP: string;
+    lecturerName?: string;
+    profilePicture?: string;
+  }[];
   documents: Record<
     string,
     { uploaded: boolean; fileName?: string; fileURL?: string }
   >;
   time: string | null;
   room: string | null;
-  assessors: { lecturerNIP: string; lecturerName?: string }[];
+  assessors: {
+    lecturerNIP: string;
+    lecturerName?: string;
+    profilePicture?: string;
+  }[];
 }
 
 const StudentSeminarProposal = () => {
   const [currentStep, setCurrentStep] = useState<string>("step1");
-  const [maxStepReached, setMaxStepReached] = useState<number>(1);
+  const [, setMaxStepReached] = useState<number>(1);
   const { user, token } = useAuth();
   const lecturersQuery = useApiData({ type: "lecturers" });
   const lecturers = lecturersQuery.data || [];
@@ -57,7 +77,7 @@ const StudentSeminarProposal = () => {
     param: user?.profile.nim,
   });
 
-  const [seminar, setSeminar] = useState<Seminar>({
+  const [seminar, setSeminar] = useState<SeminarProposal>({
     id: null,
     title: "",
     student: null,
@@ -87,6 +107,7 @@ const StudentSeminarProposal = () => {
     useState(false);
   const [documentUploadModalOpen, setDocumentUploadModalOpen] = useState(false);
   const [shouldPrint, setShouldPrint] = useState(false);
+  const [shouldPrintReport, setShouldPrintReport] = useState(false);
 
   if (!user || !user.profile?.nim) {
     return <div>Loading...</div>;
@@ -102,9 +123,10 @@ const StudentSeminarProposal = () => {
         title: seminarData.title,
         student: seminarData.student,
         status: seminarData.status,
-        advisors: seminarData.advisors.map((a: any) => ({
-          lecturerNIP: a.lecturerNIP,
-          lecturerName: a.lecturer?.name,
+        advisors: seminarData.advisors.map((advisor: any) => ({
+          lecturerNIP: advisor.lecturerNIP,
+          lecturerName: advisor.lecturer?.name,
+          profilePicture: advisor.lecturer?.profilePicture,
         })),
         documents: {
           THESIS_PROPOSAL: {
@@ -165,15 +187,17 @@ const StudentSeminarProposal = () => {
         },
         time: seminarData.time,
         room: seminarData.room,
-        assessors: seminarData.assessors.map((a: any) => ({
-          lecturerNIP: a.lecturerNIP,
-          lecturerName: a.lecturer?.name,
+        assessors: seminarData.assessors.map((assessor: any) => ({
+          lecturerNIP: assessor.lecturerNIP,
+          lecturerName: assessor.lecturer?.name,
+          profilePicture: assessor.lecturer?.profilePicture,
         })),
       });
 
       if (seminarData.status === "DRAFT") setCurrentStep("step1");
       else if (seminarData.status === "SUBMITTED") setCurrentStep("step2");
       else if (seminarData.status === "SCHEDULED") setCurrentStep("step3");
+      else if (seminarData.status === "COMPLETED") setCurrentStep("step4");
     }
   }, [seminarQuery.data, documentUploadModalOpen]);
 
@@ -337,31 +361,31 @@ const StudentSeminarProposal = () => {
   const allDocumentsUploaded = () =>
     Object.values(seminar.documents).every((doc) => doc.uploaded);
 
-  const getStatusBadge = (step: string) => {
-    const currentStepNum = Number.parseInt(currentStep.replace("step", ""));
-    const stepNum = Number.parseInt(step.replace("step", ""));
-    if (stepNum < maxStepReached) {
-      return (
-        <Badge className="bg-primary-100 text-primary-800 border-primary-400">
-          Sudah
-        </Badge>
-      );
-    } else if (stepNum === currentStepNum) {
-      return (
-        <Badge className="bg-primary-200 text-primary-800 border-primary-400 border-2">
-          Belum
-        </Badge>
-      );
-    } else {
-      return (
-        <Badge className="bg-white text-primary-800 border-primary-300">
-          Pending
-        </Badge>
-      );
-    }
-  };
+  // const getStatusBadge = (step: string) => {
+  //   const currentStepNum = Number.parseInt(currentStep.replace("step", ""));
+  //   const stepNum = Number.parseInt(step.replace("step", ""));
+  //   if (stepNum < maxStepReached) {
+  //     return (
+  //       <Badge className="bg-primary-100 text-env-darker border-env-lighter">
+  //         Sudah
+  //       </Badge>
+  //     );
+  //   } else if (stepNum === currentStepNum) {
+  //     return (
+  //       <Badge className="bg-primary-200 text-env-darker border-env-lighter border-2">
+  //         Belum
+  //       </Badge>
+  //     );
+  //   } else {
+  //     return (
+  //       <Badge className="bg-white text-env-darker border-env-lighter">
+  //         Pending
+  //       </Badge>
+  //     );
+  //   }
+  // };
 
-  const isScheduled = seminar.status === "SCHEDULED";
+  // const isScheduled = seminar.status === "SCHEDULED";
 
   const steps = [
     "Detail Seminar",
@@ -384,6 +408,12 @@ const StudentSeminarProposal = () => {
         );
         return;
       }
+      if (currentStep === "step3" && seminar.status !== "COMPLETED") {
+        toast.error(
+          "Seminar belum selesai dinilai oleh semua dosen. Tunggu hingga semua penilaian diserahkan untuk melanjutkan."
+        );
+        return;
+      }
       setCurrentStep(`step${nextStepNum}`);
       setMaxStepReached((prev) => Math.max(prev, nextStepNum));
     }
@@ -398,6 +428,10 @@ const StudentSeminarProposal = () => {
 
   const handlePrintInvitation = () => {
     setShouldPrint(true);
+  };
+
+  const handlePrintReport = () => {
+    setShouldPrintReport(true);
   };
 
   const formatDate = (dateString: string) => {
@@ -416,18 +450,133 @@ const StudentSeminarProposal = () => {
     });
   };
 
+  const progressPercentage =
+    {
+      DRAFT: 25,
+      SUBMITTED: 50,
+      SCHEDULED: 75,
+      COMPLETED: 100,
+    }[seminar.status!] || 0;
+
+  // const statusMessage =
+  //   {
+  //     DRAFT: "Masukkan detail seminar untuk melanjutkan.",
+  //     SUBMITTED: "Menunggu penjadwalan oleh koordinator.",
+  //     SCHEDULED: "Jadwal telah ditentukan, unduh undangan!",
+  //     COMPLETED: "Seminar selesai!",
+  //   }[seminar.status!] || "Belum Dimulai";
+
   return (
     <StudentLayout>
       <div className="flex flex-col mb-4">
-        <h1 className="text-4xl font-heading font-black mb-3 text-primary-800">
+        <h1 className="text-xl md:text-4xl font-heading font-black mb-3 text-env-darker">
           Pendaftaran Seminar Proposal
         </h1>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 auto-rows-[minmax(120px,_auto)] sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="col-span-1 sm:col-span-2 lg:col-span-2 py-4 px-8 row-span-2 border-2 border-pastel-green relative overflow-hidden rounded-xl bg-env-light">
+          <img
+            src={studentImg}
+            alt="student"
+            className="absolute right-0 -bottom-10 w-32 md:w-48 opacity-80"
+          />
+          <div className="w-full flex flex-col gap-4">
+            <div className="w-full flex justify-between items-center">
+              <h1 className="text-lg font-heading font-bold text-primary-foreground">
+                Hai, {user.profile.name}
+              </h1>
+              <div className="w-10 flex items-center justify-center h-10 rounded-full bg-pastel-yellow">
+                <Info className="text-jewel-yellow" />
+              </div>
+            </div>
+            <p className="text-env-darker text-lg font-semibold">
+              {seminar.status === null || seminar.status === undefined
+                ? "Anda belum mendaftar seminar."
+                : seminar.status === "DRAFT"
+                ? "Silakan mengupload dokumen agar seminar Anda dapat diproses lebih lanjut."
+                : seminar.status === "SUBMITTED"
+                ? "Seminar anda menunggu untuk dijadwalkan."
+                : seminar.status === "SCHEDULED" && seminar.time
+                ? (() => {
+                    const today = new Date();
+                    const seminarDate = new Date(seminar.time!);
+                    const diffTime = seminarDate.getTime() - today.getTime();
+                    const diffDays = Math.ceil(
+                      diffTime / (1000 * 60 * 60 * 24)
+                    );
+                    if (diffDays === 0) {
+                      return "Semangat untuk seminar hari ini!";
+                    } else if (diffDays > 0) {
+                      return `Seminar Anda sudah dijadwalkan, ${diffDays} hari lagi seminar Anda dimulai. Silakan unduh undangan seminar.`;
+                    } else {
+                      return "Seminar Anda sudah dijadwalkan. Silakan unduh undangan seminar.";
+                    }
+                  })()
+                : seminar.status === "COMPLETED"
+                ? "Seminar anda telah selesai. Silakan unduh Berita Acara."
+                : "Status seminar belum diketahui."}
+            </p>
+          </div>
+        </Card>
+        <Card className="col-span-1 border border-env-darker row-span-1 gap-0 px-8 py-4 bg-env-lighter overflow-hidden relative">
+          <div className="w-full flex justify-between items-center">
+            <h1 className="text-base md:text-lg font-heading font-bold text-env-light">
+              Jadwal Seminar
+            </h1>
+            <div className="w-10 flex items-center justify-center h-10 rounded-full bg-pastel-red">
+              <Calendar className="text-jewel-red" />
+            </div>
+          </div>
+          <p className="-mt-2 text-env-darker font-bold md:text-2xl text-xl">
+            {seminar.time
+              ? `Jam  ${formatTime(seminar.time)} | ${formatDate(seminar.time)}`
+              : "Belum ditentukan"}
+          </p>
+        </Card>
+        <Card className="col-span-1 row-span-1 gap-0 px-8 py-4 bg-background overflow-hidden relative">
+          <div className="w-12 h-12 rounded-full bg-env-base absolute -left-2 -bottom-4"></div>
+          <div className="w-full flex justify-between items-center">
+            <h1 className="text-base md:text-lg font-heading font-bold text-muted-foreground">
+              Hari & Tanggal
+            </h1>
+            <div className="w-10 flex items-center justify-center h-10 rounded-full bg-pastel-purple">
+              <Calendar className="text-jewel-purple" />
+            </div>
+          </div>
+          <p className="-mt-2 text-env-darker font-bold md:text-2xl text-xl">
+            {new Date().toLocaleDateString("id-ID", {
+              weekday: "long",
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
+          </p>
+        </Card>
+        <Card className="col-span-1 sm:col-span-2 lg:col-span-2 row-span-1 gap-0 px-8 py-4 bg-background overflow-hidden relative">
+          <div className="w-full flex justify-between items-center">
+            <h1 className="text-base md:text-lg font-heading font-bold text-muted-foreground">
+              Status Seminar Anda
+            </h1>
+            <div className="w-10 flex items-center justify-center h-10 rounded-full bg-pastel-green">
+              <Loader className="text-jewel-yellbg-pastel-green" />
+            </div>
+          </div>
+          <div className="w-4/5 bg-pastel-green rounded-full h-2.5">
+            <div
+              className="bg-jewel-green h-2.5 rounded-full"
+              style={{ width: `${progressPercentage}%` }}
+            ></div>
+          </div>
+          <div className="flex flex-1 w-full justify-end items-end">
+            <Badge className="md:h-6 h-4 md:text-xs text-[8px] bg-pastel-blue text-jewel-blue">
+              {seminar.status || "Belum Dimulai"}
+            </Badge>
+          </div>
+        </Card>
         <Stepper
           steps={steps}
           currentStep={currentStepIndex}
-          className="mb-8 col-span-1 sm:col-span-2 lg:col-span-4"
+          className="col-span-1 sm:col-span-2 lg:col-span-4"
         />
 
         {seminarQuery.isLoading && <div>Loading seminar data...</div>}
@@ -439,58 +588,70 @@ const StudentSeminarProposal = () => {
 
         {currentStep === "step1" && (
           <Card className="bg-white col-span-1 sm:col-span-2 lg:col-span-4 overflow-hidden ">
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary opacity-100"></div>
+            <div className="relative bg-gradient-to-r from-env-base to-env-darker">
               <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10"></div>
 
               <CardHeader className="relative z-10 ">
                 <div className="flex justify-between items-center">
-                  <CardTitle className="text-2xl -mb-1 font-heading font-black text-primary-foreground">
+                  <CardTitle className="text-xl md:text-2xl -mb-1 font-heading font-bold text-primary-foreground">
                     Detail Seminar
                   </CardTitle>
-                  {getStatusBadge("step3")}
                 </div>
-                <CardDescription className="text-primary-foreground text-sm">
+                <CardDescription className="text-primary-foreground text-xs md:text-sm">
                   Masukkan judul penelitian dan dosen pembimbing Anda.
                 </CardDescription>
               </CardHeader>
             </div>
             <CardContent>
               {seminar.title ? (
-                <div className="space-y-4 mt-6">
+                <div className="space-y-4">
                   <div>
-                    <h3 className="text-sm font-bold font-heading text-primary">
+                    <h3 className="text-xs md:text-sm font-medium font-heading text-muted-foreground">
                       Judul Penelitian
                     </h3>
-                    <p className="text-primary-800 text-lg font-bold">
+                    <p className="text-env-darker text-sm md:text-base font-bold">
                       {seminar.title}
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold font-heading text-primary">
-                      Dosen Pembimbing I
+                    <h3 className="text-xs md:text-sm font-medium font-heading text-muted-foreground mb-2">
+                      Dosen Pembimbing
                     </h3>
-                    <div>
-                      <div>
-                        <p className="text-primary-800 text-lg font-bold">
-                          {seminar.advisors[0]?.lecturerName}
-                        </p>
-                        <p className="text-primary-800 text-lg font-bold">
-                          {seminar.advisors[0]?.lecturerNIP}
-                        </p>
-                      </div>
+                    <div className="md:flex-row flex flex-col md:gap-12 md:items-center">
+                      {seminar.advisors.map((advisor, index) => (
+                        <div
+                          key={index}
+                          className="flex md:border-l-2 border-env-light rounded-md items-center md:px-4 pb-1 space-x-2"
+                        >
+                          <Avatar>
+                            <AvatarImage
+                              src={
+                                advisor.profilePicture
+                                  ? advisor.profilePicture
+                                  : `https://robohash.org/${advisor.lecturerName}`
+                              }
+                              alt="advisor-image"
+                              className="border rounded-full h-8 w-8 md:h-12 md:w-12"
+                            />
+                            <AvatarFallback className="bg-primary-100 text-primary-800">
+                              {advisor
+                                .lecturerName!.split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="text-xs md:text-sm font-medium text-primary-800">
+                              {advisor.lecturerName}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {advisor.lecturerNIP}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                  {seminar.advisors[1] && (
-                    <div>
-                      <h3 className="text-sm font-bold font-heading text-primary">
-                        Dosen Pembimbing II
-                      </h3>
-                      <p className="text-primary-800 text-lg font-bold">
-                        {seminar.advisors[1]?.lecturerName}
-                      </p>
-                    </div>
-                  )}
                 </div>
               ) : (
                 <div className="py-8 text-center">
@@ -507,18 +668,12 @@ const StudentSeminarProposal = () => {
                   onClick={() => setResearchDetailsModalOpen(true)}
                   disabled={seminar.status === "SCHEDULED"}
                   variant="outline"
-                  className="border-2 border-primary text-primary-800"
                 >
                   {seminar.title
                     ? "Perbarui Detail Seminar"
                     : "Masukkan Detail Seminar"}
                 </Button>
-                <Button
-                  onClick={handleNextStep}
-                  className="bg-primary hover:bg-primary-700 text-primary-foreground"
-                >
-                  Lanjut
-                </Button>
+                <Button onClick={handleNextStep}>Lanjut</Button>
               </div>
             </CardFooter>
           </Card>
@@ -526,28 +681,26 @@ const StudentSeminarProposal = () => {
 
         {currentStep === "step2" && (
           <Card className="bg-white col-span-1 sm:col-span-2 lg:col-span-4 overflow-hidden">
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary opacity-100"></div>
+            <div className="relative bg-gradient-to-r from-env-base to-env-darker">
               <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10"></div>
 
               <CardHeader className="relative z-10 ">
                 <div className="flex justify-between items-center">
-                  <CardTitle className="text-2xl -mb-1 font-heading font-black text-primary-foreground">
+                  <CardTitle className="text-xl md:text-2xl -mb-1 font-heading font-bold text-primary-foreground">
                     Dokumen yang Dibutuhkan
                   </CardTitle>
-                  {getStatusBadge("step3")}
                 </div>
-                <CardDescription className="text-primary-foreground text-sm">
+                <CardDescription className="text-primary-foreground text-xs md:text-sm">
                   Upload semua dokumen yang dibutuhkan untuk seminar proposal.
                 </CardDescription>
               </CardHeader>
             </div>
             <CardContent>
               {allDocumentsUploaded() ? (
-                <div className="space-y-4 mt-6">
+                <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-primary-600" />
-                    <p className="text-primary-800">
+                    <p className="text-env-darker text-sm md:text-base">
                       Semua dokumen yang dibutuhkan sudah berhasil diunggah.
                     </p>
                   </div>
@@ -558,19 +711,19 @@ const StudentSeminarProposal = () => {
                       );
                       return (
                         <div key={key} className="flex flex-col">
-                          <h1 className="font-bold text-lg font-heading text-primary-800">
+                          <h1 className="font-bold text-sm md:text-lg font-heading text-env-darker">
                             {reqDoc ? reqDoc.name : key}
                           </h1>
                           <div className="flex items-center gap-1">
                             <FileText className="h-4 w-4 text-primary-600" />
-                            <span className="text-sm text-primary-800">
+                            <span className="text-xs md:text-sm text-env-darker">
                               {doc.uploaded ? doc.fileName : "Belum diunggah"}
                             </span>
                             {doc.uploaded && doc.fileURL && (
                               <Button
                                 variant="link"
                                 size="sm"
-                                className="text-primary-600 hover:text-primary-800 p-0"
+                                className="text-primary-600 hover:text-env-darker p-0"
                               >
                                 <Link
                                   to={doc.fileURL}
@@ -588,20 +741,45 @@ const StudentSeminarProposal = () => {
                   </div>
                 </div>
               ) : (
-                <div className="py-8 mt-4 text-center">
-                  <Upload className="h-12 w-12 text-primary-800 mx-auto mb-4" />
-                  <p className="text-primary-600 mb-4">
+                <div
+                  className="border-2 border-dashed border-primary-400 rounded-lg text-center p-10"
+                  onClick={() => setDocumentUploadModalOpen(true)}
+                >
+                  <Upload className="h-8 w-8 sm:h-12 sm:w-12 text-primary-800 mx-auto mb-3 sm:mb-4" />
+                  <p className="text-sm sm:text-base text-primary-600 mb-2 sm:mb-4 px-2">
                     Silakan upload semua dokumen yang dibutuhkan, untuk
                     diproses.
                   </p>
                 </div>
               )}
             </CardContent>
-            <CardFooter className="flex justify-between">
+            <CardFooter className="md:hidden flex-col flex gap-2">
+              <Button
+                onClick={() => setDocumentUploadModalOpen(true)}
+                disabled={seminar.status === "SCHEDULED"}
+                variant="outline"
+                className="border-2 border-primary text-env-darker w-full"
+              >
+                {allDocumentsUploaded() ? "Perbarui Dokumen" : "Unggah Dokumen"}
+              </Button>
+              <div className="w-full gap-2 flex items-center">
+                <Button
+                  variant="secondary"
+                  onClick={handlePrevStep}
+                  className="flex-0 min-w-[120px]"
+                >
+                  Kembali
+                </Button>
+                <Button onClick={handleNextStep} className="flex-1">
+                  Lanjut
+                </Button>
+              </div>
+            </CardFooter>
+            <CardFooter className="md:flex justify-between hidden">
               <Button
                 variant="secondary"
                 onClick={handlePrevStep}
-                className="border-primary-400 text-primary-700 hover:bg-accent hover:text-accent-foreground"
+                className="border-env-lighter text-primary-700 hover:bg-accent hover:text-accent-foreground"
               >
                 Kembali
               </Button>
@@ -610,7 +788,7 @@ const StudentSeminarProposal = () => {
                   onClick={() => setDocumentUploadModalOpen(true)}
                   disabled={seminar.status === "SCHEDULED"}
                   variant="outline"
-                  className="border-2 border-primary text-primary-800"
+                  className="border-2 border-primary text-env-darker"
                 >
                   {allDocumentsUploaded()
                     ? "Perbarui Dokumen"
@@ -629,144 +807,190 @@ const StudentSeminarProposal = () => {
 
         {currentStep === "step3" && (
           <Card className="bg-white col-span-1 sm:col-span-2 lg:col-span-4 overflow-hidden">
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary opacity-100"></div>
+            <div className="relative bg-gradient-to-r from-env-base to-env-darker">
               <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10"></div>
 
               <CardHeader className="relative z-10 ">
                 <div className="flex justify-between items-center">
-                  <CardTitle className="text-2xl -mb-1 font-heading font-black text-primary-foreground">
+                  <CardTitle className="text-xl md:text-2xl -mb-1 font-heading font-bold text-primary-foreground">
                     Undangan Seminar
                   </CardTitle>
-                  {getStatusBadge("step3")}
                 </div>
-                <CardDescription className="text-primary-foreground text-sm">
+                <CardDescription className="text-primary-foreground text-xs md:text-sm">
                   Lihat detail seminar Anda dan unduh undangan seminar setelah
                   jadwal ditentukan.
                 </CardDescription>
               </CardHeader>
             </div>
             <CardContent>
-              <div className="space-y-6 mt-6">
+              <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <h3 className="text-sm font-bold font-heading text-primary">
+                    <h3 className="text-xs md:text-sm font-medium font-heading text-muted-foreground">
                       Mahasiswa
                     </h3>
                     <div className="flex flex-col">
-                      <p className="text-primary-800 -mb-2 text-lg font-bold">
+                      <p className="text-env-darker text-sm md:text-base font-bold">
                         {seminar.student?.name}
                       </p>
-                      <p className="text-primary-800 font-bold">
-                        NIM:{" "}
-                        <span className="text-primary-400 font-medium">
-                          {seminar.student?.nim}
-                        </span>
+                      <p className="text-env-darker text-sm md:text-base font-bold">
+                        {seminar.student?.nim}
                       </p>
                     </div>
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-bold font-heading text-primary">
+                    <h3 className="text-xs md:text-sm font-medium font-heading text-muted-foreground">
                       Judul Penelitian
                     </h3>
-                    <p className="text-primary-800 text-lg font-bold">
+                    <p className="text-env-darker text-sm md:text-base font-bold">
                       {seminar.title}
                     </p>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-bold font-heading text-primary">
-                      Dosen Pembimbing I
+                  <div className="col-span-1">
+                    <h3 className="text-xs mb-2 md:text-sm font-medium font-heading text-muted-foreground">
+                      Dosen Pembimbing
                     </h3>
-                    <div className="flex flex-col">
-                      <p className="text-primary-800 -mb-2 text-lg font-bold">
-                        {seminar.advisors[0]?.lecturerName}
-                      </p>
-                      <p className="text-primary-800 font-bold">
-                        NIP:{" "}
-                        <span className="text-primary-400 font-medium">
-                          {seminar.advisors[0]?.lecturerNIP}
-                        </span>
-                      </p>
+                    <div className="flex flex-col gap-2">
+                      {seminar.advisors.map((advisor, index) => (
+                        <div
+                          key={index}
+                          className="flex border-env-light rounded-md items-center space-x-2"
+                        >
+                          <Avatar>
+                            <AvatarImage
+                              src={
+                                advisor.profilePicture
+                                  ? advisor.profilePicture
+                                  : `https://robohash.org/${advisor.lecturerName}`
+                              }
+                              alt="advisor-image"
+                              className="border rounded-full h-8 w-8 md:h-12 md:w-12"
+                            />
+                            <AvatarFallback className="bg-primary-100 text-primary-800">
+                              {advisor
+                                .lecturerName!.split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="text-xs md:text-sm font-medium text-primary-800">
+                              {advisor.lecturerName}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {advisor.lecturerNIP}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                  {seminar.advisors[1] && (
-                    <div>
-                      <h3 className="text-sm font-bold font-heading text-primary">
-                        Dosen Pembimbing II
-                      </h3>
-                      <div className="flex flex-col">
-                        <p className="text-primary-800 -mb-2 text-lg font-bold">
-                          {seminar.advisors[1]?.lecturerName}
-                        </p>
-                        <p className="text-primary-800 font-bold">
-                          NIP:{" "}
-                          <span className="text-primary-400 font-medium">
-                            {seminar.advisors[1]?.lecturerNIP}
-                          </span>
-                        </p>
+                  <div className="col-span-1">
+                    <h3 className="text-xs mb-2 md:text-sm font-medium font-heading text-muted-foreground">
+                      Dosen Penguji
+                    </h3>
+                    {seminar.assessors.length > 0 ? (
+                      <div className="flex flex-col gap-2">
+                        {seminar.assessors.map((assessor, index) => (
+                          <div
+                            key={index}
+                            className="flex border-env-light rounded-md items-center space-x-2"
+                          >
+                            <Avatar>
+                              <AvatarImage
+                                src={
+                                  assessor.profilePicture
+                                    ? assessor.profilePicture
+                                    : `https://robohash.org/${assessor.lecturerName}`
+                                }
+                                alt="assessor-image"
+                                className="border rounded-full h-8 w-8 md:h-12 md:w-12"
+                              />
+                              <AvatarFallback className="bg-primary-100 text-primary-800">
+                                {assessor
+                                  .lecturerName!.split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="text-xs md:text-sm font-medium text-primary-800">
+                                {assessor.lecturerName}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {assessor.lecturerNIP}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  )}
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    ) : (
+                      <p className="text-env-darker text-sm md:text-base font-bold">
+                        Belum ditentukan
+                      </p>
+                    )}
+                  </div>
                   <div>
-                    <h3 className="text-sm font-bold font-heading text-primary">
+                    <h3 className="text-xs md:text-sm font-medium font-heading text-muted-foreground">
                       Waktu
                     </h3>
-                    <p className="text-primary-800 text-lg font-bold">
+                    <p className="text-env-darker text-sm md:text-base font-bold">
                       {seminar.time
-                        ? `${formatDate(seminar.time)} • ${formatTime(
+                        ? `Jam ${formatTime(seminar.time)} | ${formatDate(
                             seminar.time
-                          )}`
+                          )}
+                          `
                         : "Belum ditentukan"}
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold font-heading text-primary">
+                    <h3 className="text-xs md:text-sm font-medium font-heading text-muted-foreground">
                       Ruangan
                     </h3>
-                    <p className="text-primary-800 text-lg font-bold">
+                    <p className="text-env-darker text-sm md:text-base font-bold">
                       {seminar.room || "Belum ditentukan"}
                     </p>
                   </div>
                 </div>
-                <h3 className="text-sm font-bold font-heading text-primary">
-                  Dosen Penguji
-                </h3>
-                {seminar.assessors.length > 0 ? (
-                  <ul>
-                    {seminar.assessors.map((assessor, index) => (
-                      <li
-                        key={index}
-                        className="text-primary-800 text-lg font-bold"
-                      >
-                        {assessor.lecturerName || assessor.lecturerNIP}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-primary-800 text-lg font-bold">
-                    Belum ditentukan
-                  </p>
-                )}
-                <Alert className="bg-primary-50 border-primary-200">
-                  <AlertCircle className="h-4 w-4 text-primary-600" />
-                  <AlertTitle className="text-primary-800">
-                    Informasi
-                  </AlertTitle>
-                  <AlertDescription className="text-primary-700">
+
+                <Alert variant="default">
+                  <AlertCircle />
+                  <AlertTitle>Informasi</AlertTitle>
+                  <AlertDescription>
                     Undangan seminar akan tersedia setelah koordinator
                     menentukan jadwal dan penguji.
                   </AlertDescription>
                 </Alert>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between">
+            <CardFooter className="md:hidden flex-col flex gap-2">
+              <Button
+                onClick={handlePrintInvitation}
+                disabled={seminar.status !== "SCHEDULED"}
+                variant="outline"
+                className="border-2 w-full border-primary text-env-darker"
+              >
+                Unduh Undangan
+              </Button>
+              <div className="w-full gap-2 flex items-center">
+                <Button
+                  variant="secondary"
+                  onClick={handlePrevStep}
+                  className="flex-0 min-w-[120px]"
+                >
+                  Kembali
+                </Button>
+                <Button onClick={handleNextStep} className="flex-1">
+                  Lanjut
+                </Button>
+              </div>
+            </CardFooter>
+            <CardFooter className="hidden md:flex justify-between">
               <Button
                 variant="secondary"
                 onClick={handlePrevStep}
-                className="border-primary-400 text-primary-700 hover:bg-accent hover:text-accent-foreground"
+                className="border-env-lighter text-primary-700 hover:bg-accent hover:text-accent-foreground"
               >
                 Kembali
               </Button>
@@ -775,7 +999,7 @@ const StudentSeminarProposal = () => {
                   onClick={handlePrintInvitation}
                   disabled={seminar.status !== "SCHEDULED"}
                   variant="outline"
-                  className="border-2 border-primary text-primary-800"
+                  className="border-2 border-primary text-env-darker"
                 >
                   Unduh Undangan
                 </Button>
@@ -792,61 +1016,202 @@ const StudentSeminarProposal = () => {
 
         {currentStep === "step4" && (
           <Card className="bg-white col-span-1 sm:col-span-2 lg:col-span-4 overflow-hidden">
-            <CardHeader>
-              <CardTitle className="text-primary-700">
-                Registration Complete
-              </CardTitle>
-              <CardDescription className="text-primary-600">
-                Your proposal seminar registration has been submitted
-                successfully.
-              </CardDescription>
-            </CardHeader>
+            <div className="relative bg-gradient-to-r from-env-base to-env-darker">
+              <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10"></div>
+
+              <CardHeader className="relative z-10">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-xl md:text-2xl -mb-1 font-heading font-bold text-primary-foreground">
+                    Berita Acara
+                  </CardTitle>
+                </div>
+                <CardDescription className="text-primary-foreground text-xs md:text-sm">
+                  Lihat detail seminar Anda dan unduh Berita Acara setelah
+                  seminar selesai.
+                </CardDescription>
+              </CardHeader>
+            </div>
             <CardContent>
-              <div className="flex flex-col items-center justify-center py-6 text-center">
-                <div className="rounded-full bg-primary-100 p-3 mb-4">
-                  <CheckCircle2 className="h-8 w-8 text-primary-600" />
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="text-xs md:text-sm font-medium font-heading text-muted-foreground">
+                      Mahasiswa
+                    </h3>
+                    <div className="flex flex-col">
+                      <p className="text-env-darker text-sm md:text-base font-bold">
+                        {seminar.student?.name}
+                      </p>
+                      <p className="text-env-darker text-sm md:text-base font-bold">
+                        {seminar.student?.nim}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xs md:text-sm font-medium font-heading text-muted-foreground">
+                      Judul Penelitian
+                    </h3>
+                    <p className="text-env-darker text-sm md:text-base font-bold">
+                      {seminar.title}
+                    </p>
+                  </div>
+                  <div className="col-span-1">
+                    <h3 className="text-xs mb-2 md:text-sm font-medium font-heading text-muted-foreground">
+                      Dosen Pembimbing
+                    </h3>
+                    <div className="flex flex-col gap-2">
+                      {seminar.advisors.map((advisor, index) => (
+                        <div
+                          key={index}
+                          className="flex border-env-light rounded-md items-center space-x-2"
+                        >
+                          <Avatar>
+                            <AvatarImage
+                              src={
+                                advisor.profilePicture
+                                  ? advisor.profilePicture
+                                  : `https://robohash.org/${advisor.lecturerName}`
+                              }
+                              alt="advisor-image"
+                              className="border rounded-full h-8 w-8 md:h-12 md:w-12"
+                            />
+                            <AvatarFallback className="bg-primary-100 text-primary-800">
+                              {advisor
+                                .lecturerName!.split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="text-xs md:text-sm font-medium text-primary-800">
+                              {advisor.lecturerName}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {advisor.lecturerNIP}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="col-span-1">
+                    <h3 className="text-xs mb-2 md:text-sm font-medium font-heading text-muted-foreground">
+                      Dosen Penguji
+                    </h3>
+                    {seminar.assessors.length > 0 ? (
+                      <div className="flex flex-col gap-2">
+                        {seminar.assessors.map((assessor, index) => (
+                          <div
+                            key={index}
+                            className="flex border-env-light rounded-md items-center space-x-2"
+                          >
+                            <Avatar>
+                              <AvatarImage
+                                src={
+                                  assessor.profilePicture
+                                    ? assessor.profilePicture
+                                    : `https://robohash.org/${assessor.lecturerName}`
+                                }
+                                alt="assessor-image"
+                                className="border rounded-full h-8 w-8 md:h-12 md:w-12"
+                              />
+                              <AvatarFallback className="bg-primary-100 text-primary-800">
+                                {assessor
+                                  .lecturerName!.split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="text-xs md:text-sm font-medium text-primary-800">
+                                {assessor.lecturerName}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {assessor.lecturerNIP}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-env-darker text-sm md:text-base font-bold">
+                        Belum ditentukan
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="text-xs md:text-sm font-medium font-heading text-muted-foreground">
+                      Waktu
+                    </h3>
+                    <p className="text-env-darker text-sm md:text-base font-bold">
+                      {seminar.time
+                        ? `Jam ${formatTime(seminar.time)} | ${formatDate(
+                            seminar.time
+                          )}
+                          `
+                        : "Belum ditentukan"}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-xs md:text-sm font-medium font-heading text-muted-foreground">
+                      Ruangan
+                    </h3>
+                    <p className="text-env-darker text-sm md:text-base font-bold">
+                      {seminar.room || "Belum ditentukan"}
+                    </p>
+                  </div>
                 </div>
-                <h3 className="text-xl font-medium mb-2 text-primary-800">
-                  Thank You!
-                </h3>
-                <p className="text-primary-600 mb-6 max-w-md">
-                  Your proposal seminar registration has been submitted and is
-                  now being processed by the coordinator.
-                </p>
-                <div className="bg-primary-50 p-4 rounded-lg mb-6 w-full max-w-md border-primary-200">
-                  <p className="font-medium text-primary-800">
-                    Registration ID:{" "}
-                    <span className="font-mono">{seminar.id || "N/A"}</span>
-                  </p>
-                  <p className="text-sm text-primary-600">
-                    Please keep this ID for your reference.
-                  </p>
-                </div>
-                <Button
-                  variant="outline"
-                  onClick={() => (window.location.href = "/dashboard")}
-                  className="border-primary-400 text-primary-700 hover:bg-accent hover:text-accent-foreground"
-                >
-                  Return to Dashboard
-                </Button>
+
+                <Alert variant="default">
+                  <AlertCircle />
+                  <AlertTitle>Informasi</AlertTitle>
+                  <AlertDescription>
+                    Berita Acara akan tersedia setelah seminar selesai dan
+                    dinilai oleh semua dosen pembimbing dan penguji.
+                  </AlertDescription>
+                </Alert>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between">
+            <CardFooter className="md:hidden flex-col flex gap-2">
               <Button
+                onClick={handlePrintReport}
+                disabled={seminar.status !== "COMPLETED"}
                 variant="outline"
-                onClick={handlePrevStep}
-                disabled={currentStepIndex === 1 || isScheduled}
-                className="border-primary-400 text-primary-700 hover:bg-accent hover:text-accent-foreground"
+                className="border-2 w-full border-primary text-env-darker"
               >
-                Back
+                <Download className="h-4 w-4 mr-2" />
+                Unduh Berita Acara
               </Button>
+              <div className="w-full gap-2 flex items-center">
+                <Button
+                  variant="secondary"
+                  onClick={handlePrevStep}
+                  className="flex-0 min-w-[120px]"
+                >
+                  Kembali
+                </Button>
+              </div>
+            </CardFooter>
+            <CardFooter className="hidden md:flex justify-between">
               <Button
-                onClick={handleNextStep}
-                disabled={true}
-                className="bg-primary hover:bg-primary-700 text-primary-foreground"
+                variant="secondary"
+                onClick={handlePrevStep}
+                className="border-env-lighter text-primary-700 hover:bg-accent hover:text-accent-foreground"
               >
-                Next
+                Kembali
               </Button>
+              <div className="space-x-2">
+                <Button
+                  onClick={handlePrintReport}
+                  disabled={seminar.status !== "COMPLETED"}
+                  variant="outline"
+                  className="border-2 border-primary text-env-darker"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Unduh Berita Acara
+                </Button>
+              </div>
             </CardFooter>
           </Card>
         )}
@@ -881,6 +1246,11 @@ const StudentSeminarProposal = () => {
         seminar={seminar}
         shouldPrint={shouldPrint}
         onPrintComplete={() => setShouldPrint(false)}
+      />
+      <EvenReport
+        seminar={seminar}
+        shouldPrint={shouldPrintReport}
+        onPrintComplete={() => setShouldPrintReport(false)}
       />
     </StudentLayout>
   );

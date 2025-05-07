@@ -244,7 +244,6 @@ const StudentLayout: React.FC<StudentLayoutProps> = ({ children }) => {
               <p className="text-body-bold text-sm font-semibold truncate max-w-[150px]">
                 {user?.profile?.name}
               </p>
-              <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
             </div>
             <img
               src={

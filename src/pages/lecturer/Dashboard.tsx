@@ -314,8 +314,8 @@ const LecturerDashboard = () => {
                       <Search className="absolute left-2.5 top-3 h-4 w-4 text-primary-600" />
                       <Input
                         type="search"
-                        placeholder="Cari seminar..."
-                        className="w-full md:w-[200px] pl-8 border-primary-400"
+                        placeholder="Cari mahasiswa berdasarkan seminar || nama || nim "
+                        className="w-full md:w-[500px] pl-8 border-primary-400"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
@@ -517,8 +517,8 @@ const LecturerDashboard = () => {
                       <Search className="absolute left-2.5 top-3 h-4 w-4 text-primary-600" />
                       <Input
                         type="search"
-                        placeholder="Cari seminar..."
-                        className="w-full md:w-[200px] pl-8 border-primary-400"
+                        placeholder="Cari mahasiswa berdasarkan seminar || nama || nim "
+                        className="w-full md:w-[500px] pl-8 border-primary-400"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
@@ -720,8 +720,8 @@ const LecturerDashboard = () => {
                       <Search className="absolute left-2.5 top-3 h-4 w-4 text-primary-600" />
                       <Input
                         type="search"
-                        placeholder="Cari seminar..."
-                        className="w-full md:w-[200px] pl-8 border-primary-400"
+                        placeholder="Cari mahasiswa berdasarkan seminar || nama || nim "
+                        className="w-full md:w-[500px] pl-8 border-primary-400"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
