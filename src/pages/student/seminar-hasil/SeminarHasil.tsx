@@ -46,14 +46,14 @@ export interface Seminar {
   assessors: { lecturerNIP: string; lecturerName?: string }[];
 }
 
-const StudentSeminarProposal = () => {
+const StudentSeminarHasil = () => {
   const [currentStep, setCurrentStep] = useState<string>("step1");
   const [maxStepReached, setMaxStepReached] = useState<number>(1);
   const { user, token } = useAuth();
   const lecturersQuery = useApiData({ type: "lecturers" });
   const lecturers = lecturersQuery.data || [];
   const seminarQuery = useApiData({
-    type: "seminarProposalByStudentNIM",
+    type: "seminarResultByStudentNIM",
     param: user?.profile.nim,
   });
 
@@ -64,11 +64,13 @@ const StudentSeminarProposal = () => {
     status: null,
     advisors: [],
     documents: {
-      THESIS_PROPOSAL: { uploaded: false },
-      ADVISOR_AVAILABILITY: { uploaded: false },
+      FINAL_THESIS: { uploaded: false },
+      FREE_THEORY_CERTIFICATE: { uploaded: false },
       KRS: { uploaded: false },
-      ADVISOR_ASSISTANCE: { uploaded: false },
-      SEMINAR_ATTENDANCE: { uploaded: false },
+      ADVISOR_APPROVAL: { uploaded: false },
+      EXAMINER_APPROVAL: { uploaded: false },
+      TRANSCRIPT: { uploaded: false },
+      ASSISTANCE_SHEET: { uploaded: false },
     },
     time: null,
     room: null,
@@ -76,12 +78,14 @@ const StudentSeminarProposal = () => {
   });
 
   const requiredDocuments = [
-    { id: "THESIS_PROPOSAL", name: "Proposal Tugas Akhir" },
-    { id: "ADVISOR_AVAILABILITY", name: "Kesediaan Pembimbing" },
+    { id: "FINAL_THESIS", name: "Dokumen Tugas Akhir" },
+    { id: "FREE_THEORY_CERTIFICATE", name: "Surat Bebas Teori" },
     { id: "KRS", name: "Kartu Rencana Studi" },
-    { id: "ADVISOR_ASSISTANCE", name: "Asistensi Pembimbing" },
-    { id: "SEMINAR_ATTENDANCE", name: "Kehadiran Seminar" },
-  ];
+    { id: "ADVISOR_APPROVAL", name: "Persetujuan Pembimbing" },
+    { id: "EXAMINER_APPROVAL", name: "Persetujuan Penguji" },
+    { id: "TRANSCRIPT", name: "Transkip Nilai" },
+    { id: "ASSISTANCE_SHEET", name: "Lembar Asistensi" },
+];
 
   const [researchDetailsModalOpen, setResearchDetailsModalOpen] =
     useState(false);
@@ -107,26 +111,26 @@ const StudentSeminarProposal = () => {
           lecturerName: a.lecturer?.name,
         })),
         documents: {
-          THESIS_PROPOSAL: {
+          FINAL_THESIS: {
             uploaded: !!seminarData.documents.find(
-              (d: any) => d.documentType === "THESIS_PROPOSAL"
+              (d: any) => d.documentType === "FINAL_THESIS"
             ),
             fileName: seminarData.documents.find(
-              (d: any) => d.documentType === "THESIS_PROPOSAL"
+              (d: any) => d.documentType === "FINAL_THESIS"
             )?.fileName,
             fileURL: seminarData.documents.find(
-              (d: any) => d.documentType === "THESIS_PROPOSAL"
+              (d: any) => d.documentType === "FINAL_THESIS"
             )?.fileURL,
           },
-          ADVISOR_AVAILABILITY: {
+          FREE_THEORY_CERTIFICATE: {
             uploaded: !!seminarData.documents.find(
-              (d: any) => d.documentType === "ADVISOR_AVAILABILITY"
+              (d: any) => d.documentType === "FREE_THEORY_CERTIFICATE"
             ),
             fileName: seminarData.documents.find(
-              (d: any) => d.documentType === "ADVISOR_AVAILABILITY"
+              (d: any) => d.documentType === "FREE_THEORY_CERTIFICATE"
             )?.fileName,
             fileURL: seminarData.documents.find(
-              (d: any) => d.documentType === "ADVISOR_AVAILABILITY"
+              (d: any) => d.documentType === "FREE_THEORY_CERTIFICATE"
             )?.fileURL,
           },
           KRS: {
@@ -140,26 +144,48 @@ const StudentSeminarProposal = () => {
               (d: any) => d.documentType === "KRS"
             )?.fileURL,
           },
-          ADVISOR_ASSISTANCE: {
+          ADVISOR_APPROVAL: {
             uploaded: !!seminarData.documents.find(
-              (d: any) => d.documentType === "ADVISOR_ASSISTANCE"
+              (d: any) => d.documentType === "ADVISOR_APPROVAL"
             ),
             fileName: seminarData.documents.find(
-              (d: any) => d.documentType === "ADVISOR_ASSISTANCE"
+              (d: any) => d.documentType === "ADVISOR_APPROVAL"
             )?.fileName,
             fileURL: seminarData.documents.find(
-              (d: any) => d.documentType === "ADVISOR_ASSISTANCE"
+              (d: any) => d.documentType === "ADVISOR_APPROVAL"
             )?.fileURL,
           },
-          SEMINAR_ATTENDANCE: {
+          EXAMINER_APPROVAL: {
             uploaded: !!seminarData.documents.find(
-              (d: any) => d.documentType === "SEMINAR_ATTENDANCE"
+              (d: any) => d.documentType === "EXAMINER_APPROVAL"
             ),
             fileName: seminarData.documents.find(
-              (d: any) => d.documentType === "SEMINAR_ATTENDANCE"
+              (d: any) => d.documentType === "EXAMINER_APPROVAL"
             )?.fileName,
             fileURL: seminarData.documents.find(
-              (d: any) => d.documentType === "SEMINAR_ATTENDANCE"
+              (d: any) => d.documentType === "EXAMINER_APPROVAL"
+            )?.fileURL,
+          },
+          TRANSCRIPT: {
+            uploaded: !!seminarData.documents.find(
+              (d: any) => d.documentType === "TRANSCRIPT"
+            ),
+            fileName: seminarData.documents.find(
+              (d: any) => d.documentType === "TRANSCRIPT"
+            )?.fileName,
+            fileURL: seminarData.documents.find(
+              (d: any) => d.documentType === "TRANSCRIPT"
+            )?.fileURL,
+          },
+          ASSISTANCE_SHEET: {
+            uploaded: !!seminarData.documents.find(
+              (d: any) => d.documentType === "ASSISTANCE_SHEET"
+            ),
+            fileName: seminarData.documents.find(
+              (d: any) => d.documentType === "ASSISTANCE_SHEET"
+            )?.fileName,
+            fileURL: seminarData.documents.find(
+              (d: any) => d.documentType === "ASSISTANCE_SHEET"
             )?.fileURL,
           },
         },
@@ -193,8 +219,8 @@ const StudentSeminarProposal = () => {
       console.log("Data: ", data);
 
       const endpoint = seminar.id
-        ? `http://localhost:5500/api/seminars/proposal-register/${seminar.id}`
-        : "http://localhost:5500/api/seminars/proposal-register";
+        ? `http://localhost:5500/api/seminars/result-register/${seminar.id}`
+        : "http://localhost:5500/api/seminars/result-register";
       const method = seminar.id ? "put" : "post";
 
       const requestData = {
@@ -276,11 +302,13 @@ const StudentSeminarProposal = () => {
 
     try {
       const requiredDocs = [
-        "THESIS_PROPOSAL",
-        "ADVISOR_AVAILABILITY",
+        "FINAL_THESIS",
+        "FREE_THEORY_CERTIFICATE",
+        "ADVISOR_APPROVAL",
+        "EXAMINER_APPROVAL",
+        "TRANSCRIPT",
+        "ASSISTANCE_SHEET",
         "KRS",
-        "ADVISOR_ASSISTANCE",
-        "SEMINAR_ATTENDANCE",
       ];
 
       for (const docType of requiredDocs) {
@@ -292,7 +320,7 @@ const StudentSeminarProposal = () => {
           uploadFormData.append("file", file);
 
           const method = seminar.documents[docType].uploaded ? "put" : "post";
-          const endpoint = `http://localhost:5500/api/seminars/proposal-documents`;
+          const endpoint = `http://localhost:5500/api/seminars/result-documents`;
 
           const response = await axios({
             method,
@@ -420,7 +448,7 @@ const StudentSeminarProposal = () => {
     <StudentLayout>
       <div className="flex flex-col mb-4">
         <h1 className="text-4xl font-heading font-black mb-3 text-primary-800">
-          Pendaftaran Seminar Proposal
+          Pendaftaran Seminar Hasil
         </h1>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -538,44 +566,48 @@ const StudentSeminarProposal = () => {
                   {getStatusBadge("step3")}
                 </div>
                 <CardDescription className="text-primary-foreground text-sm">
-                  Upload semua dokumen yang dibutuhkan untuk seminar proposal.
+                  Upload semua dokumen yang dibutuhkan untuk seminar Hasil.
                 </CardDescription>
               </CardHeader>
             </div>
-            <CardContent>
+            <CardContent className="px-4 sm:px-6 py-4 sm:py-6">
               {allDocumentsUploaded() ? (
-                <div className="space-y-4 mt-6">
+                <div className="space-y-3 sm:space-y-4">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary-600" />
-                    <p className="text-primary-800">
+                    <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600 flex-shrink-0" />
+                    <p className="text-sm sm:text-base text-primary-800">
                       Semua dokumen yang dibutuhkan sudah berhasil diunggah.
                     </p>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     {Object.entries(seminar.documents).map(([key, doc]) => {
                       const reqDoc = requiredDocuments.find(
                         (d) => d.id === key
                       );
                       return (
-                        <div key={key} className="flex flex-col">
-                          <h1 className="font-bold text-lg font-heading text-primary-800">
+                        <div
+                          key={key}
+                          className="flex flex-col border rounded-lg p-3 bg-primary-50"
+                        >
+                          <h1 className="font-bold text-base sm:text-lg font-heading text-primary-800 truncate">
                             {reqDoc ? reqDoc.name : key}
                           </h1>
-                          <div className="flex items-center gap-1">
-                            <FileText className="h-4 w-4 text-primary-600" />
-                            <span className="text-sm text-primary-800">
+                          <div className="flex items-center gap-1 mt-1 flex-wrap">
+                            <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-primary-600 flex-shrink-0" />
+                            <span className="text-xs sm:text-sm text-primary-800 truncate max-w-full">
                               {doc.uploaded ? doc.fileName : "Belum diunggah"}
                             </span>
                             {doc.uploaded && doc.fileURL && (
                               <Button
                                 variant="link"
                                 size="sm"
-                                className="text-primary-600 hover:text-primary-800 p-0"
+                                className="text-primary-600 hover:text-primary-800 p-0 h-auto text-xs sm:text-sm"
                               >
                                 <Link
                                   to={doc.fileURL}
                                   target="_blank"
                                   rel="noopener noreferrer"
+                                  className="flex items-center gap-1"
                                 >
                                   Lihat File
                                 </Link>
@@ -588,9 +620,12 @@ const StudentSeminarProposal = () => {
                   </div>
                 </div>
               ) : (
-                <div className="py-8 mt-4 text-center">
-                  <Upload className="h-12 w-12 text-primary-800 mx-auto mb-4" />
-                  <p className="text-primary-600 mb-4">
+                <div
+                  className="border-2 border-dashed border-primary-400 rounded-lg text-center p-10"
+                  onClick={() => setDocumentUploadModalOpen(true)}
+                >
+                  <Upload className="h-8 w-8 sm:h-12 sm:w-12 text-primary-800 mx-auto mb-3 sm:mb-4" />
+                  <p className="text-sm sm:text-base text-primary-600 mb-2 sm:mb-4 px-2">
                     Silakan upload semua dokumen yang dibutuhkan, untuk
                     diproses.
                   </p>
@@ -797,7 +832,7 @@ const StudentSeminarProposal = () => {
                 Registration Complete
               </CardTitle>
               <CardDescription className="text-primary-600">
-                Your proposal seminar registration has been submitted
+                Your Hasil seminar registration has been submitted
                 successfully.
               </CardDescription>
             </CardHeader>
@@ -810,7 +845,7 @@ const StudentSeminarProposal = () => {
                   Thank You!
                 </h3>
                 <p className="text-primary-600 mb-6 max-w-md">
-                  Your proposal seminar registration has been submitted and is
+                  Your Hasil seminar registration has been submitted and is
                   now being processed by the coordinator.
                 </p>
                 <div className="bg-primary-50 p-4 rounded-lg mb-6 w-full max-w-md border-primary-200">
@@ -886,4 +921,4 @@ const StudentSeminarProposal = () => {
   );
 };
 
-export default StudentSeminarProposal;
+export default StudentSeminarHasil;

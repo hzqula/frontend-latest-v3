@@ -18,7 +18,7 @@ import SeminarDetailsModal from "../SeminarDetailModal";
 import SeminarsSubmittedTable from "../SeminarsSubmittedTable";
 import SeminarsCompletedTable from "../SeminarsCompletedTable";
 
-const CoordinatorSeminarProposal = () => {
+const CoordinatorSeminarHasil = () => {
   const { user, token } = useAuth();
   const [activeTab, setActiveTab] = useState("submitted");
   const [searchQuery, setSearchQuery] = useState("");
@@ -54,18 +54,18 @@ const CoordinatorSeminarProposal = () => {
   const seminars = seminarsQuery.data || [];
   const lecturers = lecturersQuery.data || [];
 
-  // Filter seminars berdasarkan status dan hanya untuk seminar proposal
+  // Filter seminars berdasarkan status dan hanya untuk seminar Hasil
   const submittedSeminars = seminars.filter(
     (seminar: any) =>
-      seminar.status === "SUBMITTED" && seminar.type === "PROPOSAL"
+      seminar.status === "SUBMITTED" && seminar.type === "HASIL"
   );
   const scheduledSeminars = seminars.filter(
     (seminar: any) =>
-      seminar.status === "SCHEDULED" && seminar.type === "PROPOSAL"
+      seminar.status === "SCHEDULED" && seminar.type === "HASIL"
   );
   const completedSeminars = seminars.filter(
     (seminar: any) =>
-      seminar.status === "COMPLETED" && seminar.type === "PROPOSAL"
+      seminar.status === "COMPLETED" && seminar.type === "HASIL"
   );
 
   // Filter seminars berdasarkan pencarian
@@ -124,9 +124,9 @@ const CoordinatorSeminarProposal = () => {
     <CoordinatorLayout>
       <div className="flex flex-col mb-4">
         <h1 className="text-4xl font-heading font-black text-primary-800">
-          Seminar Proposal
+          Seminar Hasil
         </h1>
-        <p>Kelola seminar proposal mahasiswa</p>
+        <p>Kelola seminar hasil mahasiswa</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -233,4 +233,4 @@ const CoordinatorSeminarProposal = () => {
   );
 };
 
-export default CoordinatorSeminarProposal;
+export default CoordinatorSeminarHasil;

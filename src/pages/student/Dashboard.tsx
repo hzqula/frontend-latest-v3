@@ -20,7 +20,7 @@ const StudentDashboard = () => {
 
   // Fetch seminar data for the logged-in student
   const seminarsQuery = useApiData({
-    type: "seminarByStudentNIM",
+    type: "seminarProposalByStudentNIM",
     param: user?.profile?.nim,
   });
 

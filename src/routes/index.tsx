@@ -9,7 +9,9 @@ import Dashboard from "../pages/redirect/Dashboard";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import SeminarProposal from "../pages/redirect/SeminarProposal";
+import SeminarHasil from "../pages/redirect/SeminarHasil";
 import AssessSeminarProposal from "../pages/lecturer/seminar-proposal/AssessSeminar";
+import AssessSeminarHasil from "../pages/lecturer/seminar-hasil/AssessSeminar";
 
 export const publicRoutes: RouteObject[] = [
   { path: "/", element: <Landing /> },
@@ -30,9 +32,17 @@ export const privateRoutes: RouteObject[] = [
     path: "/seminar-proposal",
     element: <SeminarProposal />,
   },
-
   {
     path: "/seminar-proposal/assess/:seminarId",
     element: <AssessSeminarProposal />,
+  },
+
+  {
+    path: "/seminar-hasil",
+    element: <SeminarHasil />,
+  },
+  {
+    path: "/seminar-hasil/assess/:seminarId",
+    element: <AssessSeminarHasil />,
   },
 ];

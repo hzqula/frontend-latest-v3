@@ -1,24 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "../../../components/ui/button";
+import { Button } from "../../components/ui/button";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
-interface SeminarsSubmittedTableProps {
+interface SeminarsCompletedTableProps {
   seminars: any[];
   formatDate: (dateString: string) => string;
   formatTime: (dateString: string) => string;
-  onSchedule: (seminar: any) => void;
   onViewDetails: (seminar: any) => void;
 }
 
-const SeminarsSubmittedTable = ({
+const SeminarsCompletedTable = ({
   seminars,
   formatDate,
   formatTime,
-  onSchedule,
   onViewDetails,
-}: SeminarsSubmittedTableProps) => {
+}: SeminarsCompletedTableProps) => {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(
     null
   );
@@ -49,9 +47,9 @@ const SeminarsSubmittedTable = ({
             <th className="p-4 w-[1%] text-center">No.</th>
             <th className="px-2 py-4 w-[40%]">Judul Penelitian</th>
             <th className="px-2 py-4 w-[25%]">Mahasiswa</th>
-            <th className="p-4 w-[25%] ">
+            <th className="p-4 w-[10%] ">
               <div className="flex justify-center items-center gap-1">
-                Diajukan Pada
+                Pada
                 <button
                   onClick={handleSort}
                   className="focus:outline-none hover:text-primary-200"
@@ -66,7 +64,8 @@ const SeminarsSubmittedTable = ({
                 </button>
               </div>
             </th>
-            <th className="p-4 w-[19%] text-center">Aksi</th>
+            <th className="p-4 w-[10%] text-center">Tempat</th>
+            <th className="p-4 w-[14%] text-center">Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -93,21 +92,13 @@ const SeminarsSubmittedTable = ({
                   </div>
                 </td>
                 <td className="p-2 flex flex-col justify-center items-center">
-                  <div className="text-sm text-primary-800">
-                    {formatDate(seminar.createdAt)}
-                  </div>
-                  <div className="text-xs text-primary">
-                    {formatTime(seminar.createdAt)}
+                  <div>{formatDate(seminar.time)}</div>
+                  <div className="text-sm text-primary-600">
+                    {formatTime(seminar.time)}
                   </div>
                 </td>
+                <td className="p-2">{seminar.room || "TBD"}</td>
                 <td className="p-2 text-center space-x-2">
-                  <Button
-                    size="sm"
-                    className="bg-primary-600 text-white hover:bg-primary-700"
-                    onClick={() => onSchedule(seminar)}
-                  >
-                    Jadwalkan
-                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
@@ -121,8 +112,8 @@ const SeminarsSubmittedTable = ({
             ))
           ) : (
             <tr>
-              <td colSpan={6} className="p-4 text-center text-primary-600">
-                Belum ada pengajuan seminar proposal.
+              <td colSpan={7} className="p-4 text-center text-primary-600">
+                Belum ada seminar proposal yang selesai.
               </td>
             </tr>
           )}
@@ -132,4 +123,4 @@ const SeminarsSubmittedTable = ({
   );
 };
 
-export default SeminarsSubmittedTable;
+export default SeminarsCompletedTable;

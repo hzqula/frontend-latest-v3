@@ -1,4 +1,3 @@
-// SeminarProposal.tsx
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "../../../context/AuthContext";
@@ -23,7 +22,7 @@ import LecturerLayout from "../../../components/layouts/LecturerLayout";
 import SeminarDetailsModal from "../SeminarDetailsModal";
 import { Badge } from "../../../components/ui/badge";
 
-const LecturerSeminarProposal = () => {
+const LecturerSeminarHasil = () => {
   const { user, token } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -67,7 +66,7 @@ const LecturerSeminarProposal = () => {
 
   const scheduledSeminars = seminars.filter(
     (seminar: any) =>
-      seminar.status === "SCHEDULED" && seminar.type === "PROPOSAL"
+      seminar.status === "SCHEDULED" && seminar.type === "HASIL"
   );
 
   const advisedSeminars = scheduledSeminars.filter((seminar: any) =>
@@ -131,7 +130,7 @@ const LecturerSeminarProposal = () => {
   };
 
   const handleAssessNavigation = (seminarId: number) => {
-    navigate(`/seminar-proposal/assess/${seminarId}`, {
+    navigate(`/seminar-hasil/assess/${seminarId}`, {
       state: { fromAssessment: true },
     });
   };
@@ -140,12 +139,12 @@ const LecturerSeminarProposal = () => {
     <LecturerLayout>
       <div className="flex flex-col mb-4">
         <h1 className="text-4xl font-heading font-black text-primary-800">
-          Seminar Proposal
+          Seminar Hasil
         </h1>
         <p className="text-primary">
           {activeTab === "advised"
-            ? "Kelola seminar proposal mahasiswa yang Anda bimbing"
-            : "Kelola seminar proposal mahasiswa yang Anda uji"}
+            ? "Kelola seminar hasil mahasiswa yang Anda bimbing"
+            : "Kelola seminar hasil mahasiswa yang Anda uji"}
         </p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -279,7 +278,7 @@ const LecturerSeminarProposal = () => {
                         colSpan={6}
                         className="p-4 text-center text-primary-600"
                       >
-                        Belum ada seminar proposal yang dijadwalkan untuk Anda
+                        Belum ada seminar hasil yang dijadwalkan untuk Anda
                         bimbing.
                       </td>
                     </tr>
@@ -383,7 +382,7 @@ const LecturerSeminarProposal = () => {
                         colSpan={6}
                         className="p-4 text-center text-primary-600"
                       >
-                        Tidak ada seminar proposal yang dijadwalkan untuk Anda
+                        Tidak ada seminar hasil yang dijadwalkan untuk Anda
                         bimbing.
                       </td>
                     </tr>
@@ -408,4 +407,4 @@ const LecturerSeminarProposal = () => {
   );
 };
 
-export default LecturerSeminarProposal;
+export default LecturerSeminarHasil;

@@ -81,8 +81,12 @@ export const fetchSeminarById = async (id: number) => {
   const response = await apiClient.get(`/seminars/${id}`);
   return response.data.seminar;
 };
-export const fetchSeminarByStudentNIM = async (nim: string) => {
-  const response = await apiClient.get(`/seminars/student/${nim}`);
+export const fetchSeminarProposalByStudentNIM = async (nim: string) => {
+  const response = await apiClient.get(`/seminars/proposal/${nim}`);
+  return response.data.seminar;
+};
+export const fetchSeminarResultByStudentNIM = async (nim: string) => {
+  const response = await apiClient.get(`/seminars/result/${nim}`);
   return response.data.seminar;
 };
 

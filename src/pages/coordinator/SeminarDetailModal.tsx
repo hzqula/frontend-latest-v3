@@ -5,9 +5,9 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "../../../components/ui/dialog";
-import { Button } from "../../../components/ui/button";
-import { ScrollArea } from "../../../components/ui/scroll-area";
+} from "../../components/ui/dialog";
+import { Button } from "../../components/ui/button";
+import { ScrollArea } from "../../components/ui/scroll-area";
 
 interface SeminarDetailsModalProps {
   open: boolean;
@@ -31,7 +31,7 @@ const SeminarDetailsModal = ({
       <DialogContent className="max-w-[90vw] sm:max-w-[500px] md:max-w-[600px] p-4 sm:p-6">
         <DialogHeader className="space-y-1 sm:space-y-2">
           <DialogTitle className="text-xl sm:text-2xl font-heading font-black text-primary-800 text-center sm:text-left">
-            Detail Seminar Proposal
+            Detail Seminar
           </DialogTitle>
           <DialogDescription className="text-primary text-sm text-center sm:text-left">
             Informasi lengkap tentang seminar proposal
