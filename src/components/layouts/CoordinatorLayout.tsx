@@ -128,6 +128,11 @@ const CoordinatorLayout: React.FC<CoordinatorLayoutProps> = ({ children }) => {
       path: "/seminar-hasil",
       label: "Seminar Hasil",
     },
+    {
+      icon: BookText,
+      path: "/security-logs",
+      label: "security-logs",
+    },
   ];
 
   return (
@@ -244,7 +249,6 @@ const CoordinatorLayout: React.FC<CoordinatorLayoutProps> = ({ children }) => {
               <p className="text-body-bold text-sm font-semibold truncate max-w-[150px]">
                 {user?.profile?.name}
               </p>
-              <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
             </div>
             <img
               src={
